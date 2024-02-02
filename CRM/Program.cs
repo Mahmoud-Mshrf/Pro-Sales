@@ -2,6 +2,7 @@
 using CRM.Data;
 using CRM.Helpers;
 using CRM.Models;
+using CRM.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +25,7 @@ namespace CRM
             builder.Services.AddSwaggerGen();
 
             builder.Services.Configure<JWT>(builder.Configuration.GetSection("JWT"));// Add JWT configuration to the container
+            builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));// Add MailSettings configuration to the container
             // Add Identity DbContext to the container
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
             var DefaultConnection = builder.Configuration.GetConnectionString("DefaultConnection");
