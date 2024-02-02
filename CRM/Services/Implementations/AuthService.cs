@@ -3,6 +3,10 @@ using CRM.Helpers;
 using CRM.Models;
 using CRM.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -17,16 +21,61 @@ namespace CRM.Services.Implementations
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly JWT _jwt;
-
-        public AuthService(UserManager<ApplicationUser> userManager, IOptions<JWT> jwt)
+        private readonly IMailingService _mailingService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IActionContextAccessor _actionContextAccessor;
+        private readonly IUrlHelperFactory _urlHelperFactory;
+        public AuthService(UserManager<ApplicationUser> userManager, IOptions<JWT> jwt, IMailingService mailingService, IHttpContextAccessor httpContextAccessor, IActionContextAccessor actionContextAccessor, IUrlHelperFactory urlHelperFactory)
         {
             _userManager = userManager;
             _jwt = jwt.Value;
+            _mailingService = mailingService;
+            _httpContextAccessor = httpContextAccessor;
+            _actionContextAccessor = actionContextAccessor;
+            _urlHelperFactory = urlHelperFactory;
         }
 
-        public Task<AuthModel> GetTokenAsync(TokenRequestDto dto)
+
+
+
+        // This method is used to generate a new Access Token for the user (will be called by Login Endpoint)
+        public async Task<AuthModel> GetTokenAsync(TokenRequestDto dto)
         {
-            throw new NotImplementedException();
+            var authModel = new AuthModel();
+            var user = await _userManager.FindByEmailAsync(dto.Email);
+            if (user is null|| !await _userManager.CheckPasswordAsync(user,dto.Password))
+            {
+                authModel.Message = "Invalid Credentials";
+                return authModel;
+            }
+            if(!user.EmailConfirmed)
+            {
+                authModel.Message = "Email not confirmed";
+                return authModel;
+            }
+            var JwtToken = await CreateToken(user);
+            var token = new JwtSecurityTokenHandler().WriteToken(JwtToken);
+            authModel.AccessToken = token;
+            authModel.IsAuthenticated = true;
+            authModel.Email = user.Email;
+            authModel.UserName = user.UserName;
+            authModel.Roles = JwtToken.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => x.Value).ToList();
+            
+            if(user.RefreshTokens.Any(x => x.IsActive))
+            {
+                var activeRefreshToken = user.RefreshTokens.Where(x => x.IsActive).FirstOrDefault();
+                authModel.RefreshToken = activeRefreshToken.Token;
+                authModel.RefreshTokenExpiration = activeRefreshToken.ExpiresOn;
+            }
+            else
+            {
+                var refreshToken = GenerateRefreshToken();
+                user.RefreshTokens.Add(refreshToken);
+                await _userManager.UpdateAsync(user);
+                authModel.RefreshToken = refreshToken.Token;
+                authModel.RefreshTokenExpiration = refreshToken.ExpiresOn;
+            }
+            return authModel;
         }
 
         public async Task<JwtSecurityToken> CreateToken(ApplicationUser user)
@@ -122,5 +171,47 @@ namespace CRM.Services.Implementations
 
         }
 
+        public async Task<ResultDto> RegisterAsync(RegisterDto dto)
+        {
+            if(await _userManager.FindByEmailAsync(dto.Email) is not null)
+                return new ResultDto() { Message = "Email is already registered"};
+            if(await _userManager.FindByNameAsync(dto.UserName) is not null)
+                return new ResultDto{ Message = "UserName is already registered"};
+            var user = new ApplicationUser
+            {
+                Email = dto.Email,
+                UserName = dto.UserName,
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                EmailConfirmed= false
+            };
+            var result = await _userManager.CreateAsync(user, dto.Password);
+            if (!result.Succeeded)
+            {
+                var errors = string.Empty;
+                foreach (var error in result.Errors)
+                {
+                    errors += $"{error.Description},";
+                }
+                return new ResultDto { Message = errors };
+            }
+            var confirmEmailToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var encodedEmailToken = Encoding.UTF8.GetBytes(confirmEmailToken);
+            var validEmailToken = WebEncoders.Base64UrlEncode(encodedEmailToken);
+            var urlHelper = _urlHelperFactory.GetUrlHelper(_actionContextAccessor.ActionContext);
+            var callBackUrl = urlHelper.Action("ConfirmEmail", "Auth", new {Id = user.Id, Token = validEmailToken }, _httpContextAccessor.HttpContext.Request.Scheme);
+            var message = new MailDto
+            {
+                MailTo = user.Email,
+                Subject = "Confirm Your Email",
+                Content = $"<h1>Welcome to CRM</h1> <p>Please confirm your email by <a href='{callBackUrl}'>Clicking here</a></p>",
+            };
+            var mailResult = await _mailingService.SendEmailAsync(message.MailTo,message.Subject,message.Content);
+            if (mailResult)
+                return new ResultDto { IsSuccess = true, Message = "Confirmation Email Sent, Please confirm your email" };
+            else
+                return new ResultDto { Message = "Email Confirmation Failed to send" };
+
+        }
     }
 }
