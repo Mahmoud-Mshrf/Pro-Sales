@@ -1,0 +1,104 @@
+﻿using CRM.Dtos;
+using CRM.Services.Interfaces;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+
+namespace CRM.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class AuthController : ControllerBase
+    {
+        private readonly IAuthService _authService;
+        
+        public AuthController(IAuthService authService)
+        {
+            _authService = authService;
+        }
+        [HttpPost("[action]")]
+        public async Task<IActionResult> Register([FromBody] RegisterDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var result = await _authService.RegisterAsync(dto);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result.Message);
+            }
+            return Ok(result);
+        }
+
+
+        [ApiExplorerSettings(IgnoreApi = true)]
+        [HttpGet("[action]")]
+        public async Task<IActionResult> ConfirmEmail(string Id, string Token)
+        {
+            var result = await _authService.ConfirmEmailAsync(Id, Token);
+            if (!result.IsAuthenticated)
+            {
+                return BadRequest(result.Message);
+            }
+            if (!string.IsNullOrEmpty(result.RefreshToken))
+            {
+                setrefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
+            }
+            return Ok(result);
+        }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> Login([FromBody] TokenRequestDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var result = await _authService.GetTokenAsync(dto);
+            if (!result.IsAuthenticated)
+            {
+                return BadRequest(result.Message);
+            }
+            if (!string.IsNullOrEmpty(result.RefreshToken))
+            {
+                setrefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
+            }
+            return Ok(result);
+        }
+
+        private void setrefreshTokenInCookie(string refreshToken, DateTime refreshTokenExpiration)
+        {
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Expires = refreshTokenExpiration.ToLocalTime()
+            };
+            Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> RefreshToken()
+        {
+            var refreshToken = Request.Cookies["refreshToken"];
+
+            var result = await _authService.RefreshTokenAsync(refreshToken);
+            if (!result.IsAuthenticated)
+                return BadRequest(result.Message);
+
+            setrefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
+            return Ok(result);
+        }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> RevokeToken()
+        {
+            var refreshToken = Request.Cookies["refreshToken"];
+            if (string.IsNullOrEmpty(refreshToken))
+                return BadRequest("Token Is Required");
+            var result = await _authService.RevokeToken(refreshToken);
+            if (!result)
+                return BadRequest("Invalid Token");
+            return Ok("Token Revoked");
+        }
+    }
+}

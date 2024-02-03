@@ -2,9 +2,12 @@
 using CRM.Data;
 using CRM.Helpers;
 using CRM.Models;
+using CRM.Services.Implementations;
+using CRM.Services.Interfaces;
 using CRM.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -26,6 +29,15 @@ namespace CRM
 
             builder.Services.Configure<JWT>(builder.Configuration.GetSection("JWT"));// Add JWT configuration to the container
             builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));// Add MailSettings configuration to the container
+            builder.Services.AddScoped<IAuthService, AuthService>();// Add IAuthService to the container
+            builder.Services.AddScoped<IMailingService, MailingService>();// Add IMailingService to the container
+            builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();// Add IActionContextAccessor to the container
+
+            builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+            {
+                options.TokenLifespan = TimeSpan.FromMinutes(1);// Sets the expiry for the confirmation token to 10 minutes  
+            });
+
             // Add Identity DbContext to the container
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
             var DefaultConnection = builder.Configuration.GetConnectionString("DefaultConnection");
