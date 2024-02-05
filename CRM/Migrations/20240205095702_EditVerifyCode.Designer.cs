@@ -4,6 +4,7 @@ using CRM.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CRM.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240205095702_EditVerifyCode")]
+    partial class EditVerifyCode
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -95,7 +98,7 @@ namespace CRM.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("CRM.Models.VerificationCode", b =>
+            modelBuilder.Entity("CRM.Models.VerifyCode", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -121,7 +124,7 @@ namespace CRM.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("VerificationCodes");
+                    b.ToTable("VerifyCodes");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -294,7 +297,7 @@ namespace CRM.Migrations
                     b.Navigation("RefreshTokens");
                 });
 
-            modelBuilder.Entity("CRM.Models.VerificationCode", b =>
+            modelBuilder.Entity("CRM.Models.VerifyCode", b =>
                 {
                     b.HasOne("CRM.Models.ApplicationUser", "User")
                         .WithMany()

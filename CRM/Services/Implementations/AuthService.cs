@@ -290,12 +290,14 @@ namespace CRM.Services.Implementations
             var result = await _mailingService.SendEmailAsync(user.Email, "Your verification code ", message, null);
             if (result)
             {
-                var Vcode = new VerifyCode
+                var Vcode = new VerificationCode
                 {
                     Code = randomNum,
                     UserId = user.Id,
+                    CreatedAt = DateTime.UtcNow,
+                    ExpiresAt = DateTime.UtcNow.AddMinutes(1),
                 };
-                await _context.VerifyCodes.AddAsync(Vcode);
+                await _context.VerificationCodes.AddAsync(Vcode);
                 _context.SaveChanges();
                 return new ResultDto
                 {
@@ -352,12 +354,12 @@ namespace CRM.Services.Implementations
                     Message = "Email Incorrect or not found"
                 };
             };
-            var result = await _context.VerifyCodes.Where(c => c.UserId == user.Id && c.Code == codeDto.Code).SingleOrDefaultAsync();
+            var result = await _context.VerificationCodes.Where(c => c.UserId == user.Id && c.Code == codeDto.Code).SingleOrDefaultAsync();
 
 
-            if (result != null)
+            if (result != null && !result.IsExpired)
             {
-                _context.VerifyCodes.Remove(result);
+                _context.VerificationCodes.Remove(result);
                 _context.SaveChanges();
 
                 var restToken = await _userManager.GeneratePasswordResetTokenAsync(user);
