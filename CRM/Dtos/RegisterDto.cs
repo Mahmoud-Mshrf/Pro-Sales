@@ -15,9 +15,13 @@ namespace CRM.Dtos
         public string UserName { get; set; } 
         [Required, StringLength(128), EmailAddress]
         public string Email { get; set; }
-        [Required, StringLength(256)]
+        [Required]
+        [DataType(DataType.Password)]
         public string Password { get; set; }
-        [Required, StringLength(256)]
+
+        [Required]
+        [DataType(DataType.Password)]
+        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; }
     }
 }

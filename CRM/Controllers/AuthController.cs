@@ -1,5 +1,6 @@
 ﻿using CRM.Dtos;
 using CRM.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -99,6 +100,61 @@ namespace CRM.Controllers
             if (!result)
                 return BadRequest("Invalid Token");
             return Ok("Token Revoked");
+        }
+
+
+        [HttpPost("ForgotPassword/{email}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ForgotPassword(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+            {
+                return NotFound(email);
+            }
+            var result = await _authService.ForgotPasswordAsync(email);
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
+
+        [HttpPost("VerifyCode")]
+        [AllowAnonymous]
+        public async Task<IActionResult> VerifyCode(VerifyCodeDto codeDto)
+        {
+            if (ModelState.IsValid)
+            {
+                var result = await _authService.VerifyCodeAsync(codeDto);
+                if (result.IsSuccess)
+                {
+                    return Ok(result);
+
+                }
+                return NotFound(result);
+            }
+            return BadRequest(ModelState);
+        }
+
+        [HttpPost("ResetPassword")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ResetPassword(ResetPasswordDto model)
+        {
+            if (string.IsNullOrEmpty(model.Email))
+            {
+                return BadRequest("Email should not be null");
+            }
+            if (ModelState.IsValid)
+            {
+                var result = await _authService.ResetPasswordAsync (model);
+                if (result.IsSuccess)
+                {
+                    return Ok(result);
+                }
+                return BadRequest(result);
+            }
+            return BadRequest(ModelState);
+
         }
     }
 }

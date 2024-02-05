@@ -1,4 +1,5 @@
-﻿using CRM.Dtos;
+﻿using CRM.Data;
+using CRM.Dtos;
 using CRM.Helpers;
 using CRM.Models;
 using CRM.Services.Interfaces;
@@ -25,7 +26,8 @@ namespace CRM.Services.Implementations
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IActionContextAccessor _actionContextAccessor;
         private readonly IUrlHelperFactory _urlHelperFactory;
-        public AuthService(UserManager<ApplicationUser> userManager, IOptions<JWT> jwt, IMailingService mailingService, IHttpContextAccessor httpContextAccessor, IActionContextAccessor actionContextAccessor, IUrlHelperFactory urlHelperFactory)
+        private readonly ApplicationDbContext _context;
+        public AuthService(UserManager<ApplicationUser> userManager, IOptions<JWT> jwt, IMailingService mailingService, IHttpContextAccessor httpContextAccessor, IActionContextAccessor actionContextAccessor, IUrlHelperFactory urlHelperFactory, ApplicationDbContext context)
         {
             _userManager = userManager;
             _jwt = jwt.Value;
@@ -33,6 +35,7 @@ namespace CRM.Services.Implementations
             _httpContextAccessor = httpContextAccessor;
             _actionContextAccessor = actionContextAccessor;
             _urlHelperFactory = urlHelperFactory;
+            _context = context;
         }
 
         // This method is used to generate a new Access Token for the user (will be called by Login Endpoint)
@@ -270,5 +273,107 @@ namespace CRM.Services.Implementations
 
         //}
 
+
+        public async Task<ResultDto> ForgotPasswordAsync(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null) return new ResultDto
+            {
+                IsSuccess = false,
+                Message = "Email is incorrect or not found !!",
+            };
+
+
+            Random rnd = new Random();
+            var randomNum = (rnd.Next(100000, 999999)).ToString();
+            string message = "Hi " + user.UserName + " Your Password verification code is: " + randomNum;
+            var result = await _mailingService.SendEmailAsync(user.Email, "Your verification code ", message, null);
+            if (result)
+            {
+                var Vcode = new VerifyCode
+                {
+                    Code = randomNum,
+                    UserId = user.Id,
+                };
+                await _context.VerifyCodes.AddAsync(Vcode);
+                _context.SaveChanges();
+                return new ResultDto
+                {
+                    IsSuccess = true,
+                    Message = "Verify code sent to the email successfully !!",
+                };
+            }
+            return new ResultDto
+            {
+                IsSuccess = false,
+                Message = "email is not real !!",
+            };
+        }
+
+        public async Task<ResultDto> ResetPasswordAsync(ResetPasswordDto model)
+        {
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user != null)
+            {
+                var res = await _userManager.ResetPasswordAsync(user, model.Token, model.Password);
+                if (res.Succeeded)
+                {
+                    return new ResultDto
+                    {
+                        IsSuccess = true,
+                        Message = "Successfully Changed "
+                    };
+                }
+                return new ResultDto
+                {
+                    IsSuccess = false,
+                    Message = "Error of change password"
+                };
+
+            }
+            return new ResultDto
+            {
+                IsSuccess = false,
+                Message = "Email is incorrect or not found !!"
+            };
+
+
+        }
+
+        public async Task<ResetTokenDto> VerifyCodeAsync(VerifyCodeDto codeDto)
+        {
+            var user = await _userManager.FindByEmailAsync(codeDto.Email);
+            if (user == null)
+            {
+                return new ResetTokenDto
+                {
+                    IsSuccess = false,
+                    Message = "Email Incorrect or not found"
+                };
+            };
+            var result = await _context.VerifyCodes.Where(c => c.UserId == user.Id && c.Code == codeDto.Code).SingleOrDefaultAsync();
+
+
+            if (result != null)
+            {
+                _context.VerifyCodes.Remove(result);
+                _context.SaveChanges();
+
+                var restToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+                return new ResetTokenDto
+                {
+                    IsSuccess = true,
+                    Message = "Successfully Verify Code",
+                    Token = restToken,
+                    Email= user.Email
+                };
+            }
+            return new ResetTokenDto
+            {
+                IsSuccess = false,
+                Message = "Verify Code is incorrect"
+            };
+        }
     }
 }

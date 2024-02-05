@@ -11,5 +11,8 @@ namespace CRM.Services.Interfaces
         Task<ResultDto> RegisterAsync(RegisterDto dto);
         //Task<ResultDto> ConfirmEmail(string Id, string Token);
         Task<AuthModel> ConfirmEmailAsync(string Id, string Token);
+        Task<ResultDto> ForgotPasswordAsync(string email);
+        Task<ResetTokenDto> VerifyCodeAsync(VerifyCodeDto codeDto);
+        Task<ResultDto> ResetPasswordAsync(ResetPasswordDto model);
     }
 }

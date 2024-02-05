@@ -17,5 +17,6 @@ namespace CRM.Data
             builder.Entity<IdentityRole>().ToTable("Roles");
             builder.Entity<IdentityUserRole<string>>().ToTable("UserRoles");
         }
+        public DbSet<VerifyCode> VerifyCodes { get; set; }
     }
 }
