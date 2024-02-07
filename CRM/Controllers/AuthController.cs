@@ -1,5 +1,5 @@
-﻿using CRM.Dtos;
-using CRM.Services.Interfaces;
+﻿using CRM.Core.Dtos;
+using CRM.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -103,20 +103,20 @@ namespace CRM.Controllers
         }
 
 
-        [HttpPost("ForgotPassword/{email}")]
+        [HttpPost("ForgotPassword")]
         [AllowAnonymous]
-        public async Task<IActionResult> ForgotPassword(string email)
+        public async Task<IActionResult> ForgotPassword([FromForm] string Email)
         {
-            if (string.IsNullOrEmpty(email))
+            if (string.IsNullOrEmpty(Email))
             {
-                return NotFound(email);
+                return NotFound(Email);
             }
-            var result = await _authService.ForgotPasswordAsync(email);
+            var result = await _authService.ForgotPasswordAsync(Email);
             if (result.IsSuccess)
             {
                 return Ok(result);
             }
-            return BadRequest(result);
+            return BadRequest(result.Message);
         }
 
         [HttpPost("VerifyCode")]

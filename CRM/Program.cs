@@ -1,10 +1,12 @@
 
-using CRM.Data;
-using CRM.Helpers;
-using CRM.Models;
-using CRM.Services.Implementations;
-using CRM.Services.Interfaces;
-using CRM.Settings;
+using CRM.Core;
+using CRM.Core.Helpers;
+using CRM.Core.Models;
+using CRM.Core.Services.Implementations;
+using CRM.Core.Services.Interfaces;
+using CRM.Core.Settings;
+using CRM.Infrastructure;
+using CRM.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -32,16 +34,17 @@ namespace CRM
             builder.Services.AddScoped<IAuthService, AuthService>();// Add IAuthService to the container
             builder.Services.AddScoped<IMailingService, MailingService>();// Add IMailingService to the container
             builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();// Add IActionContextAccessor to the container
-
+            //builder.Services.AddTransient(typeof(IBaseRepository<>), typeof(BaseRepository<>));
+            builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();// Add IUnitOfWork to the container
             builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
             {
-                options.TokenLifespan = TimeSpan.FromMinutes(1);// Sets the expiry for the confirmation token to 10 minutes  
+                options.TokenLifespan = TimeSpan.FromMinutes(10);// Sets the expiry for the generated token to 10 minutes  
             });
 
             // Add Identity DbContext to the container
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
             var DefaultConnection = builder.Configuration.GetConnectionString("DefaultConnection");
-            builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(DefaultConnection));
+            builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(DefaultConnection, b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
             // Add JWT Authentication to the container
             builder.Services.AddAuthentication(options =>
             {
