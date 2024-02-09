@@ -12,13 +12,11 @@ namespace CRM.Core.Models
     {
         [Key] 
         public int MeetingID { get; set; }        
-        public DateOnly MeetingDate { get; set; }
-        public TimeSpan MeetingTime { get; set; }
+        public DateTime MeetingDate { get; set; }
 
         [MaxLength(1000)] 
         public string?MeetingSummary { get; set; }  
-        public DateOnly FollowUpDate { get; set; }
-        public TimeSpan FollowUpTime { get; set; }
+        public DateTime FollowUpDate { get; set; }
         public bool Online { get; set; }
 
         [ForeignKey("CustomerId")] 

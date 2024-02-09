@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 
 namespace CRM.Infrastructure.Data
 {
@@ -16,6 +17,7 @@ namespace CRM.Infrastructure.Data
             builder.Entity<ApplicationUser>().ToTable("Users");
             builder.Entity<IdentityRole>().ToTable("Roles");
             builder.Entity<IdentityUserRole<string>>().ToTable("UserRoles");
+       ;
         }
         public DbSet<VerificationCode> VerificationCodes { get; set; }
         public DbSet<Customer> Customers { get; set; }
