@@ -4,6 +4,7 @@ using CRM.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CRM.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240209031823_OurTables")]
+    partial class OurTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -130,21 +133,24 @@ namespace CRM.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CallID"));
 
-                    b.Property<DateTime>("CallDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("CallStatus")
-                        .HasColumnType("int");
+                    b.Property<DateOnly>("CallDate")
+                        .HasColumnType("date");
 
                     b.Property<string>("CallSummery")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<TimeSpan>("CallTime")
+                        .HasColumnType("time");
+
                     b.Property<int?>("CustomerId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("FollowUpDate")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly>("FollowUpDate")
+                        .HasColumnType("date");
+
+                    b.Property<TimeSpan>("FollowUpTime")
+                        .HasColumnType("time");
 
                     b.Property<string>("SalesRepresntativeId")
                         .HasColumnType("nvarchar(450)");
@@ -226,11 +232,11 @@ namespace CRM.Infrastructure.Migrations
                     b.Property<int?>("CustomerId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("DealDate")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly>("DealDate")
+                        .HasColumnType("date");
 
-                    b.Property<int?>("InterestID")
-                        .HasColumnType("int");
+                    b.Property<TimeSpan>("DealTime")
+                        .HasColumnType("time");
 
                     b.Property<double>("Price")
                         .HasColumnType("float");
@@ -244,8 +250,6 @@ namespace CRM.Infrastructure.Migrations
                     b.HasKey("DealId");
 
                     b.HasIndex("CustomerId");
-
-                    b.HasIndex("InterestID");
 
                     b.HasIndex("SalesRepresntativeId");
 
@@ -286,15 +290,21 @@ namespace CRM.Infrastructure.Migrations
                     b.Property<int?>("CustomerId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("FollowUpDate")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly>("FollowUpDate")
+                        .HasColumnType("date");
 
-                    b.Property<DateTime>("MeetingDate")
-                        .HasColumnType("datetime2");
+                    b.Property<TimeSpan>("FollowUpTime")
+                        .HasColumnType("time");
+
+                    b.Property<DateOnly>("MeetingDate")
+                        .HasColumnType("date");
 
                     b.Property<string>("MeetingSummary")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
+
+                    b.Property<TimeSpan>("MeetingTime")
+                        .HasColumnType("time");
 
                     b.Property<bool>("Online")
                         .HasColumnType("bit");
@@ -322,16 +332,25 @@ namespace CRM.Infrastructure.Migrations
                     b.Property<int?>("CustomerId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("FollowUpDate")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly>("FollowUpDate")
+                        .HasColumnType("date");
+
+                    b.Property<TimeSpan>("FollowUpTime")
+                        .HasColumnType("time");
 
                     b.Property<string>("MessageContent")
                         .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
-                    b.Property<DateTime>("MessageDate")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly>("MessageDate")
+                        .HasColumnType("date");
+
+                    b.Property<TimeSpan>("MessageTime")
+                        .HasColumnType("time");
+
+                    b.Property<string>("Replay")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SalesRepresntativeId")
                         .HasColumnType("nvarchar(450)");
@@ -627,26 +646,22 @@ namespace CRM.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("CustomerId");
 
-                    b.HasOne("CRM.Core.Models.Interest", "Interest")
-                        .WithMany()
-                        .HasForeignKey("InterestID");
-
                     b.HasOne("CRM.Core.Models.ApplicationUser", "SalesRepresntative")
                         .WithMany()
                         .HasForeignKey("SalesRepresntativeId");
 
                     b.Navigation("Customer");
 
-                    b.Navigation("Interest");
-
                     b.Navigation("SalesRepresntative");
                 });
 
             modelBuilder.Entity("CRM.Core.Models.Interest", b =>
                 {
-                    b.HasOne("CRM.Core.Models.Deal", null)
+                    b.HasOne("CRM.Core.Models.Deal", "Deal")
                         .WithMany("interests")
                         .HasForeignKey("DealId");
+
+                    b.Navigation("Deal");
                 });
 
             modelBuilder.Entity("CRM.Core.Models.Meeting", b =>
