@@ -15,7 +15,6 @@ namespace CRM.Core.Models
         public DateTime DealDate { get; set; }
         public String? description { get; set; }
         public double Price { get; set; }
-        public ICollection<Interest> interests { get; set; }=new List<Interest>();
         public Customer?Customer { get; set; }
         [ForeignKey("SalesRepresntativeId")]
         public ApplicationUser? SalesRepresntative { get; set; }

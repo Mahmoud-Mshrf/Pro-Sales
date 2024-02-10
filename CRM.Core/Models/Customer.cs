@@ -59,6 +59,10 @@ namespace CRM.Core.Models
             public ICollection<Message> Messages { get; set; } = new List<Message>();
 
             public ICollection<Call> Calls { get; set; } = new List<Call>();
+
+            public ICollection <Deal> Deals {  get; set; } = new List<Deal>();
+            public ICollection<Meeting> Meetings { get; set; }=new List<Meeting>();
+
         
     
     }

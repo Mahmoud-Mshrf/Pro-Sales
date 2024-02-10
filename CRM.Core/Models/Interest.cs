@@ -12,6 +12,8 @@ namespace CRM.Core.Models
         public string?InterestName { get; set; }
 
         public ICollection<Customer>?Customers { get; set; }=new List<Customer>();
+
+        public ICollection<Deal> deals { get; set; } = new List<Deal>();
       
 
     }
