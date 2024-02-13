@@ -37,6 +37,7 @@ namespace CRM
             builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));// Add MailSettings configuration to the container
             builder.Services.AddScoped<IAuthService, AuthService>();// Add IAuthService to the container
             builder.Services.AddScoped<IMailingService, MailingService>();// Add IMailingService to the container
+            builder.Services.AddScoped<IUserProfileService, UserProfileService>();// Add IUserProfileService to the container
             builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();// Add IActionContextAccessor to the container
             //builder.Services.AddTransient(typeof(IBaseRepository<>), typeof(BaseRepository<>));
             builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();// Add IUnitOfWork to the container
