@@ -14,5 +14,6 @@ namespace CRM.Core.Services.Interfaces
         Task<ResultDto> ForgotPasswordAsync(string email);
         Task<ResetTokenDto> VerifyCodeAsync(VerifyCodeDto codeDto);
         Task<ResultDto> ResetPasswordAsync(ResetPasswordDto model);
+        Task<AuthModel> ConfirmNewEmailAsync(string Id, string newEmail, string Token);
     }
 }

@@ -262,6 +262,52 @@ namespace CRM.Core.Services.Implementations
             return authModel;
         }
 
+
+
+        public async Task<AuthModel> ConfirmNewEmailAsync(string Id,string newEmail ,string Token)
+        {
+            var authModel = new AuthModel();
+            if (string.IsNullOrEmpty(Id) || string.IsNullOrEmpty(Token))
+            {
+                authModel.Message = "Invalid Email Confirmation Url";
+                return authModel;
+            }
+            var user = await _unitOfWork.UserManager.FindByIdAsync(Id);
+            var decodedToken = WebEncoders.Base64UrlDecode(Token);
+            var normalToken = Encoding.UTF8.GetString(decodedToken);
+            var result = await _unitOfWork.UserManager.ChangeEmailAsync(user, newEmail,normalToken);
+            if (!result.Succeeded)
+            {
+                authModel.Message = "Email Confirmation Failed";
+                return authModel;
+            }
+
+            var JwtToken = await CreateToken(user);
+            var token = new JwtSecurityTokenHandler().WriteToken(JwtToken);
+            authModel.AccessToken = token;
+            authModel.IsAuthenticated = true;
+            authModel.Email = user.Email;
+            authModel.UserName = user.UserName;
+            authModel.Roles = JwtToken.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => x.Value).ToList();
+            authModel.Message = "Email Confirmed Successfully";
+
+            if (user.RefreshTokens.Any(x => x.IsActive))
+            {
+                var activeRefreshToken = user.RefreshTokens.Where(x => x.IsActive).FirstOrDefault();
+                authModel.RefreshToken = activeRefreshToken.Token;
+                authModel.RefreshTokenExpiration = activeRefreshToken.ExpiresOn;
+            }
+            else
+            {
+                var refreshToken = GenerateRefreshToken();
+                user.RefreshTokens.Add(refreshToken);
+                await _unitOfWork.UserManager.UpdateAsync(user);
+                authModel.RefreshToken = refreshToken.Token;
+                authModel.RefreshTokenExpiration = refreshToken.ExpiresOn;
+            }
+            return authModel;
+        }
+
         //public async Task<ResultDto> ConfirmEmail(string Id, string Token)
         //{
         //    if(string.IsNullOrEmpty(Id) || string.IsNullOrEmpty(Token))
