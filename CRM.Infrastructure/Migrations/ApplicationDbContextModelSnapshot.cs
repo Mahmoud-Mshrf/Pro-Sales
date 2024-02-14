@@ -119,7 +119,7 @@ namespace CRM.Infrastructure.Migrations
 
                     b.HasIndex("ManagerId");
 
-                    b.ToTable("Business", (string)null);
+                    b.ToTable("Business");
                 });
 
             modelBuilder.Entity("CRM.Core.Models.Call", b =>
@@ -155,7 +155,7 @@ namespace CRM.Infrastructure.Migrations
 
                     b.HasIndex("SalesRepresntativeId");
 
-                    b.ToTable("Calls", (string)null);
+                    b.ToTable("Calls");
                 });
 
             modelBuilder.Entity("CRM.Core.Models.Customer", b =>
@@ -212,7 +212,7 @@ namespace CRM.Infrastructure.Migrations
 
                     b.HasIndex("SourceId");
 
-                    b.ToTable("Customers", (string)null);
+                    b.ToTable("Customers");
                 });
 
             modelBuilder.Entity("CRM.Core.Models.Deal", b =>
@@ -249,7 +249,7 @@ namespace CRM.Infrastructure.Migrations
 
                     b.HasIndex("SalesRepresntativeId");
 
-                    b.ToTable("Deals", (string)null);
+                    b.ToTable("Deals");
                 });
 
             modelBuilder.Entity("CRM.Core.Models.Interest", b =>
@@ -260,9 +260,6 @@ namespace CRM.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("InterestID"));
 
-                    b.Property<int?>("DealId")
-                        .HasColumnType("int");
-
                     b.Property<string>("InterestName")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -270,9 +267,7 @@ namespace CRM.Infrastructure.Migrations
 
                     b.HasKey("InterestID");
 
-                    b.HasIndex("DealId");
-
-                    b.ToTable("Interests", (string)null);
+                    b.ToTable("Interests");
                 });
 
             modelBuilder.Entity("CRM.Core.Models.Meeting", b =>
@@ -308,7 +303,7 @@ namespace CRM.Infrastructure.Migrations
 
                     b.HasIndex("SalesRepresntativeId");
 
-                    b.ToTable("Meetings", (string)null);
+                    b.ToTable("Meetings");
                 });
 
             modelBuilder.Entity("CRM.Core.Models.Message", b =>
@@ -342,7 +337,7 @@ namespace CRM.Infrastructure.Migrations
 
                     b.HasIndex("SalesRepresntativeId");
 
-                    b.ToTable("Messages", (string)null);
+                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("CRM.Core.Models.Source", b =>
@@ -359,7 +354,7 @@ namespace CRM.Infrastructure.Migrations
 
                     b.HasKey("SourceId");
 
-                    b.ToTable("Sources", (string)null);
+                    b.ToTable("Sources");
                 });
 
             modelBuilder.Entity("CRM.Core.Models.VerificationCode", b =>
@@ -388,7 +383,7 @@ namespace CRM.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("VerificationCodes", (string)null);
+                    b.ToTable("VerificationCodes");
                 });
 
             modelBuilder.Entity("CustomerInterest", b =>
@@ -541,7 +536,7 @@ namespace CRM.Infrastructure.Migrations
 
             modelBuilder.Entity("CRM.Core.Models.ApplicationUser", b =>
                 {
-                    b.OwnsMany("CRM.Core.Models.ApplicationUser.RefreshTokens#CRM.Core.Helpers.RefreshToken", "RefreshTokens", b1 =>
+                    b.OwnsMany("CRM.Core.Helpers.RefreshToken", "RefreshTokens", b1 =>
                         {
                             b1.Property<string>("ApplicationUserId")
                                 .HasColumnType("nvarchar(450)");
@@ -567,7 +562,7 @@ namespace CRM.Infrastructure.Migrations
 
                             b1.HasKey("ApplicationUserId", "Id");
 
-                            b1.ToTable("RefreshToken", (string)null);
+                            b1.ToTable("RefreshToken");
 
                             b1.WithOwner()
                                 .HasForeignKey("ApplicationUserId");
@@ -624,11 +619,11 @@ namespace CRM.Infrastructure.Migrations
             modelBuilder.Entity("CRM.Core.Models.Deal", b =>
                 {
                     b.HasOne("CRM.Core.Models.Customer", "Customer")
-                        .WithMany()
+                        .WithMany("Deals")
                         .HasForeignKey("CustomerId");
 
                     b.HasOne("CRM.Core.Models.Interest", "Interest")
-                        .WithMany()
+                        .WithMany("deals")
                         .HasForeignKey("InterestID");
 
                     b.HasOne("CRM.Core.Models.ApplicationUser", "SalesRepresntative")
@@ -642,17 +637,10 @@ namespace CRM.Infrastructure.Migrations
                     b.Navigation("SalesRepresntative");
                 });
 
-            modelBuilder.Entity("CRM.Core.Models.Interest", b =>
-                {
-                    b.HasOne("CRM.Core.Models.Deal", null)
-                        .WithMany("interests")
-                        .HasForeignKey("DealId");
-                });
-
             modelBuilder.Entity("CRM.Core.Models.Meeting", b =>
                 {
                     b.HasOne("CRM.Core.Models.Customer", "Customer")
-                        .WithMany()
+                        .WithMany("Meetings")
                         .HasForeignKey("CustomerId");
 
                     b.HasOne("CRM.Core.Models.ApplicationUser", "SalesRepresntative")
@@ -760,12 +748,16 @@ namespace CRM.Infrastructure.Migrations
                 {
                     b.Navigation("Calls");
 
+                    b.Navigation("Deals");
+
+                    b.Navigation("Meetings");
+
                     b.Navigation("Messages");
                 });
 
-            modelBuilder.Entity("CRM.Core.Models.Deal", b =>
+            modelBuilder.Entity("CRM.Core.Models.Interest", b =>
                 {
-                    b.Navigation("interests");
+                    b.Navigation("deals");
                 });
 
             modelBuilder.Entity("CRM.Core.Models.Source", b =>

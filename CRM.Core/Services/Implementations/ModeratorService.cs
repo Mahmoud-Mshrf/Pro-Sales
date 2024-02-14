@@ -19,35 +19,35 @@ namespace CRM.Core.Services.Implementations
             _unitOfWork = unitOfWork;
         }
         // Will be used after adding Manager module
-        public async Task<ReturnUsersDto> GetAllSalesRepresentatives()
-        {
-            var salesReps = await _unitOfWork.UserManager.GetUsersInRoleAsync("SalesRepresentative");
-            if (salesReps == null)
-            {
-                return new ReturnUsersDto
-                {
-                    IsSuccess = false,
-                    Message = "No sales representatives found",
-                };
-            }
-            var Representatives = new List<UserDto>();
-            foreach (var rep in salesReps)
-            {
-                var user = new UserDto
-                {
-                    Name = rep.FirstName + " " + rep.LastName,
-                    Email = rep.Email,
-                    UserId = rep.Id
-                };
-                Representatives.Add(user);
-            }
-            return new ReturnUsersDto
-            {
-                IsSuccess = true,
-                Message = "Sales representatives found",
-                Users = Representatives
-            };
-        }
+        //public async Task<ReturnUsersDto> GetAllSalesRepresentatives()
+        //{
+        //    var salesReps = await _unitOfWork.UserManager.GetUsersInRoleAsync("SalesRepresentative");
+        //    if (salesReps == null)
+        //    {
+        //        return new ReturnUsersDto
+        //        {
+        //            IsSuccess = false,
+        //            Message = "No sales representatives found",
+        //        };
+        //    }
+        //    var Representatives = new List<UserDto>();
+        //    foreach (var rep in salesReps)
+        //    {
+        //        var user = new UserDto
+        //        {
+        //            Name = rep.FirstName + " " + rep.LastName,
+        //            Email = rep.Email,
+        //            UserId = rep.Id
+        //        };
+        //        Representatives.Add(user);
+        //    }
+        //    return new ReturnUsersDto
+        //    {
+        //        IsSuccess = true,
+        //        Message = "Sales representatives found",
+        //        Users = Representatives
+        //    };
+        //}
 
         public async Task<ResultDto> AddCustomer(CustomerDto customerDto,string marketingModeratorEmail)
         {
@@ -164,24 +164,21 @@ namespace CRM.Core.Services.Implementations
                         Message = "Interest not found"
                     };
                 }
-
-                var existingInterest = customer.Interests.FirstOrDefault(i => i.InterestID == interest.InterestID);
-
-                if (interestt.IsSelected)
+                if (customer.Interests.Any(i => i.InterestID == interest.InterestID) && interestt.IsSelected)
                 {
-                    if (existingInterest == null)
-                    {
-                        // Only add if not already present
-                        customer.Interests.Add(interest);
-                    }
+                    continue;
                 }
-                else
+                if (!customer.Interests.Any(i => i.InterestID == interest.InterestID) && !interestt.IsSelected)
                 {
-                    // Remove the interest if it exists
-                    if (existingInterest != null)
-                    {
-                        customer.Interests.Remove(existingInterest);
-                    }
+                    continue;
+                }
+                if ((!customer.Interests.Any(i => i.InterestID == interest.InterestID)) && interestt.IsSelected)
+                {
+                    customer.Interests.Add(interest);
+                }
+                if (customer.Interests.Any(i => i.InterestID == interest.InterestID) && !interestt.IsSelected)
+                {
+                    customer.Interests.Remove(interest);
                 }
 
 
@@ -212,63 +209,67 @@ namespace CRM.Core.Services.Implementations
                 Message = "Customer updated successfully"
             };
         }
+        // will be used after adding Manager module
+        //public async Task<ReturnInterstsDto> GetAllInterests()
+        //{
+        //    var interests = await _unitOfWork.Interests.GetAllAsync();
+        //    if(interests == null)
+        //    {
+        //        return new ReturnInterstsDto
+        //        {
+        //            IsSuccess = false,
+        //            Message = "No interests found"
+        //        };
+        //    }
+        //    var Interests = new List<InterestDto>();
+        //    foreach(var interest in interests)
+        //    {
+        //        var interestDto = new InterestDto
+        //        {
+        //            InterestID = interest.InterestID,
+        //            InterestName = interest.InterestName
+        //        };
+        //        Interests.Add(interestDto);
+        //    }
+        //    return new ReturnInterstsDto
+        //    {
+        //        IsSuccess = true,
+        //        Message = "Interests found",
+        //        Interests = Interests
+        //    };
+        //}
 
-        public async Task<ReturnInterstsDto> GetAllInterests()
-        {
-            var interests = await _unitOfWork.Interests.GetAllAsync();
-            if(interests == null)
-            {
-                return new ReturnInterstsDto
-                {
-                    IsSuccess = false,
-                    Message = "No interests found"
-                };
-            }
-            var Interests = new List<InterestDto>();
-            foreach(var interest in interests)
-            {
-                var interestDto = new InterestDto
-                {
-                    InterestID = interest.InterestID,
-                    InterestName = interest.InterestName
-                };
-                Interests.Add(interestDto);
-            }
-            return new ReturnInterstsDto
-            {
-                IsSuccess = true,
-                Message = "Interests found",
-                Interests = Interests
-            };
-        }
-        public async Task<ReturnSourcesDto> GetAllSources()
-        {
-            var sources = await _unitOfWork.Sources.GetAllAsync();
-            if(sources == null)
-            {
-                return new ReturnSourcesDto
-                {
-                    IsSuccess = false,
-                    Message = "No sources found"
-                };
-            }
-            var Sources = new List<SourceDto>();
-            foreach(var source in sources)
-            {
-                var sourceDto = new SourceDto
-                {
-                    SourceName = source.SourceName,
-                    SourceId=source.SourceId
-                };
-                Sources.Add(sourceDto);
-            }
-            return new ReturnSourcesDto
-            {
-                IsSuccess = true,
-                Message = "Sources found",
-                Sources = Sources
-            };
-        }
+
+
+        // will be used after adding Manager module
+        //public async Task<ReturnSourcesDto> GetAllSources()
+        //{
+        //    var sources = await _unitOfWork.Sources.GetAllAsync();
+        //    if(sources == null)
+        //    {
+        //        return new ReturnSourcesDto
+        //        {
+        //            IsSuccess = false,
+        //            Message = "No sources found"
+        //        };
+        //    }
+        //    var Sources = new List<SourceDto>();
+        //    foreach(var source in sources)
+        //    {
+        //        var sourceDto = new SourceDto
+        //        {
+        //            SourceName = source.SourceName,
+        //            SourceId=source.SourceId
+        //        };
+        //        Sources.Add(sourceDto);
+        //    }
+        //    return new ReturnSourcesDto
+        //    {
+        //        IsSuccess = true,
+        //        Message = "Sources found",
+        //        Sources = Sources
+        //    };
+        //}
 
     }
 }

@@ -19,16 +19,16 @@ namespace CRM.Controllers
         }
 
         // Will be used after adding Manager module
-        [HttpGet("GetAllRepresentatives")]
-        public async Task<IActionResult> GetAllSalesRepresentatives()
-        {
-            var result = await _moderatorService.GetAllSalesRepresentatives();
-            if (!result.IsSuccess)
-            {
-                return BadRequest(result.Message);
-            }
-            return Ok(result.Users);
-        }
+        //[HttpGet("GetAllRepresentatives")]
+        //public async Task<IActionResult> GetAllSalesRepresentatives()
+        //{
+        //    var result = await _moderatorService.GetAllSalesRepresentatives();
+        //    if (!result.IsSuccess)
+        //    {
+        //        return BadRequest(result.Message);
+        //    }
+        //    return Ok(result.Users);
+        //}
 
         [HttpPost("[action]")]
         public async Task<IActionResult> AddCustomer([FromBody] CustomerDto customerDto)
@@ -61,22 +61,22 @@ namespace CRM.Controllers
             return Ok(result);
         }
 
-        [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllSources()
-        {
-            var result = await _moderatorService.GetAllSources();
-            if(!result.IsSuccess)
-                return BadRequest(result.Message);
-            return Ok(result.Sources);
-        }
-        [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllInterests()
-        {
-            var result = await _moderatorService.GetAllInterests();
-            if (!result.IsSuccess)
-                return BadRequest(result.Message);
-            return Ok(result.Interests);
-        }
+        //[HttpGet("[action]")]
+        //public async Task<IActionResult> GetAllSources()
+        //{
+        //    var result = await _moderatorService.GetAllSources();
+        //    if(!result.IsSuccess)
+        //        return BadRequest(result.Message);
+        //    return Ok(result.Sources);
+        //}
+        //[HttpGet("[action]")]
+        //public async Task<IActionResult> GetAllInterests()
+        //{
+        //    var result = await _moderatorService.GetAllInterests();
+        //    if (!result.IsSuccess)
+        //        return BadRequest(result.Message);
+        //    return Ok(result.Interests);
+        //}
 
     }
 }

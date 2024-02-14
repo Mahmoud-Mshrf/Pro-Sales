@@ -10,10 +10,10 @@ namespace CRM.Core.Services.Interfaces
     public interface IModeratorService
     {
         // Will be used after adding Manager module
-        Task<ReturnUsersDto> GetAllSalesRepresentatives();
+        //Task<ReturnUsersDto> GetAllSalesRepresentatives();
         Task<ResultDto> AddCustomer(CustomerDto customerDto, string marketingModeratorEmail);
         Task<ResultDto> UpdateCustomer(CustomerDto customerDto, int CustomerId);
-        Task<ReturnInterstsDto> GetAllInterests();
-        Task<ReturnSourcesDto> GetAllSources();
+        //Task<ReturnInterstsDto> GetAllInterests();
+        //Task<ReturnSourcesDto> GetAllSources();
     }
 }
