@@ -42,8 +42,8 @@ namespace CRM.Core.Services.Implementations
             var user = await _unitOfWork.UserManager.FindByEmailAsync(email);
             if (user == null)
             {
-                   return new ResultDto
-                   {
+                return new ResultDto
+                {
                     IsSuccess = false,
                     Message = "User not found"
                 };

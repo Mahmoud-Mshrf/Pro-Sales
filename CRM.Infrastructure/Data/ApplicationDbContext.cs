@@ -17,7 +17,11 @@ namespace CRM.Infrastructure.Data
             builder.Entity<ApplicationUser>().ToTable("Users");
             builder.Entity<IdentityRole>().ToTable("Roles");
             builder.Entity<IdentityUserRole<string>>().ToTable("UserRoles");
-       ;
+            builder.Entity<Customer>()
+            .HasMany(c => c.Interests)
+            .WithMany(i => i.Customers)
+            .UsingEntity(j => j.ToTable("CustomerInterest"));
+            
         }
         public DbSet<VerificationCode> VerificationCodes { get; set; }
         public DbSet<Customer> Customers { get; set; }

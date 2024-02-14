@@ -14,6 +14,9 @@ namespace CRM.Core
         IBaseRepository<VerificationCode> VerificationCodes { get; }
         UserManager<ApplicationUser> UserManager { get; }
         RoleManager<IdentityRole> RoleManager { get; }
+        IBaseRepository<Source> Sources { get; }
+        IBaseRepository<Interest> Interests { get; }
+        IBaseRepository<Customer> Customers { get; }
         int complete();
     }
 }
