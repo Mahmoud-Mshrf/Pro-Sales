@@ -125,7 +125,7 @@ namespace CRM.Core.Services.Implementations
         }
         public async Task<ResultDto> UpdateCustomer(CustomerDto customerDto,int customerId)
         {
-            var customer = await _unitOfWork.Customers.GetByIdAsync(customerId);
+            var customer = await _unitOfWork.Customers.FindAsync(c => c.CustomerId == customerId, ["Interests"]);
             if (customer == null)
             {
                 return new ResultDto
