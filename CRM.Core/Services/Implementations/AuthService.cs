@@ -2,6 +2,7 @@
 using CRM.Core.Helpers;
 using CRM.Core.Models;
 using CRM.Core.Services.Interfaces;
+using Hangfire;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -208,6 +209,7 @@ namespace CRM.Core.Services.Implementations
             };
             try
             {
+                BackgroundJob.Schedule(() => DeleteUnConfirmedUser(user.Id), TimeSpan.FromMinutes(10));
                 var mailResult = await _mailingService.SendEmailAsync(message.MailTo, message.Subject, message.Content);
                 return new ResultDto { IsSuccess = true, Message = "Confirmation Email Was Sent, Please confirm your email" };
             }
@@ -215,6 +217,15 @@ namespace CRM.Core.Services.Implementations
             {
                 await _unitOfWork.UserManager.DeleteAsync(user);
                 return new ResultDto { Message = "Confirmation Email Failed to send" };
+            }
+        }
+
+        public async Task DeleteUnConfirmedUser(string id)
+        {
+            var user = await _unitOfWork.UserManager.FindByIdAsync(id);
+            if (user != null && !user.EmailConfirmed)
+            {
+                await _unitOfWork.UserManager.DeleteAsync(user);
             }
         }
 

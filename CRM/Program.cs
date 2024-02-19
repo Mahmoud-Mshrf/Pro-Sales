@@ -7,6 +7,7 @@ using CRM.Core.Services.Interfaces;
 using CRM.Core.Settings;
 using CRM.Infrastructure;
 using CRM.Infrastructure.Data;
+using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -32,6 +33,12 @@ namespace CRM
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+
+            // Add Hangfire to the container
+            builder.Services.AddHangfire(x => x.UseSqlServerStorage(builder.Configuration.GetConnectionString("HangfireConnection")));
+            builder.Services.AddHangfireServer();
+
 
             builder.Services.Configure<JWT>(builder.Configuration.GetSection("JWT"));// Add JWT configuration to the container
             builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));// Add MailSettings configuration to the container
@@ -88,7 +95,7 @@ namespace CRM
             app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseAuthorization();
-
+            app.UseHangfireDashboard("/HangfireDashboard");
 
             app.MapControllers();
 
