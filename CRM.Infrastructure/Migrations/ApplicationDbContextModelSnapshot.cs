@@ -260,17 +260,12 @@ namespace CRM.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("InterestID"));
 
-                    b.Property<int?>("DealId")
-                        .HasColumnType("int");
-
                     b.Property<string>("InterestName")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
                     b.HasKey("InterestID");
-
-                    b.HasIndex("DealId");
 
                     b.ToTable("Interests");
                 });
@@ -403,7 +398,7 @@ namespace CRM.Infrastructure.Migrations
 
                     b.HasIndex("InterestsInterestID");
 
-                    b.ToTable("CustomerInterest");
+                    b.ToTable("CustomerInterest", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -624,11 +619,11 @@ namespace CRM.Infrastructure.Migrations
             modelBuilder.Entity("CRM.Core.Models.Deal", b =>
                 {
                     b.HasOne("CRM.Core.Models.Customer", "Customer")
-                        .WithMany()
+                        .WithMany("Deals")
                         .HasForeignKey("CustomerId");
 
                     b.HasOne("CRM.Core.Models.Interest", "Interest")
-                        .WithMany()
+                        .WithMany("deals")
                         .HasForeignKey("InterestID");
 
                     b.HasOne("CRM.Core.Models.ApplicationUser", "SalesRepresntative")
@@ -642,17 +637,10 @@ namespace CRM.Infrastructure.Migrations
                     b.Navigation("SalesRepresntative");
                 });
 
-            modelBuilder.Entity("CRM.Core.Models.Interest", b =>
-                {
-                    b.HasOne("CRM.Core.Models.Deal", null)
-                        .WithMany("interests")
-                        .HasForeignKey("DealId");
-                });
-
             modelBuilder.Entity("CRM.Core.Models.Meeting", b =>
                 {
                     b.HasOne("CRM.Core.Models.Customer", "Customer")
-                        .WithMany()
+                        .WithMany("Meetings")
                         .HasForeignKey("CustomerId");
 
                     b.HasOne("CRM.Core.Models.ApplicationUser", "SalesRepresntative")
@@ -760,12 +748,16 @@ namespace CRM.Infrastructure.Migrations
                 {
                     b.Navigation("Calls");
 
+                    b.Navigation("Deals");
+
+                    b.Navigation("Meetings");
+
                     b.Navigation("Messages");
                 });
 
-            modelBuilder.Entity("CRM.Core.Models.Deal", b =>
+            modelBuilder.Entity("CRM.Core.Models.Interest", b =>
                 {
-                    b.Navigation("interests");
+                    b.Navigation("deals");
                 });
 
             modelBuilder.Entity("CRM.Core.Models.Source", b =>
