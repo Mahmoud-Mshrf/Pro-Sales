@@ -209,7 +209,7 @@ namespace CRM.Core.Services.Implementations
             };
             try
             {
-                BackgroundJob.Schedule(() => DeleteUnConfirmedUser(user.Id), TimeSpan.FromMinutes(2));
+                BackgroundJob.Schedule(() => DeleteUnConfirmedUser(user.Id), TimeSpan.FromMinutes(10));
                 var mailResult = await _mailingService.SendEmailAsync(message.MailTo, message.Subject, message.Content);
                 return new ResultDto { IsSuccess = true, Message = "Confirmation Email Was Sent, Please confirm your email" };
             }
