@@ -53,19 +53,6 @@ namespace CRM.Controllers
             }
             return Ok(result);
         }
-        //[ApiExplorerSettings(IgnoreApi = true)]
-        //[AllowAnonymous]
-        //[HttpGet("ConfirmNewEmail")]
-        //public async Task<IActionResult> ConfirmNewEmail(string Id,string NewEmail,string Token)
-        //{
-        //    var result = await _authService.ConfirmNewEmailAsync(Id,NewEmail,Token);
-        //    if (!result.IsAuthenticated)
-        //    {
-        //        return BadRequest(result.Message);
-        //    }
-        //    return Ok(result);
-        //}
-
         
         [AllowAnonymous]
         [HttpPost("ConfirmNewEmail")]

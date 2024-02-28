@@ -155,27 +155,6 @@ namespace CRM.Core.Services.Implementations
             {
                 return new ResultDto { Message = "Confirmation Email Failed to send" };
             }
-            //var token =await _unitOfWork.UserManager.GenerateChangeEmailTokenAsync(user, Newemail);
-            //var encodedToken = Encoding.UTF8.GetBytes(token);
-            //var validToken = Convert.ToBase64String(encodedToken);
-            //var urlHelper = _urlHelperFactory.GetUrlHelper(_actionContextAccessor.ActionContext);
-            //var callBackUrl = urlHelper.Action("ConfirmNewEmail", "UserProfile", new { Id = user.Id,NewEmail=Newemail,Token = validToken }, _httpContextAccessor.HttpContext.Request.Scheme);
-            //var message = new MailDto
-            //{
-            //    MailTo = Newemail,
-            //    Subject = "Confirm Your New Email",
-            //    Content = $"<h1>Welcome to CRM</h1> <p>Please confirm your email by <a href='{callBackUrl}'>Clicking here</a></p>",
-            //};
-            //try
-            //{
-            //    var mailResult = await _mailingService.SendEmailAsync(message.MailTo, message.Subject, message.Content);
-            //    return new ResultDto { IsSuccess = true, Message = "Confirmation Email Was Sent, Please confirm your new email" };
-            //}
-            //catch
-            //{
-            //    return new ResultDto { Message = "Confirmation Email Failed to send" };
-            //}
-
         }
 
     }
