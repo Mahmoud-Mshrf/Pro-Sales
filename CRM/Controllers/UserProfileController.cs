@@ -10,7 +10,7 @@ namespace CRM.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-
+         
     public class UserProfileController : ControllerBase
     {
         private readonly IUserProfileService _userProfileService;
@@ -53,12 +53,25 @@ namespace CRM.Controllers
             }
             return Ok(result);
         }
-        [ApiExplorerSettings(IgnoreApi = true)]
+        //[ApiExplorerSettings(IgnoreApi = true)]
+        //[AllowAnonymous]
+        //[HttpGet("ConfirmNewEmail")]
+        //public async Task<IActionResult> ConfirmNewEmail(string Id,string NewEmail,string Token)
+        //{
+        //    var result = await _authService.ConfirmNewEmailAsync(Id,NewEmail,Token);
+        //    if (!result.IsAuthenticated)
+        //    {
+        //        return BadRequest(result.Message);
+        //    }
+        //    return Ok(result);
+        //}
+
+        
         [AllowAnonymous]
-        [HttpGet("ConfirmNewEmail")]
-        public async Task<IActionResult> ConfirmNewEmail(string Id,string NewEmail,string Token)
+        [HttpPost("ConfirmNewEmail")]
+        public async Task<IActionResult> ConfirmNewEmail(VerifyCodeDto codeDto)
         {
-            var result = await _authService.ConfirmNewEmailAsync(Id,NewEmail,Token);
+            var result = await _authService.ConfirmNewEmailAsync(codeDto);
             if (!result.IsAuthenticated)
             {
                 return BadRequest(result.Message);

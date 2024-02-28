@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Org.BouncyCastle.Bcpg;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -24,16 +25,16 @@ namespace CRM.Core.Services.Implementations
         private readonly IUnitOfWork _unitOfWork;
         private readonly JWT _jwt;
         private readonly IMailingService _mailingService;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IActionContextAccessor _actionContextAccessor;
-        private readonly IUrlHelperFactory _urlHelperFactory;
-        public AuthService(IOptions<JWT> jwt, IMailingService mailingService, IHttpContextAccessor httpContextAccessor, IActionContextAccessor actionContextAccessor, IUrlHelperFactory urlHelperFactory, IUnitOfWork unitOfWork)
+        //private readonly IHttpContextAccessor _httpContextAccessor;
+        //private readonly IActionContextAccessor _actionContextAccessor;
+        //private readonly IUrlHelperFactory _urlHelperFactory;
+        public AuthService(IOptions<JWT> jwt, IMailingService mailingService,/* IHttpContextAccessor httpContextAccessor, IActionContextAccessor actionContextAccessor, IUrlHelperFactory urlHelperFactory,*/ IUnitOfWork unitOfWork)
         {
             _jwt = jwt.Value;
             _mailingService = mailingService;
-            _httpContextAccessor = httpContextAccessor;
-            _actionContextAccessor = actionContextAccessor;
-            _urlHelperFactory = urlHelperFactory;
+            //_httpContextAccessor = httpContextAccessor;
+            //_actionContextAccessor = actionContextAccessor;
+            //_urlHelperFactory = urlHelperFactory;
             _unitOfWork = unitOfWork;
         }
 
@@ -59,6 +60,8 @@ namespace CRM.Core.Services.Implementations
             authModel.IsAuthenticated = true;
             authModel.Email = user.Email;
             authModel.UserName = user.UserName;
+            authModel.FirstName = user.FirstName;
+            authModel.LastName = user.LastName;
             authModel.Roles = JwtToken.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => x.Value).ToList();
             
             if(user.RefreshTokens.Any(x => x.IsActive))
@@ -147,6 +150,8 @@ namespace CRM.Core.Services.Implementations
             var JwtToken = await CreateToken(user);
             authModel.AccessToken = new JwtSecurityTokenHandler().WriteToken(JwtToken);
             authModel.IsAuthenticated = true;
+            authModel.FirstName = user.FirstName;
+            authModel.LastName = user.LastName;
             authModel.RefreshToken = newRefreshToken.Token;
             authModel.RefreshTokenExpiration = newRefreshToken.ExpiresOn;
             authModel.Email = user.Email;
@@ -196,22 +201,48 @@ namespace CRM.Core.Services.Implementations
                 }
                 return new ResultDto { Message = errors };
             }
-            var confirmEmailToken = await _unitOfWork.UserManager.GenerateEmailConfirmationTokenAsync(user);
-            var encodedEmailToken = Encoding.UTF8.GetBytes(confirmEmailToken);
-            var validEmailToken = WebEncoders.Base64UrlEncode(encodedEmailToken);
-            var urlHelper = _urlHelperFactory.GetUrlHelper(_actionContextAccessor.ActionContext);
-            var callBackUrl = urlHelper.Action("ConfirmEmail", "Auth", new {Id = user.Id, Token = validEmailToken }, _httpContextAccessor.HttpContext.Request.Scheme);
-            var message = new MailDto
-            {
-                MailTo = user.Email,
-                Subject = "Confirm Your Email",
-                Content = $"<h1>Welcome to CRM</h1> <p>Please confirm your email by <a href='{callBackUrl}'>Clicking here</a></p>",
-            };
+            //var confirmEmailToken = await _unitOfWork.UserManager.GenerateEmailConfirmationTokenAsync(user);
+            //var encodedEmailToken = Encoding.UTF8.GetBytes(confirmEmailToken);
+            //var validEmailToken = WebEncoders.Base64UrlEncode(encodedEmailToken);
+            //var urlHelper = _urlHelperFactory.GetUrlHelper(_actionContextAccessor.ActionContext);
+            //var callBackUrl = urlHelper.Action("ConfirmEmail", "Auth", new {Id = user.Id, Token = validEmailToken }, _httpContextAccessor.HttpContext.Request.Scheme);
+            //var message = new MailDto
+            //{
+            //    MailTo = user.Email,
+            //    Subject = "Confirm Your Email",
+            //    Content = $"<h1>Welcome to CRM</h1> <p>Please confirm your email by <a href='{callBackUrl}'>Clicking here</a></p>",
+            //};
+
+            Random rnd = new Random();
+            var randomNum = (rnd.Next(100000, 999999)).ToString();
+            string message = "Hi " + user.UserName + " Your email confirmation code is: " + randomNum;
             try
             {
                 BackgroundJob.Schedule(() => DeleteUnConfirmedUser(user.Id), TimeSpan.FromMinutes(10));
-                var mailResult = await _mailingService.SendEmailAsync(message.MailTo, message.Subject, message.Content);
-                return new ResultDto { IsSuccess = true, Message = "Confirmation Email Was Sent, Please confirm your email" };
+                var emailResult = await _mailingService.SendEmailAsync(user.Email, "Email Confirmation Code ", message, null);
+                if (emailResult)
+                {
+                    var Vcode = new VerificationCode
+                    {
+                        Code = randomNum,
+                        UserId = user.Id,
+                        CreatedAt = DateTime.UtcNow,
+                        ExpiresAt = DateTime.UtcNow.AddMinutes(10),
+                    };
+                    await _unitOfWork.VerificationCodes.AddAsync(Vcode);
+                    _unitOfWork.complete();
+                    return new ResultDto
+                    {
+                        IsSuccess = true,
+                        Message = "Email confirmation was sent to the email successfully !!",
+                    };
+                }
+                await _unitOfWork.UserManager.DeleteAsync(user);
+                return new ResultDto
+                {
+                    IsSuccess = false,
+                    Message = "email is not real !!",
+                };
             }
             catch
             {
@@ -229,33 +260,83 @@ namespace CRM.Core.Services.Implementations
             }
         }
 
-        public async Task<AuthModel> ConfirmEmailAsync(string Id, string Token)
+        public async Task<AuthModel> ConfirmEmailAsync(VerifyCodeDto codeDto)
         {
             var authModel = new AuthModel();
-            if (string.IsNullOrEmpty(Id) || string.IsNullOrEmpty(Token))
+            var user = await _unitOfWork.UserManager.FindByEmailAsync(codeDto.Email);
+            if (user == null)
             {
-                authModel.Message = "Invalid Email Confirmation Url";
+                authModel.Message = "Invalid Email";
                 return authModel;
             }
-            var user = await _unitOfWork.UserManager.FindByIdAsync(Id);
-            var decodedToken = WebEncoders.Base64UrlDecode(Token);
-            var normalToken = Encoding.UTF8.GetString(decodedToken);
-            var result = await _unitOfWork.UserManager.ConfirmEmailAsync(user, normalToken);
-            if (!result.Succeeded)
+            var result = await _unitOfWork.VerificationCodes.FindAsync(c => c.UserId == user.Id && c.Code == codeDto.Code);
+            if (result != null && !result.IsExpired)
             {
-                authModel.Message = "Email Confirmation Failed";
+                _unitOfWork.VerificationCodes.Delete(result);
+                user.EmailConfirmed = true;
+                await _unitOfWork.UserManager.UpdateAsync(user);
+                _unitOfWork.complete();
+                var JwtToken = await CreateToken(user);
+                var token = new JwtSecurityTokenHandler().WriteToken(JwtToken);
+                authModel.AccessToken = token;
+                authModel.IsAuthenticated = true;
+                authModel.Email = user.Email;
+                authModel.UserName = user.UserName;
+                authModel.FirstName = user.FirstName;
+                authModel.LastName = user.LastName;
+                authModel.Roles = JwtToken.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => x.Value).ToList();
+                authModel.Message = "Email Confirmed Successfully";
+                if (user.RefreshTokens.Any(x => x.IsActive))
+                {
+                    var activeRefreshToken = user.RefreshTokens.Where(x => x.IsActive).FirstOrDefault();
+                    authModel.RefreshToken = activeRefreshToken.Token;
+                    authModel.RefreshTokenExpiration = activeRefreshToken.ExpiresOn;
+                }
+                else
+                {
+                    var refreshToken = GenerateRefreshToken();
+                    user.RefreshTokens.Add(refreshToken);
+                    await _unitOfWork.UserManager.UpdateAsync(user);
+                    authModel.RefreshToken = refreshToken.Token;
+                    authModel.RefreshTokenExpiration = refreshToken.ExpiresOn;
+                }
+                return authModel;
+            }
+            return new AuthModel { Message = "Invalid Code" };
+        }
+
+        public async Task<AuthModel> ConfirmNewEmailAsync(VerifyCodeDto codeDto)
+        {
+            var authModel = new AuthModel();
+            var verifyCode = await _unitOfWork.VerificationCodes.FindAsync(c => c.Code == codeDto.Code);
+            if (verifyCode == null || verifyCode.IsExpired)
+            {
+                authModel.Message = "Invalid Code";
+                return authModel;
+            }
+            var user = await _unitOfWork.UserManager.FindByIdAsync(verifyCode.UserId);
+            if (user == null)
+            {
+                authModel.Message = "Invalid Code";
                 return authModel;
             }
 
+            _unitOfWork.VerificationCodes.Delete(verifyCode);
+            user.Email= codeDto.Email;
+            user.NormalizedEmail = codeDto.Email.ToUpper();
+            user.EmailConfirmed = true;
+            await _unitOfWork.UserManager.UpdateAsync(user);
+            _unitOfWork.complete();
             var JwtToken = await CreateToken(user);
             var token = new JwtSecurityTokenHandler().WriteToken(JwtToken);
             authModel.AccessToken = token;
             authModel.IsAuthenticated = true;
             authModel.Email = user.Email;
             authModel.UserName = user.UserName;
+            authModel.FirstName = user.FirstName;
+            authModel.LastName = user.LastName;
             authModel.Roles = JwtToken.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => x.Value).ToList();
             authModel.Message = "Email Confirmed Successfully";
-
             if (user.RefreshTokens.Any(x => x.IsActive))
             {
                 var activeRefreshToken = user.RefreshTokens.Where(x => x.IsActive).FirstOrDefault();
@@ -271,53 +352,102 @@ namespace CRM.Core.Services.Implementations
                 authModel.RefreshTokenExpiration = refreshToken.ExpiresOn;
             }
             return authModel;
+
         }
 
+        //public async Task<AuthModel> ConfirmEmailAsync(string Id, string Token)
+        //{
+        //    var authModel = new AuthModel();
+        //    if (string.IsNullOrEmpty(Id) || string.IsNullOrEmpty(Token))
+        //    {
+        //        authModel.Message = "Invalid Email Confirmation Url";
+        //        return authModel;
+        //    }
+        //    var user = await _unitOfWork.UserManager.FindByIdAsync(Id);
+        //    var decodedToken = WebEncoders.Base64UrlDecode(Token);
+        //    var normalToken = Encoding.UTF8.GetString(decodedToken);
+        //    var result = await _unitOfWork.UserManager.ConfirmEmailAsync(user, normalToken);
+        //    if (!result.Succeeded)
+        //    {
+        //        authModel.Message = "Email Confirmation Failed";
+        //        return authModel;
+        //    }
+
+        //    var JwtToken = await CreateToken(user);
+        //    var token = new JwtSecurityTokenHandler().WriteToken(JwtToken);
+        //    authModel.AccessToken = token;
+        //    authModel.IsAuthenticated = true;
+        //    authModel.Email = user.Email;
+        //    authModel.UserName = user.UserName;
+        //    authModel.FirstName = user.FirstName;
+        //    authModel.LastName = user.LastName;
+        //    authModel.Roles = JwtToken.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => x.Value).ToList();
+        //    authModel.Message = "Email Confirmed Successfully";
+
+        //    if (user.RefreshTokens.Any(x => x.IsActive))
+        //    {
+        //        var activeRefreshToken = user.RefreshTokens.Where(x => x.IsActive).FirstOrDefault();
+        //        authModel.RefreshToken = activeRefreshToken.Token;
+        //        authModel.RefreshTokenExpiration = activeRefreshToken.ExpiresOn;
+        //    }
+        //    else
+        //    {
+        //        var refreshToken = GenerateRefreshToken();
+        //        user.RefreshTokens.Add(refreshToken);
+        //        await _unitOfWork.UserManager.UpdateAsync(user);
+        //        authModel.RefreshToken = refreshToken.Token;
+        //        authModel.RefreshTokenExpiration = refreshToken.ExpiresOn;
+        //    }
+        //    return authModel;
+        //}
 
 
-        public async Task<AuthModel> ConfirmNewEmailAsync(string Id,string newEmail ,string Token)
-        {
-            var authModel = new AuthModel();
-            if (string.IsNullOrEmpty(Id) || string.IsNullOrEmpty(Token))
-            {
-                authModel.Message = "Invalid Email Confirmation Url";
-                return authModel;
-            }
-            var user = await _unitOfWork.UserManager.FindByIdAsync(Id);
-            var decodedToken = WebEncoders.Base64UrlDecode(Token);
-            var normalToken = Encoding.UTF8.GetString(decodedToken);
-            var result = await _unitOfWork.UserManager.ChangeEmailAsync(user, newEmail,normalToken);
-            if (!result.Succeeded)
-            {
-                authModel.Message = "Email Confirmation Failed";
-                return authModel;
-            }
 
-            var JwtToken = await CreateToken(user);
-            var token = new JwtSecurityTokenHandler().WriteToken(JwtToken);
-            authModel.AccessToken = token;
-            authModel.IsAuthenticated = true;
-            authModel.Email = user.Email;
-            authModel.UserName = user.UserName;
-            authModel.Roles = JwtToken.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => x.Value).ToList();
-            authModel.Message = "Email Confirmed Successfully";
+        //public async Task<AuthModel> ConfirmNewEmailAsync(string Id,string newEmail ,string Token)
+        //{
+        //    var authModel = new AuthModel();
+        //    if (string.IsNullOrEmpty(Id) || string.IsNullOrEmpty(Token))
+        //    {
+        //        authModel.Message = "Invalid Email Confirmation Url";
+        //        return authModel;
+        //    }
+        //    var user = await _unitOfWork.UserManager.FindByIdAsync(Id);
+        //    var decodedToken = WebEncoders.Base64UrlDecode(Token);
+        //    var normalToken = Encoding.UTF8.GetString(decodedToken);
+        //    var result = await _unitOfWork.UserManager.ChangeEmailAsync(user, newEmail,normalToken);
+        //    if (!result.Succeeded)
+        //    {
+        //        authModel.Message = "Email Confirmation Failed";
+        //        return authModel;
+        //    }
 
-            if (user.RefreshTokens.Any(x => x.IsActive))
-            {
-                var activeRefreshToken = user.RefreshTokens.Where(x => x.IsActive).FirstOrDefault();
-                authModel.RefreshToken = activeRefreshToken.Token;
-                authModel.RefreshTokenExpiration = activeRefreshToken.ExpiresOn;
-            }
-            else
-            {
-                var refreshToken = GenerateRefreshToken();
-                user.RefreshTokens.Add(refreshToken);
-                await _unitOfWork.UserManager.UpdateAsync(user);
-                authModel.RefreshToken = refreshToken.Token;
-                authModel.RefreshTokenExpiration = refreshToken.ExpiresOn;
-            }
-            return authModel;
-        }
+        //    var JwtToken = await CreateToken(user);
+        //    var token = new JwtSecurityTokenHandler().WriteToken(JwtToken);
+        //    authModel.AccessToken = token;
+        //    authModel.IsAuthenticated = true;
+        //    authModel.Email = user.Email;
+        //    authModel.UserName = user.UserName;
+        //    authModel.FirstName = user.FirstName;
+        //    authModel.LastName = user.LastName;
+        //    authModel.Roles = JwtToken.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => x.Value).ToList();
+        //    authModel.Message = "Email Confirmed Successfully";
+
+        //    if (user.RefreshTokens.Any(x => x.IsActive))
+        //    {
+        //        var activeRefreshToken = user.RefreshTokens.Where(x => x.IsActive).FirstOrDefault();
+        //        authModel.RefreshToken = activeRefreshToken.Token;
+        //        authModel.RefreshTokenExpiration = activeRefreshToken.ExpiresOn;
+        //    }
+        //    else
+        //    {
+        //        var refreshToken = GenerateRefreshToken();
+        //        user.RefreshTokens.Add(refreshToken);
+        //        await _unitOfWork.UserManager.UpdateAsync(user);
+        //        authModel.RefreshToken = refreshToken.Token;
+        //        authModel.RefreshTokenExpiration = refreshToken.ExpiresOn;
+        //    }
+        //    return authModel;
+        //}
 
         //public async Task<ResultDto> ConfirmEmail(string Id, string Token)
         //{

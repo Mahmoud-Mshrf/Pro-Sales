@@ -32,11 +32,28 @@ namespace CRM.Controllers
         }
 
 
-        [ApiExplorerSettings(IgnoreApi = true)]
-        [HttpGet("[action]")]
-        public async Task<IActionResult> ConfirmEmail(string Id, string Token)
+        //[ApiExplorerSettings(IgnoreApi = true)]
+        //[HttpGet("[action]")]
+        //public async Task<IActionResult> ConfirmEmail(string Id, string Token)
+        //{
+        //    var result = await _authService.ConfirmEmailAsync(Id, Token);
+        //    if (!result.IsAuthenticated)
+        //    {
+        //        return BadRequest(result.Message);
+        //    }
+        //    if (!string.IsNullOrEmpty(result.RefreshToken))
+        //    {
+        //        setrefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
+        //    }
+        //    return Ok(result);
+        //}
+
+
+        
+        [HttpPost("[action]")]
+        public async Task<IActionResult> ConfirmEmail(VerifyCodeDto codeDto)
         {
-            var result = await _authService.ConfirmEmailAsync(Id, Token);
+            var result = await _authService.ConfirmEmailAsync(codeDto);
             if (!result.IsAuthenticated)
             {
                 return BadRequest(result.Message);

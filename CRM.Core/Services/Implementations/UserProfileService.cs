@@ -2,6 +2,7 @@
 using CRM.Core.Helpers;
 using CRM.Core.Models;
 using CRM.Core.Services.Interfaces;
+using Hangfire;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -24,17 +25,17 @@ namespace CRM.Core.Services.Implementations
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAuthService _authService;
         private readonly IMailingService _mailingService;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IActionContextAccessor _actionContextAccessor;
-        private readonly IUrlHelperFactory _urlHelperFactory;
-        public UserProfileService(IUnitOfWork unitOfWork, IAuthService authService, IMailingService mailingService, IHttpContextAccessor httpContextAccessor, IActionContextAccessor actionContextAccessor, IUrlHelperFactory urlHelperFactory)
+        //private readonly IHttpContextAccessor _httpContextAccessor;
+        //private readonly IActionContextAccessor _actionContextAccessor;
+        //private readonly IUrlHelperFactory _urlHelperFactory;
+        public UserProfileService(IUnitOfWork unitOfWork, IAuthService authService, IMailingService mailingService/*, IHttpContextAccessor httpContextAccessor, IActionContextAccessor actionContextAccessor, IUrlHelperFactory urlHelperFactory*/)
         {
             _unitOfWork = unitOfWork;
             _authService = authService;
             _mailingService = mailingService;
-            _httpContextAccessor = httpContextAccessor;
-            _actionContextAccessor = actionContextAccessor;
-            _urlHelperFactory = urlHelperFactory;
+            //_httpContextAccessor = httpContextAccessor;
+            //_actionContextAccessor = actionContextAccessor;
+            //_urlHelperFactory = urlHelperFactory;
         }
 
         public async Task<ResultDto> UpdateNameAsync(string email, UpdateNameDto dto)
@@ -120,26 +121,60 @@ namespace CRM.Core.Services.Implementations
                 };
             }
 
-            var token =await _unitOfWork.UserManager.GenerateChangeEmailTokenAsync(user, Newemail);
-            var encodedToken = Encoding.UTF8.GetBytes(token);
-            var validToken = Convert.ToBase64String(encodedToken);
-            var urlHelper = _urlHelperFactory.GetUrlHelper(_actionContextAccessor.ActionContext);
-            var callBackUrl = urlHelper.Action("ConfirmNewEmail", "UserProfile", new { Id = user.Id,NewEmail=Newemail,Token = validToken }, _httpContextAccessor.HttpContext.Request.Scheme);
-            var message = new MailDto
-            {
-                MailTo = Newemail,
-                Subject = "Confirm Your New Email",
-                Content = $"<h1>Welcome to CRM</h1> <p>Please confirm your email by <a href='{callBackUrl}'>Clicking here</a></p>",
-            };
+
+            Random rnd = new Random();
+            var randomNum = (rnd.Next(100000, 999999)).ToString();
+            string message = "Hi " + user.UserName + " Your new email confirmation code is: " + randomNum;
             try
             {
-                var mailResult = await _mailingService.SendEmailAsync(message.MailTo, message.Subject, message.Content);
-                return new ResultDto { IsSuccess = true, Message = "Confirmation Email Was Sent, Please confirm your new email" };
+                var emailResult = await _mailingService.SendEmailAsync(user.Email, "Email Confirmation Code ", message, null);
+                if (emailResult)
+                {
+                    var Vcode = new VerificationCode
+                    {
+                        Code = randomNum,
+                        UserId = user.Id,
+                        CreatedAt = DateTime.UtcNow,
+                        ExpiresAt = DateTime.UtcNow.AddMinutes(10),
+                    };
+                    await _unitOfWork.VerificationCodes.AddAsync(Vcode);
+                    _unitOfWork.complete();
+                    return new ResultDto
+                    {
+                        IsSuccess = true,
+                        Message = "Email confirmation was sent to the email successfully !!",
+                    };
+                }
+                return new ResultDto
+                {
+                    IsSuccess = false,
+                    Message = "email is not real !!",
+                };
             }
             catch
             {
                 return new ResultDto { Message = "Confirmation Email Failed to send" };
             }
+            //var token =await _unitOfWork.UserManager.GenerateChangeEmailTokenAsync(user, Newemail);
+            //var encodedToken = Encoding.UTF8.GetBytes(token);
+            //var validToken = Convert.ToBase64String(encodedToken);
+            //var urlHelper = _urlHelperFactory.GetUrlHelper(_actionContextAccessor.ActionContext);
+            //var callBackUrl = urlHelper.Action("ConfirmNewEmail", "UserProfile", new { Id = user.Id,NewEmail=Newemail,Token = validToken }, _httpContextAccessor.HttpContext.Request.Scheme);
+            //var message = new MailDto
+            //{
+            //    MailTo = Newemail,
+            //    Subject = "Confirm Your New Email",
+            //    Content = $"<h1>Welcome to CRM</h1> <p>Please confirm your email by <a href='{callBackUrl}'>Clicking here</a></p>",
+            //};
+            //try
+            //{
+            //    var mailResult = await _mailingService.SendEmailAsync(message.MailTo, message.Subject, message.Content);
+            //    return new ResultDto { IsSuccess = true, Message = "Confirmation Email Was Sent, Please confirm your new email" };
+            //}
+            //catch
+            //{
+            //    return new ResultDto { Message = "Confirmation Email Failed to send" };
+            //}
 
         }
 
