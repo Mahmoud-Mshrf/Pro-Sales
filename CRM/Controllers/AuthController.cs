@@ -23,6 +23,16 @@ namespace CRM.Controllers
             {
                 return BadRequest(ModelState);
             }
+            //if (!ModelState.IsValid)
+            //{
+            //    // Handle model state errors
+            //    var errors = ModelState.ToDictionary(
+            //        kvp => kvp.Key,
+            //        kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToList()
+            //    );
+            //    var modelStateErrorResponse = new { errors };
+            //    return BadRequest(modelStateErrorResponse);
+            //}
             var result = await _authService.RegisterAsync(dto);
             if (!result.IsSuccess)
             {
@@ -39,7 +49,8 @@ namespace CRM.Controllers
             var result = await _authService.ConfirmEmailAsync(codeDto);
             if (!result.IsAuthenticated)
             {
-                return BadRequest(result.Message);
+                var errors = new { errors = result.Errors };
+                return BadRequest(errors);
             }
             if (!string.IsNullOrEmpty(result.RefreshToken))
             {
@@ -58,7 +69,8 @@ namespace CRM.Controllers
             var result = await _authService.GetTokenAsync(dto);
             if (!result.IsAuthenticated)
             {
-                return BadRequest(result.Message);
+                var errors = new { errors = result.Errors };
+                return BadRequest(errors);
             }
             if (!string.IsNullOrEmpty(result.RefreshToken))
             {
@@ -84,7 +96,11 @@ namespace CRM.Controllers
 
             var result = await _authService.RefreshTokenAsync(refreshToken);
             if (!result.IsAuthenticated)
-                return BadRequest(result.Message);
+            {
+                var errors = new { errors = result.Errors };
+                return BadRequest(errors);
+            }
+                
 
             setrefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
             return Ok(result);

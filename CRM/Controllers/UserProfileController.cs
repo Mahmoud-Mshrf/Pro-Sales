@@ -61,7 +61,8 @@ namespace CRM.Controllers
             var result = await _authService.ConfirmNewEmailAsync(codeDto);
             if (!result.IsAuthenticated)
             {
-                return BadRequest(result.Message);
+                var errors = new { errors = result.Errors };
+                return BadRequest(errors);
             }
             return Ok(result);
         }

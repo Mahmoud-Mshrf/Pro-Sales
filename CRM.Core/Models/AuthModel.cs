@@ -12,12 +12,17 @@ namespace CRM.Core.Models
         public List<string> Roles { get; set; }
         [JsonIgnore]
         public bool IsAuthenticated { get; set; }
-        [JsonIgnore]
-        public string Message { get; set; }= string.Empty;
+        //[JsonIgnore]
+        //public string Message { get; set; }= string.Empty;
         [JsonIgnore]
         public string? RefreshToken { get; set; }
         public DateTime RefreshTokenExpiration { get; set; }
-        
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public Dictionary<string,List<string>> Errors { get; set;}
+        public AuthModel()
+        {
+            Errors = null;
+        }
 
     }
 }
