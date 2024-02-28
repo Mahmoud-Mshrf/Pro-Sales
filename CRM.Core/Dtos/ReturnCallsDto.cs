@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 
 namespace CRM.Core.Dtos
 {
-    public class ReturnInterstsDto
+    public class ReturnCallsDto
     {
         public string Message { get; set; }
         public bool IsSuccess { get; set; }
-        public IList<InterestDto> Interests { get; set; }
+        public IList<CallDto> Calls { get; set; }
+
     }
 }

@@ -11,7 +11,7 @@ namespace CRM.Core.Models
         public bool IsAuthenticated { get; set; }
         public string Message { get; set; }= string.Empty;
         [JsonIgnore]
-        public string? RefreshToken { get; set; }
+        public string RefreshToken { get; set; }
         public DateTime RefreshTokenExpiration { get; set; }
 
     }

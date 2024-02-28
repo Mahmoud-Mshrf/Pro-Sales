@@ -40,7 +40,7 @@ namespace CRM
             builder.Services.AddScoped<IUserProfileService, UserProfileService>();// Add IUserProfileService to the container
             builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();// Add IActionContextAccessor to the container
             builder.Services.AddScoped<IModeratorService,ModeratorService>(); // Add IModeratorService to the container
-            
+            builder.Services.AddScoped<ISalesRepresntative,SalesService>();
 
             //builder.Services.AddTransient(typeof(IBaseRepository<>), typeof(BaseRepository<>));
             builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();// Add IUnitOfWork to the container
