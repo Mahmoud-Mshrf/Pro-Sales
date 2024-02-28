@@ -6,6 +6,14 @@ namespace CRM.Core.Dtos
     {
         [JsonIgnore]
         public bool IsSuccess { get; set; }
+        [JsonIgnore(Condition =JsonIgnoreCondition.WhenWritingNull)]
         public string Message { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public Dictionary<string,List<string>> Errors { get; set; }
+        public ResultDto()
+        {
+            Errors = null;
+        }
+
     }
 }

@@ -35,15 +35,15 @@ namespace CRM.Core.Services.Implementations
         // This method is used to generate a new Access Token for the user (will be called by Login Endpoint)
         public async Task<AuthModel> GetTokenAsync(TokenRequestDto dto)
         {
-            
+
             var authModel = new AuthModel();
             var user = await _unitOfWork.UserManager.FindByEmailAsync(dto.Email);
-            if (user is null|| !await _unitOfWork.UserManager.CheckPasswordAsync(user,dto.Password))
+            if (user is null || !await _unitOfWork.UserManager.CheckPasswordAsync(user, dto.Password))
             {
                 authModel.Errors = new Dictionary<string, List<string>> { { "Invalid Credentials", new List<string> { "Email or Password is not true" } } };
                 return authModel;
             }
-            if(!user.EmailConfirmed)
+            if (!user.EmailConfirmed)
             {
                 authModel.Errors = new Dictionary<string, List<string>> { { "ConfirmationError", new List<string> { "Email is not confirmed" } } };
                 return authModel;
@@ -57,8 +57,8 @@ namespace CRM.Core.Services.Implementations
             authModel.FirstName = user.FirstName;
             authModel.LastName = user.LastName;
             authModel.Roles = JwtToken.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => x.Value).ToList();
-            
-            if(user.RefreshTokens.Any(x => x.IsActive))
+
+            if (user.RefreshTokens.Any(x => x.IsActive))
             {
                 var activeRefreshToken = user.RefreshTokens.Where(x => x.IsActive).FirstOrDefault();
                 authModel.RefreshToken = activeRefreshToken.Token;
@@ -172,18 +172,18 @@ namespace CRM.Core.Services.Implementations
 
         public async Task<ResultDto> RegisterAsync(RegisterDto dto)
         {
-            if(await _unitOfWork.UserManager.FindByEmailAsync(dto.Email) is not null)
-                return new ResultDto() { Message = "Email is already registered"};
-            if(await _unitOfWork.UserManager.FindByNameAsync(dto.UserName) is not null)
-                return new ResultDto{ Message = "UserName is already registered"};
-            
+            if (await _unitOfWork.UserManager.FindByEmailAsync(dto.Email) is not null)
+                return new ResultDto() { Errors = new Dictionary<string, List<string>> { { "Invalid Email", new List<string> { "Email is already registered" } } } };
+            if (await _unitOfWork.UserManager.FindByNameAsync(dto.UserName) is not null)
+                return new ResultDto() { Errors = new Dictionary<string, List<string>> { { "Invalid UserName", new List<string> { "UserName is already registered" } } } };
+
             var user = new ApplicationUser
             {
                 Email = dto.Email,
                 UserName = dto.UserName,
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
-                EmailConfirmed= false
+                EmailConfirmed = false
             };
             var result = await _unitOfWork.UserManager.CreateAsync(user, dto.Password);
             if (!result.Succeeded)
@@ -224,13 +224,13 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = "email is not real !!",
+                    Errors = new Dictionary<string, List<string>> { { "Invalid Email", new List<string> { "Email is not real" } } }
                 };
             }
             catch
             {
                 await _unitOfWork.UserManager.DeleteAsync(user);
-                return new ResultDto { Message = "Confirmation Email Failed to send" };
+                return new ResultDto { Errors = new Dictionary<string, List<string>> { { "Something Wrong", new List<string> { "Confirmation Email Failed to send" } } } };
             }
         }
 
@@ -306,7 +306,7 @@ namespace CRM.Core.Services.Implementations
             }
 
             _unitOfWork.VerificationCodes.Delete(verifyCode);
-            user.Email= codeDto.Email;
+            user.Email = codeDto.Email;
             user.NormalizedEmail = codeDto.Email.ToUpper();
             user.EmailConfirmed = true;
             await _unitOfWork.UserManager.UpdateAsync(user);
@@ -345,7 +345,7 @@ namespace CRM.Core.Services.Implementations
             if (user == null) return new ResultDto
             {
                 IsSuccess = false,
-                Message = "Email is incorrect or not found !!",
+                Errors = new Dictionary<string, List<string>> { { "Invalid Email", new List<string> { "Email is incorrect or not found !!" } } }
             };
 
 
@@ -373,7 +373,7 @@ namespace CRM.Core.Services.Implementations
             return new ResultDto
             {
                 IsSuccess = false,
-                Message = "email is not real !!",
+                Errors = new Dictionary<string, List<string>> { { "Invalid Email", new List<string> { "Email is not real" } } }
             };
         }
 
@@ -395,14 +395,14 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = "Something Wrong"
+                    Errors = new Dictionary<string, List<string>> { { "Something Wrong", new List<string> { "Password was not changed" } } }
                 };
 
             }
             return new ResultDto
             {
                 IsSuccess = false,
-                Message = "Email is incorrect or not found !!"
+                Errors = new Dictionary<string, List<string>> { { "Invalid Email", new List<string> { "Email is incorrect or not found !!" } } }
             };
 
 
@@ -416,7 +416,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResetTokenDto
                 {
                     IsSuccess = false,
-                    Message = "Email Incorrect or not found"
+                    Errors = new Dictionary<string, List<string>> { { "Invalid Email", new List<string> { "Email is incorrect or not found !!" } } }
                 };
             };
             var result = await _unitOfWork.VerificationCodes.FindAsync(c => c.UserId == user.Id && c.Code == codeDto.Code);
@@ -433,13 +433,13 @@ namespace CRM.Core.Services.Implementations
                     IsSuccess = true,
                     Message = "Code Was Verified Successfully",
                     Token = restToken,
-                    Email= user.Email
+                    Email = user.Email
                 };
             }
             return new ResetTokenDto
             {
                 IsSuccess = false,
-                Message = "Verify Code is incorrect"
+                Errors = new Dictionary<string, List<string>> { { "Invalid Code", new List<string> { "Verification code is not correct" } } }
             };
         }
     }

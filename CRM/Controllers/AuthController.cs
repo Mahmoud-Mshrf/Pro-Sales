@@ -132,44 +132,40 @@ namespace CRM.Controllers
             {
                 return Ok(result);
             }
-            return BadRequest(result.Message);
+            return BadRequest(result);
         }
 
         [HttpPost("VerifyCode")]
         [AllowAnonymous]
         public async Task<IActionResult> VerifyCode(VerifyCodeDto codeDto)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var result = await _authService.VerifyCodeAsync(codeDto);
-                if (result.IsSuccess)
-                {
-                    return Ok(result);
-
-                }
-                return NotFound(result);
+                return BadRequest(ModelState);
             }
-            return BadRequest(ModelState);
+            var result = await _authService.VerifyCodeAsync(codeDto);
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+
+            }
+            return NotFound(result);
         }
 
         [HttpPost("ResetPassword")]
         [AllowAnonymous]
         public async Task<IActionResult> ResetPassword(ResetPasswordDto model)
         {
-            if (string.IsNullOrEmpty(model.Email))
+            if (!ModelState.IsValid)
             {
-                return BadRequest("Email should not be null");
+                return BadRequest(ModelState);
             }
-            if (ModelState.IsValid)
+            var result = await _authService.ResetPasswordAsync(model);
+            if (result.IsSuccess)
             {
-                var result = await _authService.ResetPasswordAsync (model);
-                if (result.IsSuccess)
-                {
-                    return Ok(result);
-                }
-                return BadRequest(result);
+                return Ok(result);
             }
-            return BadRequest(ModelState);
+            return BadRequest(result);
 
         }
     }

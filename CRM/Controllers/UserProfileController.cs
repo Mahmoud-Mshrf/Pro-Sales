@@ -27,7 +27,7 @@ namespace CRM.Controllers
             var result = await _userProfileService.UpdateNameAsync(email, dto);
             if (!result.IsSuccess)
             {
-                return BadRequest(result.Message);
+                return BadRequest(result);
             }
             return Ok(result);
         }
@@ -38,7 +38,7 @@ namespace CRM.Controllers
             var result = await _userProfileService.UpdatePasswordAsync(email, dto);
             if (!result.IsSuccess)
             {
-                return BadRequest(result.Message);
+                return BadRequest(result);
             }
             return Ok(result);
         }
@@ -49,7 +49,7 @@ namespace CRM.Controllers
             var result = await _userProfileService.UpdateEmailAsync(email, NewEmail);
             if (!result.IsSuccess)
             {
-                return BadRequest(result.Message);
+                return BadRequest(result);
             }
             return Ok(result);
         }

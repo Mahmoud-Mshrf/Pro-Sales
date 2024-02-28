@@ -20,7 +20,7 @@ using System.Threading.Tasks;
 
 namespace CRM.Core.Services.Implementations
 {
-    public class UserProfileService: IUserProfileService
+    public class UserProfileService : IUserProfileService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAuthService _authService;
@@ -46,7 +46,8 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = "User not found"
+                    Errors = new Dictionary<string, List<string>> { { "Not Found", new List<string> { "User not found" } } }
+
                 };
             }
             user.FirstName = dto.FirstName;
@@ -63,7 +64,8 @@ namespace CRM.Core.Services.Implementations
             return new ResultDto
             {
                 IsSuccess = false,
-                Message = "Name update failed"
+                Errors = new Dictionary<string, List<string>> { { "Something Wrong", new List<string> { "Name update failed" } } }
+
             };
         }
         public async Task<ResultDto> UpdatePasswordAsync(string email, UpdatePasswordDto dto)
@@ -74,7 +76,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = "User not found"
+                    Errors = new Dictionary<string, List<string>> { { "Invalid Email", new List<string> { "User not found" } } }
                 };
             }
             var result = await _unitOfWork.UserManager.ChangePasswordAsync(user, dto.CurrentPassword, dto.NewPassword);
@@ -90,7 +92,7 @@ namespace CRM.Core.Services.Implementations
             return new ResultDto
             {
                 IsSuccess = false,
-                Message = "Password update failed"
+                Errors = new Dictionary<string, List<string>> { { "Something Wrong", new List<string> { "Password was not changed" } } }
             };
         }
         public async Task<ResultDto> UpdateEmailAsync(string email, string Newemail)
@@ -101,7 +103,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = "User not found"
+                    Errors = new Dictionary<string, List<string>> { { "Invalid Email", new List<string> { "User not found" } } }
                 };
             }
             if (user.Email == Newemail)
@@ -109,15 +111,15 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = "Email is same as current email"
+                    Errors = new Dictionary<string, List<string>> { { "Invalid Email", new List<string> { "Email is same as current email" } } }
                 };
             }
-            if(_unitOfWork.UserManager.Users.Any(u => u.Email == Newemail))
+            if (_unitOfWork.UserManager.Users.Any(u => u.Email == Newemail))
             {
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = "Email already exists"
+                    Errors = new Dictionary<string, List<string>> { { "Invalid Email", new List<string> { "Email already exists" } } }
                 };
             }
 
@@ -148,12 +150,12 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = "email is not real !!",
+                    Errors = new Dictionary<string, List<string>> { { "Invalid Email", new List<string> { "email is not real !!" } } },
                 };
             }
             catch
             {
-                return new ResultDto { Message = "Confirmation Email Failed to send" };
+                return new ResultDto { Errors = new Dictionary<string, List<string>> { { "Something Wrong", new List<string> { "Confirmation Email Failed to send" } } } };
             }
         }
 
