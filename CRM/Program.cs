@@ -5,6 +5,7 @@ using CRM.Core.Models;
 using CRM.Core.Services.Implementations;
 using CRM.Core.Services.Interfaces;
 using CRM.Core.Settings;
+using CRM.Extentions;
 using CRM.Infrastructure;
 using CRM.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -32,15 +33,11 @@ namespace CRM
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
 
             builder.Services.Configure<JWT>(builder.Configuration.GetSection("JWT"));// Add JWT configuration to the container
             builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));// Add MailSettings configuration to the container
-            builder.Services.AddScoped<IAuthService, AuthService>();// Add IAuthService to the container
-            builder.Services.AddScoped<IMailingService, MailingService>();// Add IMailingService to the container
-            builder.Services.AddScoped<IUserProfileService, UserProfileService>();// Add IUserProfileService to the container
-            builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();// Add IActionContextAccessor to the container
-            builder.Services.AddScoped<IModeratorService,ModeratorService>(); // Add IModeratorService to the container
-            builder.Services.AddScoped<ISalesRepresntative,SalesService>();
+            builder.Services.AddApplicationServices();
 
             //builder.Services.AddTransient(typeof(IBaseRepository<>), typeof(BaseRepository<>));
             builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();// Add IUnitOfWork to the container
