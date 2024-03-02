@@ -1,4 +1,3 @@
-
 using CRM.Core;
 using CRM.Core.Filters;
 using CRM.Core.Helpers;
@@ -39,7 +38,7 @@ namespace CRM
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
-
+            builder.Services.AddCors();
 
             // Add Hangfire to the container
             builder.Services.AddHangfire(x => x.UseSqlServerStorage(builder.Configuration.GetConnectionString("HangfireConnection")));
@@ -105,6 +104,15 @@ namespace CRM
             }
 
             app.UseHttpsRedirection();
+            app.UseCors(builder =>
+            {
+                builder.WithOrigins("http://localhost:3000","http://localhost:3001","http://localhost:3002")
+                       .AllowAnyHeader()
+                       .AllowAnyMethod()
+                       .AllowCredentials()
+                       .SetIsOriginAllowed(host=>true) // Allow any other origin, but handle in the controller
+                       .Build();
+            });
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseHangfireDashboard("/HangfireDashboard");
