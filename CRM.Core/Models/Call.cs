@@ -25,12 +25,12 @@ namespace CRM.Core.Models
         public CallStatus CallStatus { get; set; }
 
         [MaxLength(500)] 
-        public string? CallSummery { get; set; }
+        public string CallSummery { get; set; }
 
         [ForeignKey("CustomerId")] 
-        public Customer? Customer { get; set; }
+        public Customer Customer { get; set; }
 
         [ForeignKey("SalesRepresntativeId")]
-        public ApplicationUser? SalesRepresntative { get; set; }
+        public ApplicationUser SalesRepresntative { get; set; }
     }
 }

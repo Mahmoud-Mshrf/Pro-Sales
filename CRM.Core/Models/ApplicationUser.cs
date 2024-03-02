@@ -10,7 +10,7 @@ namespace CRM.Core.Models
         public string FirstName { get; set; }
         [Required]
         public string LastName { get; set; }
-        public List<RefreshToken>? RefreshTokens { get; set; }
+        public List<RefreshToken> RefreshTokens { get; set; }
 
     }
 }

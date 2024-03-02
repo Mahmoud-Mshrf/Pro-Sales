@@ -17,6 +17,10 @@ namespace CRM.Core
         IBaseRepository<Source> Sources { get; }
         IBaseRepository<Interest> Interests { get; }
         IBaseRepository<Customer> Customers { get; }
+        IBaseRepository<Call> Calls { get; }
+        IBaseRepository<Message> Messages { get; }
+        IBaseRepository<Meeting>Meetings { get; } 
+        IBaseRepository<Deal> Deals { get; }
         int complete();
     }
 }

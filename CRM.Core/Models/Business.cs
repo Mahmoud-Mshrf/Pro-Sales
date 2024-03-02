@@ -15,12 +15,12 @@ namespace CRM.Core.Models
 
         [Required]
         [MaxLength(50)]
-        public string?CompanyName { get; set; }
+        public string CompanyName { get; set; }
 
         [MaxLength(500)]
-        public string?Description { get; set; }
+        public string Description { get; set; }
 
         [ForeignKey("ManagerId")] 
-        public ApplicationUser?Manager { get; set; }
+        public ApplicationUser Manager { get; set; }
     }
 }

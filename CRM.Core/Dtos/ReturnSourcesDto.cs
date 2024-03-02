@@ -10,6 +10,6 @@ namespace CRM.Core.Dtos
     {
         public string Message { get; set; }
         public bool IsSuccess { get; set; }
-        public IList<SourceDto>? Sources { get; set; }
+        public IList<SourceDto> Sources { get; set; }
     }
 }

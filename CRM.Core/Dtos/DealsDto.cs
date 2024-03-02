@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CRM.Core.Models;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -6,25 +7,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CRM.Core.Models
+namespace CRM.Core.Dtos
 {
-  public class Deal
+    public class DealsDto
     {
-        [Key]
-        public int DealId { get; set; }
+        [Required]
         public DateTime DealDate { get; set; }
+        [Required]
         public String description { get; set; }
+        [Required]
         public double Price { get; set; }
-        public Customer Customer { get; set; }
-        [ForeignKey("SalesRepresntativeId")]
-        public ApplicationUser SalesRepresntative { get; set; }
-        public Interest Interest { get; set; }  
-
-
-
-
-
-
+        [Required]
+        public int CustomerId { get; set; }
+        [Required]
+        public int InterestId { get; set; }
 
     }
 }

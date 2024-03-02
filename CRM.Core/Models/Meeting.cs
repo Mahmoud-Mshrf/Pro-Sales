@@ -8,6 +8,11 @@ using System.Threading.Tasks;
 
 namespace CRM.Core.Models
 {
+    public enum ConnectionState
+    {
+        Online,
+        Offline
+    }
     public class Meeting
     {
         [Key] 
@@ -15,15 +20,15 @@ namespace CRM.Core.Models
         public DateTime MeetingDate { get; set; }
 
         [MaxLength(1000)] 
-        public string?MeetingSummary { get; set; }  
+        public string MeetingSummary { get; set; }  
         public DateTime FollowUpDate { get; set; }
-        public bool Online { get; set; }
+        public ConnectionState connectionState { get; set; }
 
         [ForeignKey("CustomerId")] 
-        public Customer ?Customer {  get; set; }
+        public Customer Customer {  get; set; }
 
         [ForeignKey("SalesRepresntativeId")]
-        public ApplicationUser?SalesRepresntative { get; set; }
+        public ApplicationUser SalesRepresntative { get; set; }
 
         
     
