@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CRM.Core.Dtos;
+using MailKit;
 
 namespace CRM.Infrastructure
 {
@@ -24,6 +26,11 @@ namespace CRM.Infrastructure
 
         public RoleManager<IdentityRole> RoleManager { get; private set; }
 
+        public IBaseRepository<Call> Calls { get; private set; }
+        public IBaseRepository<Message> Messages { get; private set; }
+        public IBaseRepository<Meeting> Meetings { get; private set; }
+        public IBaseRepository<Deal> Deals { get; private set; }    
+
         public UnitOfWork(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             _context = context;
@@ -33,6 +40,11 @@ namespace CRM.Infrastructure
             Customers = new BaseRepository<Customer>(_context);
             UserManager = userManager;
             RoleManager = roleManager;
+            Calls= new BaseRepository<Call>(_context);
+            Messages =new BaseRepository<Message>(_context); 
+            Meetings = new BaseRepository<Meeting>(_context);
+            Deals=new BaseRepository<Deal>(_context);
+            
         }
 
         public int complete()

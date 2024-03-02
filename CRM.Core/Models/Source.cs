@@ -13,7 +13,7 @@ namespace CRM.Core.Models
         public int SourceId { get; set; }
 
         [MaxLength(50)]
-        public string? SourceName { get; set; }
+        public string SourceName { get; set; }
 
         public ICollection<Customer> Customers { get; set; } = new List<Customer>();
     }

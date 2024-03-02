@@ -11,14 +11,14 @@ namespace CRM.Core.Models
         public DateTime MessageDate { get; set; }
         [Required]
         [MaxLength(1000)]
-        public string? MessageContent { get; set; }
+        public string  MessageContent { get; set; }
         public DateTime FollowUpDate { get; set; }
 
-        [ForeignKey("CustomerId")] // Specify the foreign key property
-        public Customer? Customer { get; set; }
+        [ForeignKey("CustomerId")] 
+        public Customer Customer { get; set; }
 
         [ForeignKey("SalesRepresntativeId")]
-        public ApplicationUser? SalesRepresntative { get; set; }
+        public ApplicationUser SalesRepresntative { get; set; }
 
     }
 }
