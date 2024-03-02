@@ -25,33 +25,27 @@ namespace CRM.Core.Services.Implementations
         private readonly IUnitOfWork _unitOfWork;
         private readonly JWT _jwt;
         private readonly IMailingService _mailingService;
-        //private readonly IHttpContextAccessor _httpContextAccessor;
-        //private readonly IActionContextAccessor _actionContextAccessor;
-        //private readonly IUrlHelperFactory _urlHelperFactory;
-        public AuthService(IOptions<JWT> jwt, IMailingService mailingService,/* IHttpContextAccessor httpContextAccessor, IActionContextAccessor actionContextAccessor, IUrlHelperFactory urlHelperFactory,*/ IUnitOfWork unitOfWork)
+        public AuthService(IOptions<JWT> jwt, IMailingService mailingService, IUnitOfWork unitOfWork)
         {
             _jwt = jwt.Value;
             _mailingService = mailingService;
-            //_httpContextAccessor = httpContextAccessor;
-            //_actionContextAccessor = actionContextAccessor;
-            //_urlHelperFactory = urlHelperFactory;
             _unitOfWork = unitOfWork;
         }
 
         // This method is used to generate a new Access Token for the user (will be called by Login Endpoint)
         public async Task<AuthModel> GetTokenAsync(TokenRequestDto dto)
         {
-            
+
             var authModel = new AuthModel();
             var user = await _unitOfWork.UserManager.FindByEmailAsync(dto.Email);
-            if (user is null|| !await _unitOfWork.UserManager.CheckPasswordAsync(user,dto.Password))
+            if (user is null || !await _unitOfWork.UserManager.CheckPasswordAsync(user, dto.Password))
             {
-                authModel.Message = "Invalid Credentials";
+                authModel.Errors = new Dictionary<string, List<string>> { { "Invalid Credentials", new List<string> { "Email or Password is not true" } } };
                 return authModel;
             }
-            if(!user.EmailConfirmed)
+            if (!user.EmailConfirmed)
             {
-                authModel.Message = "Email not confirmed";
+                authModel.Errors = new Dictionary<string, List<string>> { { "ConfirmationError", new List<string> { "Email is not confirmed" } } };
                 return authModel;
             }
             var JwtToken = await CreateToken(user);
@@ -63,8 +57,8 @@ namespace CRM.Core.Services.Implementations
             authModel.FirstName = user.FirstName;
             authModel.LastName = user.LastName;
             authModel.Roles = JwtToken.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => x.Value).ToList();
-            
-            if(user.RefreshTokens.Any(x => x.IsActive))
+
+            if (user.RefreshTokens.Any(x => x.IsActive))
             {
                 var activeRefreshToken = user.RefreshTokens.Where(x => x.IsActive).FirstOrDefault();
                 authModel.RefreshToken = activeRefreshToken.Token;
@@ -132,13 +126,13 @@ namespace CRM.Core.Services.Implementations
             var user = await _unitOfWork.UserManager.Users.SingleOrDefaultAsync(u => u.RefreshTokens.Any(t => t.Token == token));
             if (user is null)
             {
-                authModel.Message = "Invalid Token";
+                authModel.Errors = new Dictionary<string, List<string>> { { "Invalid Token", new List<string> { "Invalid Token" } } };
                 return authModel;
             }
             var refreshToken = user.RefreshTokens.Single(x => x.Token == token);
             if (!refreshToken.IsActive)
             {
-                authModel.Message = "Inactive Token";
+                authModel.Errors = new Dictionary<string, List<string>> { { "Inactive Token", new List<string> { "Inactive Token" } } };
                 return authModel;
             }
             refreshToken.RevokedOn = DateTime.Now;
@@ -178,18 +172,18 @@ namespace CRM.Core.Services.Implementations
 
         public async Task<ResultDto> RegisterAsync(RegisterDto dto)
         {
-            if(await _unitOfWork.UserManager.FindByEmailAsync(dto.Email) is not null)
-                return new ResultDto() { Message = "Email is already registered"};
-            if(await _unitOfWork.UserManager.FindByNameAsync(dto.UserName) is not null)
-                return new ResultDto{ Message = "UserName is already registered"};
-            
+            if (await _unitOfWork.UserManager.FindByEmailAsync(dto.Email) is not null)
+                return new ResultDto() { Errors = new Dictionary<string, List<string>> { { "Invalid Email", new List<string> { "Email is already registered" } } } };
+            if (await _unitOfWork.UserManager.FindByNameAsync(dto.UserName) is not null)
+                return new ResultDto() { Errors = new Dictionary<string, List<string>> { { "Invalid UserName", new List<string> { "UserName is already registered" } } } };
+
             var user = new ApplicationUser
             {
                 Email = dto.Email,
                 UserName = dto.UserName,
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
-                EmailConfirmed= false
+                EmailConfirmed = false
             };
             var result = await _unitOfWork.UserManager.CreateAsync(user, dto.Password);
             if (!result.Succeeded)
@@ -201,17 +195,6 @@ namespace CRM.Core.Services.Implementations
                 }
                 return new ResultDto { Message = errors };
             }
-            //var confirmEmailToken = await _unitOfWork.UserManager.GenerateEmailConfirmationTokenAsync(user);
-            //var encodedEmailToken = Encoding.UTF8.GetBytes(confirmEmailToken);
-            //var validEmailToken = WebEncoders.Base64UrlEncode(encodedEmailToken);
-            //var urlHelper = _urlHelperFactory.GetUrlHelper(_actionContextAccessor.ActionContext);
-            //var callBackUrl = urlHelper.Action("ConfirmEmail", "Auth", new {Id = user.Id, Token = validEmailToken }, _httpContextAccessor.HttpContext.Request.Scheme);
-            //var message = new MailDto
-            //{
-            //    MailTo = user.Email,
-            //    Subject = "Confirm Your Email",
-            //    Content = $"<h1>Welcome to CRM</h1> <p>Please confirm your email by <a href='{callBackUrl}'>Clicking here</a></p>",
-            //};
 
             Random rnd = new Random();
             var randomNum = (rnd.Next(100000, 999999)).ToString();
@@ -241,13 +224,13 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = "email is not real !!",
+                    Errors = new Dictionary<string, List<string>> { { "Invalid Email", new List<string> { "Email is not real" } } }
                 };
             }
             catch
             {
                 await _unitOfWork.UserManager.DeleteAsync(user);
-                return new ResultDto { Message = "Confirmation Email Failed to send" };
+                return new ResultDto { Errors = new Dictionary<string, List<string>> { { "Something Wrong", new List<string> { "Confirmation Email Failed to send" } } } };
             }
         }
 
@@ -266,7 +249,7 @@ namespace CRM.Core.Services.Implementations
             var user = await _unitOfWork.UserManager.FindByEmailAsync(codeDto.Email);
             if (user == null)
             {
-                authModel.Message = "Invalid Email";
+                authModel.Errors = new Dictionary<string, List<string>> { { "Invalid Email", new List<string> { "Invalid Email" } } };
                 return authModel;
             }
             var result = await _unitOfWork.VerificationCodes.FindAsync(c => c.UserId == user.Id && c.Code == codeDto.Code);
@@ -285,7 +268,7 @@ namespace CRM.Core.Services.Implementations
                 authModel.FirstName = user.FirstName;
                 authModel.LastName = user.LastName;
                 authModel.Roles = JwtToken.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => x.Value).ToList();
-                authModel.Message = "Email Confirmed Successfully";
+                //authModel.Message = "Email Confirmed Successfully";
                 if (user.RefreshTokens.Any(x => x.IsActive))
                 {
                     var activeRefreshToken = user.RefreshTokens.Where(x => x.IsActive).FirstOrDefault();
@@ -302,7 +285,8 @@ namespace CRM.Core.Services.Implementations
                 }
                 return authModel;
             }
-            return new AuthModel { Message = "Invalid Code" };
+            authModel.Errors = new Dictionary<string, List<string>> { { "Invalid Code", new List<string> { "Invalid Code" } } };
+            return authModel;
         }
 
         public async Task<AuthModel> ConfirmNewEmailAsync(VerifyCodeDto codeDto)
@@ -311,18 +295,18 @@ namespace CRM.Core.Services.Implementations
             var verifyCode = await _unitOfWork.VerificationCodes.FindAsync(c => c.Code == codeDto.Code);
             if (verifyCode == null || verifyCode.IsExpired)
             {
-                authModel.Message = "Invalid Code";
+                authModel.Errors = new Dictionary<string, List<string>> { { "Invalid Code", new List<string> { "Invalid Code" } } };
                 return authModel;
             }
             var user = await _unitOfWork.UserManager.FindByIdAsync(verifyCode.UserId);
             if (user == null)
             {
-                authModel.Message = "Invalid Code";
+                authModel.Errors = new Dictionary<string, List<string>> { { "Invalid Code", new List<string> { "Invalid Code" } } };
                 return authModel;
             }
 
             _unitOfWork.VerificationCodes.Delete(verifyCode);
-            user.Email= codeDto.Email;
+            user.Email = codeDto.Email;
             user.NormalizedEmail = codeDto.Email.ToUpper();
             user.EmailConfirmed = true;
             await _unitOfWork.UserManager.UpdateAsync(user);
@@ -336,7 +320,7 @@ namespace CRM.Core.Services.Implementations
             authModel.FirstName = user.FirstName;
             authModel.LastName = user.LastName;
             authModel.Roles = JwtToken.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => x.Value).ToList();
-            authModel.Message = "Email Confirmed Successfully";
+            //authModel.Message = "Email Confirmed Successfully";
             if (user.RefreshTokens.Any(x => x.IsActive))
             {
                 var activeRefreshToken = user.RefreshTokens.Where(x => x.IsActive).FirstOrDefault();
@@ -355,122 +339,13 @@ namespace CRM.Core.Services.Implementations
 
         }
 
-        //public async Task<AuthModel> ConfirmEmailAsync(string Id, string Token)
-        //{
-        //    var authModel = new AuthModel();
-        //    if (string.IsNullOrEmpty(Id) || string.IsNullOrEmpty(Token))
-        //    {
-        //        authModel.Message = "Invalid Email Confirmation Url";
-        //        return authModel;
-        //    }
-        //    var user = await _unitOfWork.UserManager.FindByIdAsync(Id);
-        //    var decodedToken = WebEncoders.Base64UrlDecode(Token);
-        //    var normalToken = Encoding.UTF8.GetString(decodedToken);
-        //    var result = await _unitOfWork.UserManager.ConfirmEmailAsync(user, normalToken);
-        //    if (!result.Succeeded)
-        //    {
-        //        authModel.Message = "Email Confirmation Failed";
-        //        return authModel;
-        //    }
-
-        //    var JwtToken = await CreateToken(user);
-        //    var token = new JwtSecurityTokenHandler().WriteToken(JwtToken);
-        //    authModel.AccessToken = token;
-        //    authModel.IsAuthenticated = true;
-        //    authModel.Email = user.Email;
-        //    authModel.UserName = user.UserName;
-        //    authModel.FirstName = user.FirstName;
-        //    authModel.LastName = user.LastName;
-        //    authModel.Roles = JwtToken.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => x.Value).ToList();
-        //    authModel.Message = "Email Confirmed Successfully";
-
-        //    if (user.RefreshTokens.Any(x => x.IsActive))
-        //    {
-        //        var activeRefreshToken = user.RefreshTokens.Where(x => x.IsActive).FirstOrDefault();
-        //        authModel.RefreshToken = activeRefreshToken.Token;
-        //        authModel.RefreshTokenExpiration = activeRefreshToken.ExpiresOn;
-        //    }
-        //    else
-        //    {
-        //        var refreshToken = GenerateRefreshToken();
-        //        user.RefreshTokens.Add(refreshToken);
-        //        await _unitOfWork.UserManager.UpdateAsync(user);
-        //        authModel.RefreshToken = refreshToken.Token;
-        //        authModel.RefreshTokenExpiration = refreshToken.ExpiresOn;
-        //    }
-        //    return authModel;
-        //}
-
-
-
-        //public async Task<AuthModel> ConfirmNewEmailAsync(string Id,string newEmail ,string Token)
-        //{
-        //    var authModel = new AuthModel();
-        //    if (string.IsNullOrEmpty(Id) || string.IsNullOrEmpty(Token))
-        //    {
-        //        authModel.Message = "Invalid Email Confirmation Url";
-        //        return authModel;
-        //    }
-        //    var user = await _unitOfWork.UserManager.FindByIdAsync(Id);
-        //    var decodedToken = WebEncoders.Base64UrlDecode(Token);
-        //    var normalToken = Encoding.UTF8.GetString(decodedToken);
-        //    var result = await _unitOfWork.UserManager.ChangeEmailAsync(user, newEmail,normalToken);
-        //    if (!result.Succeeded)
-        //    {
-        //        authModel.Message = "Email Confirmation Failed";
-        //        return authModel;
-        //    }
-
-        //    var JwtToken = await CreateToken(user);
-        //    var token = new JwtSecurityTokenHandler().WriteToken(JwtToken);
-        //    authModel.AccessToken = token;
-        //    authModel.IsAuthenticated = true;
-        //    authModel.Email = user.Email;
-        //    authModel.UserName = user.UserName;
-        //    authModel.FirstName = user.FirstName;
-        //    authModel.LastName = user.LastName;
-        //    authModel.Roles = JwtToken.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => x.Value).ToList();
-        //    authModel.Message = "Email Confirmed Successfully";
-
-        //    if (user.RefreshTokens.Any(x => x.IsActive))
-        //    {
-        //        var activeRefreshToken = user.RefreshTokens.Where(x => x.IsActive).FirstOrDefault();
-        //        authModel.RefreshToken = activeRefreshToken.Token;
-        //        authModel.RefreshTokenExpiration = activeRefreshToken.ExpiresOn;
-        //    }
-        //    else
-        //    {
-        //        var refreshToken = GenerateRefreshToken();
-        //        user.RefreshTokens.Add(refreshToken);
-        //        await _unitOfWork.UserManager.UpdateAsync(user);
-        //        authModel.RefreshToken = refreshToken.Token;
-        //        authModel.RefreshTokenExpiration = refreshToken.ExpiresOn;
-        //    }
-        //    return authModel;
-        //}
-
-        //public async Task<ResultDto> ConfirmEmail(string Id, string Token)
-        //{
-        //    if(string.IsNullOrEmpty(Id) || string.IsNullOrEmpty(Token))
-        //        return new ResultDto { Message = "Invalid Email Confirmation Url" };
-        //    var user = await _unitOfWork.UserManager.FindByIdAsync(Id);
-        //    var decodedToken = WebEncoders.Base64UrlDecode(Token);
-        //    var normalToken = Encoding.UTF8.GetString(decodedToken);
-        //    var result = await _unitOfWork.UserManager.ConfirmEmailAsync(user, normalToken);
-        //    if(!result.Succeeded)
-        //        return new ResultDto { Message = "Email Confirmation Failed" };
-        //    return new ResultDto { IsSuccess = true, Message = "Email Confirmed Successfully" };
-
-        //}
-
-
         public async Task<ResultDto> ForgotPasswordAsync(string email)
         {
             var user = await _unitOfWork.UserManager.FindByEmailAsync(email);
             if (user == null) return new ResultDto
             {
                 IsSuccess = false,
-                Message = "Email is incorrect or not found !!",
+                Errors = new Dictionary<string, List<string>> { { "Invalid Email", new List<string> { "Email is incorrect or not found !!" } } }
             };
 
 
@@ -498,7 +373,7 @@ namespace CRM.Core.Services.Implementations
             return new ResultDto
             {
                 IsSuccess = false,
-                Message = "email is not real !!",
+                Errors = new Dictionary<string, List<string>> { { "Invalid Email", new List<string> { "Email is not real" } } }
             };
         }
 
@@ -520,14 +395,14 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = "Something Wrong"
+                    Errors = new Dictionary<string, List<string>> { { "Something Wrong", new List<string> { "Password was not changed" } } }
                 };
 
             }
             return new ResultDto
             {
                 IsSuccess = false,
-                Message = "Email is incorrect or not found !!"
+                Errors = new Dictionary<string, List<string>> { { "Invalid Email", new List<string> { "Email is incorrect or not found !!" } } }
             };
 
 
@@ -541,7 +416,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResetTokenDto
                 {
                     IsSuccess = false,
-                    Message = "Email Incorrect or not found"
+                    Errors = new Dictionary<string, List<string>> { { "Invalid Email", new List<string> { "Email is incorrect or not found !!" } } }
                 };
             };
             var result = await _unitOfWork.VerificationCodes.FindAsync(c => c.UserId == user.Id && c.Code == codeDto.Code);
@@ -558,13 +433,13 @@ namespace CRM.Core.Services.Implementations
                     IsSuccess = true,
                     Message = "Code Was Verified Successfully",
                     Token = restToken,
-                    Email= user.Email
+                    Email = user.Email
                 };
             }
             return new ResetTokenDto
             {
                 IsSuccess = false,
-                Message = "Verify Code is incorrect"
+                Errors = new Dictionary<string, List<string>> { { "Invalid Code", new List<string> { "Verification code is not correct" } } }
             };
         }
     }

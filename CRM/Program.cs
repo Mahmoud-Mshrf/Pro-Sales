@@ -1,5 +1,6 @@
 
 using CRM.Core;
+using CRM.Core.Filters;
 using CRM.Core.Helpers;
 using CRM.Core.Models;
 using CRM.Core.Services.Implementations;
@@ -30,7 +31,10 @@ namespace CRM
              options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
              }
             );
-            builder.Services.AddControllers();
+            builder.Services.AddControllers(options =>
+            {
+                options.Filters.Add<CustomValidationResultFilter>();
+            });
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -78,6 +82,17 @@ namespace CRM
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"])),
                     ClockSkew = TimeSpan.Zero
                 };
+            });
+
+            builder.Services.Configure<IdentityOptions>(options =>
+            {
+                // Default Password settings.
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireNonAlphanumeric = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequiredLength = 8;
+                options.Password.RequiredUniqueChars = 1;
             });
 
             var app = builder.Build();

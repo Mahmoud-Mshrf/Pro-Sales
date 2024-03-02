@@ -23,6 +23,16 @@ namespace CRM.Controllers
             {
                 return BadRequest(ModelState);
             }
+            //if (!ModelState.IsValid)
+            //{
+            //    // Handle model state errors
+            //    var errors = ModelState.ToDictionary(
+            //        kvp => kvp.Key,
+            //        kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToList()
+            //    );
+            //    var modelStateErrorResponse = new { errors };
+            //    return BadRequest(modelStateErrorResponse);
+            //}
             var result = await _authService.RegisterAsync(dto);
             if (!result.IsSuccess)
             {
@@ -32,23 +42,6 @@ namespace CRM.Controllers
         }
 
 
-        //[ApiExplorerSettings(IgnoreApi = true)]
-        //[HttpGet("[action]")]
-        //public async Task<IActionResult> ConfirmEmail(string Id, string Token)
-        //{
-        //    var result = await _authService.ConfirmEmailAsync(Id, Token);
-        //    if (!result.IsAuthenticated)
-        //    {
-        //        return BadRequest(result.Message);
-        //    }
-        //    if (!string.IsNullOrEmpty(result.RefreshToken))
-        //    {
-        //        setrefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
-        //    }
-        //    return Ok(result);
-        //}
-
-
         
         [HttpPost("[action]")]
         public async Task<IActionResult> ConfirmEmail(VerifyCodeDto codeDto)
@@ -56,7 +49,8 @@ namespace CRM.Controllers
             var result = await _authService.ConfirmEmailAsync(codeDto);
             if (!result.IsAuthenticated)
             {
-                return BadRequest(result.Message);
+                var errors = new { errors = result.Errors };
+                return BadRequest(errors);
             }
             if (!string.IsNullOrEmpty(result.RefreshToken))
             {
@@ -75,7 +69,8 @@ namespace CRM.Controllers
             var result = await _authService.GetTokenAsync(dto);
             if (!result.IsAuthenticated)
             {
-                return BadRequest(result.Message);
+                var errors = new { errors = result.Errors };
+                return BadRequest(errors);
             }
             if (!string.IsNullOrEmpty(result.RefreshToken))
             {
@@ -101,7 +96,11 @@ namespace CRM.Controllers
 
             var result = await _authService.RefreshTokenAsync(refreshToken);
             if (!result.IsAuthenticated)
-                return BadRequest(result.Message);
+            {
+                var errors = new { errors = result.Errors };
+                return BadRequest(errors);
+            }
+                
 
             setrefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
             return Ok(result);
@@ -133,44 +132,40 @@ namespace CRM.Controllers
             {
                 return Ok(result);
             }
-            return BadRequest(result.Message);
+            return BadRequest(result);
         }
 
         [HttpPost("VerifyCode")]
         [AllowAnonymous]
         public async Task<IActionResult> VerifyCode(VerifyCodeDto codeDto)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var result = await _authService.VerifyCodeAsync(codeDto);
-                if (result.IsSuccess)
-                {
-                    return Ok(result);
-
-                }
-                return NotFound(result);
+                return BadRequest(ModelState);
             }
-            return BadRequest(ModelState);
+            var result = await _authService.VerifyCodeAsync(codeDto);
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+
+            }
+            return NotFound(result);
         }
 
         [HttpPost("ResetPassword")]
         [AllowAnonymous]
         public async Task<IActionResult> ResetPassword(ResetPasswordDto model)
         {
-            if (string.IsNullOrEmpty(model.Email))
+            if (!ModelState.IsValid)
             {
-                return BadRequest("Email should not be null");
+                return BadRequest(ModelState);
             }
-            if (ModelState.IsValid)
+            var result = await _authService.ResetPasswordAsync(model);
+            if (result.IsSuccess)
             {
-                var result = await _authService.ResetPasswordAsync (model);
-                if (result.IsSuccess)
-                {
-                    return Ok(result);
-                }
-                return BadRequest(result);
+                return Ok(result);
             }
-            return BadRequest(ModelState);
+            return BadRequest(result);
 
         }
     }
