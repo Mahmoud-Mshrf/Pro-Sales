@@ -18,36 +18,36 @@ namespace CRM.Core.Services.Implementations
         {
             _unitOfWork = unitOfWork;
         }
-        // Will be used after adding Manager module
-        //public async Task<ReturnUsersDto> GetAllSalesRepresentatives()
-        //{
-        //    var salesReps = await _unitOfWork.UserManager.GetUsersInRoleAsync("SalesRepresentative");
-        //    if (salesReps == null)
-        //    {
-        //        return new ReturnUsersDto
-        //        {
-        //            IsSuccess = false,
-        //            Message = "No sales representatives found",
-        //        };
-        //    }
-        //    var Representatives = new List<UserDto>();
-        //    foreach (var rep in salesReps)
-        //    {
-        //        var user = new UserDto
-        //        {
-        //            Name = rep.FirstName + " " + rep.LastName,
-        //            Email = rep.Email,
-        //            UserId = rep.Id
-        //        };
-        //        Representatives.Add(user);
-        //    }
-        //    return new ReturnUsersDto
-        //    {
-        //        IsSuccess = true,
-        //        Message = "Sales representatives found",
-        //        Users = Representatives
-        //    };
-        //}
+         // Will be used after adding Manager module
+        public async Task<ReturnUsersDto> GetAllSalesRepresentatives()
+        {
+            var salesReps = await _unitOfWork.UserManager.GetUsersInRoleAsync("SalesRepresentative");
+            if (salesReps == null)
+            {
+                return new ReturnUsersDto
+                {
+                    IsSuccess = false,
+                    Message = "No sales representatives found",
+                };
+            }
+            var Representatives = new List<UserDto>();
+            foreach (var rep in salesReps)
+            {
+                var user = new UserDto
+                {
+                    Name = rep.FirstName + " " + rep.LastName,
+                    Email = rep.Email,
+                    UserId = rep.Id
+                };
+                Representatives.Add(user);
+            }
+            return new ReturnUsersDto
+            {
+                IsSuccess = true,
+                Message = "Sales representatives found",
+                Users = Representatives
+            };
+        }
 
         public async Task<ResultDto> AddCustomer(CustomerDto customerDto,string marketingModeratorEmail)
         {
