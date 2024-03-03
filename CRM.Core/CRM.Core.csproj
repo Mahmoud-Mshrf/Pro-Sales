@@ -26,4 +26,10 @@
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
 		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.3.0" />
 	</ItemGroup>
+
+
+	<ItemGroup>
+	  <Folder Include="Custom Attributes\" />
+	  <Folder Include="Filters\" />
+	</ItemGroup>
 </Project>
