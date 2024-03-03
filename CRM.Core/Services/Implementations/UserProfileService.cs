@@ -25,17 +25,11 @@ namespace CRM.Core.Services.Implementations
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAuthService _authService;
         private readonly IMailingService _mailingService;
-        //private readonly IHttpContextAccessor _httpContextAccessor;
-        //private readonly IActionContextAccessor _actionContextAccessor;
-        //private readonly IUrlHelperFactory _urlHelperFactory;
-        public UserProfileService(IUnitOfWork unitOfWork, IAuthService authService, IMailingService mailingService/*, IHttpContextAccessor httpContextAccessor, IActionContextAccessor actionContextAccessor, IUrlHelperFactory urlHelperFactory*/)
+        public UserProfileService(IUnitOfWork unitOfWork, IAuthService authService, IMailingService mailingService)
         {
             _unitOfWork = unitOfWork;
             _authService = authService;
             _mailingService = mailingService;
-            //_httpContextAccessor = httpContextAccessor;
-            //_actionContextAccessor = actionContextAccessor;
-            //_urlHelperFactory = urlHelperFactory;
         }
 
         public async Task<ResultDto> UpdateNameAsync(string email, UpdateNameDto dto)
