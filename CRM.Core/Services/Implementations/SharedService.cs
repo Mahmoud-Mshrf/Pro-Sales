@@ -26,7 +26,7 @@ namespace CRM.Core.Services.Implementations
                 return new ReturnInterstsDto
                 {
                     IsSuccess = false,
-                    Message = "No interests found"
+                    Errors = ["No interests found"]
                 };
             }
             var Interests = new List<InterestDto>();
@@ -42,7 +42,6 @@ namespace CRM.Core.Services.Implementations
             return new ReturnInterstsDto
             {
                 IsSuccess = true,
-                Message = "Interests found",
                 Interests = Interests
             };
         }
@@ -58,7 +57,7 @@ namespace CRM.Core.Services.Implementations
                 return new ReturnSourcesDto
                 {
                     IsSuccess = false,
-                    Message = "No sources found"
+                    Errors = ["No sources found"]
                 };
             }
             var Sources = new List<SourceDto>();
@@ -74,7 +73,6 @@ namespace CRM.Core.Services.Implementations
             return new ReturnSourcesDto
             {
                 IsSuccess = true,
-                Message = "Sources found",
                 Sources = Sources
             };
         }
