@@ -40,12 +40,12 @@ namespace CRM.Core.Services.Implementations
             var user = await _unitOfWork.UserManager.FindByEmailAsync(dto.Email);
             if (user is null || !await _unitOfWork.UserManager.CheckPasswordAsync(user, dto.Password))
             {
-                authModel.Errors = new Dictionary<string, List<string>> { { "Invalid Credentials", new List<string> { "Email or Password is not true" } } };
+                authModel.Errors = ["Invalid Credintials"];
                 return authModel;
             }
             if (!user.EmailConfirmed)
             {
-                authModel.Errors = new Dictionary<string, List<string>> { { "ConfirmationError", new List<string> { "Email is not confirmed" } } };
+                authModel.Errors = ["Email is not confirmed"];
                 return authModel;
             }
             var JwtToken = await CreateToken(user);
@@ -126,13 +126,13 @@ namespace CRM.Core.Services.Implementations
             var user = await _unitOfWork.UserManager.Users.SingleOrDefaultAsync(u => u.RefreshTokens.Any(t => t.Token == token));
             if (user is null)
             {
-                authModel.Errors = new Dictionary<string, List<string>> { { "Invalid Token", new List<string> { "Invalid Token" } } };
+                authModel.Errors = ["Invalid Token"];
                 return authModel;
             }
             var refreshToken = user.RefreshTokens.Single(x => x.Token == token);
             if (!refreshToken.IsActive)
             {
-                authModel.Errors = new Dictionary<string, List<string>> { { "Inactive Token", new List<string> { "Inactive Token" } } };
+                authModel.Errors = ["Inactive Token"];
                 return authModel;
             }
             refreshToken.RevokedOn = DateTime.Now;
@@ -249,7 +249,7 @@ namespace CRM.Core.Services.Implementations
             var user = await _unitOfWork.UserManager.FindByEmailAsync(codeDto.Email);
             if (user == null)
             {
-                authModel.Errors = new Dictionary<string, List<string>> { { "Invalid Email", new List<string> { "Invalid Email" } } };
+                authModel.Errors = new string[] { "Invalid Email" };
                 return authModel;
             }
             var result = await _unitOfWork.VerificationCodes.FindAsync(c => c.UserId == user.Id && c.Code == codeDto.Code);
@@ -285,7 +285,7 @@ namespace CRM.Core.Services.Implementations
                 }
                 return authModel;
             }
-            authModel.Errors = new Dictionary<string, List<string>> { { "Invalid Code", new List<string> { "Invalid Code" } } };
+            authModel.Errors = ["Invalid Code"];
             return authModel;
         }
 
@@ -295,13 +295,13 @@ namespace CRM.Core.Services.Implementations
             var verifyCode = await _unitOfWork.VerificationCodes.FindAsync(c => c.Code == codeDto.Code);
             if (verifyCode == null || verifyCode.IsExpired)
             {
-                authModel.Errors = new Dictionary<string, List<string>> { { "Invalid Code", new List<string> { "Invalid Code" } } };
+                authModel.Errors = ["Invalid Code"];
                 return authModel;
             }
             var user = await _unitOfWork.UserManager.FindByIdAsync(verifyCode.UserId);
             if (user == null)
             {
-                authModel.Errors = new Dictionary<string, List<string>> { { "Invalid Code", new List<string> { "Invalid Code" } } };
+                authModel.Errors = ["Invalid Code"];
                 return authModel;
             }
 
