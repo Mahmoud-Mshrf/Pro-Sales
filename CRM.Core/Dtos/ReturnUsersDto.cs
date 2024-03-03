@@ -13,6 +13,7 @@ namespace CRM.Core.Dtos
         public string[] Errors { get; set; }
         [JsonIgnore]
         public bool IsSuccess { get; set; }
+        [JsonIgnore(Condition =JsonIgnoreCondition.WhenWritingNull)]
         public IList<UserDto> Users { get; set; }
         public ReturnUsersDto()
         {
