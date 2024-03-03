@@ -1,4 +1,5 @@
 using CRM.Core;
+using CRM.Core.Filters;
 using CRM.Core.Helpers;
 using CRM.Core.Models;
 using CRM.Core.Services.Implementations;
@@ -29,6 +30,10 @@ namespace CRM
              options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
              }
             );
+            builder.Services.AddControllers(options =>
+            {
+                options.Filters.Add<CustomValidationResultFilter>();
+            });
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
