@@ -13,7 +13,6 @@ namespace CRM.Core.Services.Interfaces
         Task<ReturnUsersDto> GetAllSalesRepresentatives();
         Task<ResultDto> AddCustomer(CustomerDto customerDto, string marketingModeratorEmail);
         Task<ResultDto> UpdateCustomer(CustomerDto customerDto, int CustomerId);
-        //Task<ReturnInterstsDto> GetAllInterests();
-        //Task<ReturnSourcesDto> GetAllSources();
+
     }
 }
