@@ -114,12 +114,21 @@ namespace CRM.Controllers
         public async Task<IActionResult> RevokeToken()
         {
             var refreshToken = Request.Cookies["refreshToken"];
-            if (string.IsNullOrEmpty(refreshToken))
-                return BadRequest("Token Is Required");
-            var result = await _authService.RevokeToken(refreshToken);
-            if (!result)
-                return BadRequest("Invalid Token");
-            return Ok("Token Revoked");
+            if (!string.IsNullOrEmpty(refreshToken))
+            {
+                await _authService.RevokeToken(refreshToken);
+                var cookieOptions = new CookieOptions
+                {
+                    Expires = DateTime.UtcNow.AddDays(-1),
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.None,
+                    Path = "/; SameSite=None; Secure; Partitioned;"
+                };
+                Request.HttpContext.Response.Cookies.Delete("refreshToken", cookieOptions);
+                return NoContent();
+            }
+            return NoContent();
         }
 
 
