@@ -1,4 +1,3 @@
-
 using CRM.Core;
 using CRM.Core.Filters;
 using CRM.Core.Helpers;
@@ -15,6 +14,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
 
 namespace CRM
@@ -35,11 +35,58 @@ namespace CRM
             {
                 options.Filters.Add<CustomValidationResultFilter>();
             });
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
-            builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+            builder.Services.AddSwaggerGen(options =>
+            {
+                // Swagger mainly is used as the documentation for the api
+                options.SwaggerDoc("v1", new OpenApiInfo //Open API Info Object, it provides the metadata about the Open API.
+                {
+                    Version = "v1",
+                    Title = "CRM_APIs",
+                    Description = "CRM APIs",
+                    //TermsOfService = new Uri("https://www.google.com"),
+                    License = new OpenApiLicense
+                    {
+                        Name = "License",
+                        Url = new Uri("https://github.com/Mahmoud-Mshrf/CRM")
+                    }
 
+                });
+                // Here we add authorization for all endpoints in one time
+                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Scheme = "Bearer",
+                    Type = SecuritySchemeType.Http,
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Enter Your JWT Key",
+
+                });
+                // Here we add aauthorization on each endpoint 
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                    new OpenApiSecurityScheme
+                    {
+                        Name= "Bearer",
+                        Reference = new OpenApiReference
+                        {
+                            Id= "Bearer",
+                            Type = ReferenceType.SecurityScheme
+                        },
+                        In = ParameterLocation.Header,
+                        BearerFormat="JWT",
+                        Scheme="Bearer"
+                    },
+                    new List<string>()
+                    }
+                });
+            });
+            builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+            builder.Services.AddCors();
 
             // Add Hangfire to the container
             builder.Services.AddHangfire(x => x.UseSqlServerStorage(builder.Configuration.GetConnectionString("HangfireConnection")));
@@ -105,6 +152,15 @@ namespace CRM
             }
 
             app.UseHttpsRedirection();
+            app.UseCors(builder =>
+            {
+                builder.WithOrigins("http://localhost:3000","http://localhost:3001","http://localhost:3002")
+                       .AllowAnyHeader()
+                       .AllowAnyMethod()
+                       .AllowCredentials()
+                       .SetIsOriginAllowed(host=>true) // Allow any other origin, but handle in the controller
+                       .Build();
+            });
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseHangfireDashboard("/HangfireDashboard");

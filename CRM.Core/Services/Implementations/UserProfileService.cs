@@ -25,17 +25,11 @@ namespace CRM.Core.Services.Implementations
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAuthService _authService;
         private readonly IMailingService _mailingService;
-        //private readonly IHttpContextAccessor _httpContextAccessor;
-        //private readonly IActionContextAccessor _actionContextAccessor;
-        //private readonly IUrlHelperFactory _urlHelperFactory;
-        public UserProfileService(IUnitOfWork unitOfWork, IAuthService authService, IMailingService mailingService/*, IHttpContextAccessor httpContextAccessor, IActionContextAccessor actionContextAccessor, IUrlHelperFactory urlHelperFactory*/)
+        public UserProfileService(IUnitOfWork unitOfWork, IAuthService authService, IMailingService mailingService)
         {
             _unitOfWork = unitOfWork;
             _authService = authService;
             _mailingService = mailingService;
-            //_httpContextAccessor = httpContextAccessor;
-            //_actionContextAccessor = actionContextAccessor;
-            //_urlHelperFactory = urlHelperFactory;
         }
 
         public async Task<ResultDto> UpdateNameAsync(string email, UpdateNameDto dto)
@@ -46,7 +40,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Errors = new Dictionary<string, List<string>> { { "Not Found", new List<string> { "User not found" } } }
+                    Errors = ["User not found"]
 
                 };
             }
@@ -64,7 +58,7 @@ namespace CRM.Core.Services.Implementations
             return new ResultDto
             {
                 IsSuccess = false,
-                Errors = new Dictionary<string, List<string>> { { "Something Wrong", new List<string> { "Name update failed" } } }
+                Errors = ["Something wrong, name was not updated"]
 
             };
         }
@@ -76,7 +70,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Errors = new Dictionary<string, List<string>> { { "Invalid Email", new List<string> { "User not found" } } }
+                    Errors = ["User not found"]
                 };
             }
             var result = await _unitOfWork.UserManager.ChangePasswordAsync(user, dto.CurrentPassword, dto.NewPassword);
@@ -92,7 +86,7 @@ namespace CRM.Core.Services.Implementations
             return new ResultDto
             {
                 IsSuccess = false,
-                Errors = new Dictionary<string, List<string>> { { "Something Wrong", new List<string> { "Password was not changed" } } }
+                Errors = ["Something wrong, password was not updated"]
             };
         }
         public async Task<ResultDto> UpdateEmailAsync(string email, string Newemail)
@@ -103,7 +97,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Errors = new Dictionary<string, List<string>> { { "Invalid Email", new List<string> { "User not found" } } }
+                    Errors= ["User not found"]
                 };
             }
             if (user.Email == Newemail)
@@ -111,7 +105,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Errors = new Dictionary<string, List<string>> { { "Invalid Email", new List<string> { "Email is same as current email" } } }
+                    Errors = ["Email is the same as the current email"]
                 };
             }
             if (_unitOfWork.UserManager.Users.Any(u => u.Email == Newemail))
@@ -119,7 +113,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Errors = new Dictionary<string, List<string>> { { "Invalid Email", new List<string> { "Email already exists" } } }
+                    Errors = ["Email already exists"]
                 };
             }
 
@@ -150,12 +144,12 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Errors = new Dictionary<string, List<string>> { { "Invalid Email", new List<string> { "email is not real !!" } } },
+                    Errors = ["Something wrong, confirmation email failed to send"]
                 };
             }
             catch
             {
-                return new ResultDto { Errors = new Dictionary<string, List<string>> { { "Something Wrong", new List<string> { "Confirmation Email Failed to send" } } } };
+                return new ResultDto { Errors =["Something wrong, confirmation email failed to send"] };
             }
         }
 

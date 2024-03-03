@@ -18,36 +18,35 @@ namespace CRM.Core.Services.Implementations
         {
             _unitOfWork = unitOfWork;
         }
-        // Will be used after adding Manager module
-        //public async Task<ReturnUsersDto> GetAllSalesRepresentatives()
-        //{
-        //    var salesReps = await _unitOfWork.UserManager.GetUsersInRoleAsync("SalesRepresentative");
-        //    if (salesReps == null)
-        //    {
-        //        return new ReturnUsersDto
-        //        {
-        //            IsSuccess = false,
-        //            Message = "No sales representatives found",
-        //        };
-        //    }
-        //    var Representatives = new List<UserDto>();
-        //    foreach (var rep in salesReps)
-        //    {
-        //        var user = new UserDto
-        //        {
-        //            Name = rep.FirstName + " " + rep.LastName,
-        //            Email = rep.Email,
-        //            UserId = rep.Id
-        //        };
-        //        Representatives.Add(user);
-        //    }
-        //    return new ReturnUsersDto
-        //    {
-        //        IsSuccess = true,
-        //        Message = "Sales representatives found",
-        //        Users = Representatives
-        //    };
-        //}
+         // Will be used after adding Manager module
+        public async Task<ReturnUsersDto> GetAllSalesRepresentatives()
+        {
+            var salesReps = await _unitOfWork.UserManager.GetUsersInRoleAsync("SalesRepresentative");
+            if (salesReps == null)
+            {
+                return new ReturnUsersDto
+                {
+                    IsSuccess = false,
+                    Errors = ["No sales representatives found"]
+                };
+            }
+            var Representatives = new List<UserDto>();
+            foreach (var rep in salesReps)
+            {
+                var user = new UserDto
+                {
+                    Name = rep.FirstName + " " + rep.LastName,
+                    Email = rep.Email,
+                    UserId = rep.Id
+                };
+                Representatives.Add(user);
+            }
+            return new ReturnUsersDto
+            {
+                IsSuccess = true,
+                Users = Representatives
+            };
+        }
 
         public async Task<ResultDto> AddCustomer(CustomerDto customerDto,string marketingModeratorEmail)
         {
@@ -58,7 +57,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = "Sales Representative not found"
+                    Errors = ["Sales Representative not found"]
                 };
             }
             var MarketingModerator = await _unitOfWork.UserManager.FindByEmailAsync(marketingModeratorEmail);
@@ -67,7 +66,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto 
                 {
                     IsSuccess = false,
-                    Message = "Marketing Moderator not found"
+                    Errors = ["Marketing Moderator not found"]
                 };
             }
             var source = await _unitOfWork.Sources.GetByIdAsync(customerDto.sourceId);
@@ -76,7 +75,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = "Source not found"
+                    Errors = ["Source not found"]
                 };
             }
             foreach (var interestt in customerDto.UserInterests)
@@ -87,7 +86,7 @@ namespace CRM.Core.Services.Implementations
                     return new ResultDto
                     {
                         IsSuccess = false,
-                        Message = "Interest not found"
+                        Errors = ["Interest not found"]
                     };
                 }
                 customer.Interests.Add(interest);
@@ -131,7 +130,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = "Customer not found"
+                    Errors = ["Customer not found"]
                 };
             }
             var salesRep = await _unitOfWork.UserManager.FindByIdAsync(customerDto.SalesRepresntativeId);
@@ -140,7 +139,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = "Sales Representative not found"
+                    Errors = ["Sales Representative not found"]
                 };
             }
             var source = await _unitOfWork.Sources.GetByIdAsync(customerDto.sourceId);
@@ -149,7 +148,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = "Source not found"
+                    Errors = ["Source not found"]
                 };
             }
             //var interest = await _unitOfWork.Interests.GetAllAsync(customerDto.);
@@ -161,7 +160,7 @@ namespace CRM.Core.Services.Implementations
                     return new ResultDto
                     {
                         IsSuccess = false,
-                        Message = "Interest not found"
+                        Errors = ["Interest not found"]
                     };
                 }
                 if (customer.Interests.Any(i => i.InterestID == interest.InterestID) && interestt.IsSelected)
@@ -200,7 +199,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = e.Message
+                    Errors = [e.Message]
                 };
             }
             return new ResultDto
@@ -209,67 +208,6 @@ namespace CRM.Core.Services.Implementations
                 Message = "Customer updated successfully"
             };
         }
-        // will be used after adding Manager module
-        //public async Task<ReturnInterstsDto> GetAllInterests()
-        //{
-        //    var interests = await _unitOfWork.Interests.GetAllAsync();
-        //    if(interests == null)
-        //    {
-        //        return new ReturnInterstsDto
-        //        {
-        //            IsSuccess = false,
-        //            Message = "No interests found"
-        //        };
-        //    }
-        //    var Interests = new List<InterestDto>();
-        //    foreach(var interest in interests)
-        //    {
-        //        var interestDto = new InterestDto
-        //        {
-        //            InterestID = interest.InterestID,
-        //            InterestName = interest.InterestName
-        //        };
-        //        Interests.Add(interestDto);
-        //    }
-        //    return new ReturnInterstsDto
-        //    {
-        //        IsSuccess = true,
-        //        Message = "Interests found",
-        //        Interests = Interests
-        //    };
-        //}
-
-
-
-        // will be used after adding Manager module
-        //public async Task<ReturnSourcesDto> GetAllSources()
-        //{
-        //    var sources = await _unitOfWork.Sources.GetAllAsync();
-        //    if(sources == null)
-        //    {
-        //        return new ReturnSourcesDto
-        //        {
-        //            IsSuccess = false,
-        //            Message = "No sources found"
-        //        };
-        //    }
-        //    var Sources = new List<SourceDto>();
-        //    foreach(var source in sources)
-        //    {
-        //        var sourceDto = new SourceDto
-        //        {
-        //            SourceName = source.SourceName,
-        //            SourceId=source.SourceId
-        //        };
-        //        Sources.Add(sourceDto);
-        //    }
-        //    return new ReturnSourcesDto
-        //    {
-        //        IsSuccess = true,
-        //        Message = "Sources found",
-        //        Sources = Sources
-        //    };
-        //}
-
+        
     }
 }

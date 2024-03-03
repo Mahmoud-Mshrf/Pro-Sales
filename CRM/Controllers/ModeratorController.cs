@@ -19,16 +19,16 @@ namespace CRM.Controllers
         }
 
         // Will be used after adding Manager module
-        //[HttpGet("GetAllRepresentatives")]
-        //public async Task<IActionResult> GetAllSalesRepresentatives()
-        //{
-        //    var result = await _moderatorService.GetAllSalesRepresentatives();
-        //    if (!result.IsSuccess)
-        //    {
-        //        return BadRequest(result.Message);
-        //    }
-        //    return Ok(result.Users);
-        //}
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetAllSalesRepresentatives()
+        {
+            var result = await _moderatorService.GetAllSalesRepresentatives();
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result.Users);
+        }
 
         [HttpPost("[action]")]
         public async Task<IActionResult> AddCustomer([FromBody] CustomerDto customerDto)
@@ -41,7 +41,7 @@ namespace CRM.Controllers
             var result = await _moderatorService.AddCustomer(customerDto,marketingModeratorEmail);
             if (!result.IsSuccess)
             {
-                return BadRequest(result.Message);
+                return BadRequest(result);
             }
             return Ok(result);
         }
@@ -56,7 +56,7 @@ namespace CRM.Controllers
             var result = await _moderatorService.UpdateCustomer(customerDto, CustomerId);
             if (!result.IsSuccess)
             {
-                return BadRequest(result.Message);
+                return BadRequest(result);
             }
             return Ok(result);
         }

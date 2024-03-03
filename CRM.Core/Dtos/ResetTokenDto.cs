@@ -6,14 +6,16 @@ namespace CRM.Core.Dtos
     {
         public string Token { get; set; }
         public string Email { get; set; }
+        [JsonIgnore]
         public bool IsSuccess { get; set; }
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string Message { get; set; }
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public Dictionary<string, List<string>> Errors { get; set; }
+        public string[] Errors { get; set; }
         public ResetTokenDto()
         {
             Errors = null;
+            Message = null;
         }
 
     }

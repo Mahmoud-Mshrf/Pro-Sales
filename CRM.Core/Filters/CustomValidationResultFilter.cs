@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc.Filters;
+﻿using CRM.Core.Custom_Attributes;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,31 +14,49 @@ namespace CRM.Core.Filters
     {
         public void OnResultExecuting(ResultExecutingContext context)
         {
-            if (context.ModelState.IsValid) return;
-
-            var errors = new Dictionary<string, List<string>>();
-
-            foreach (var keyModelStatePair in context.ModelState)
+            if (!context.ModelState.IsValid)
             {
-                var key = keyModelStatePair.Key;
-                var errorsList = keyModelStatePair.Value.Errors
-                    .Select(e => e.ErrorMessage)
+                var orderedErrors = new List<string>();
+
+                var propertiesOrder = context
+                    .ActionDescriptor
+                    .Parameters
+                    .SelectMany(p => p.ParameterType.GetProperties())
+                    .Select(prop => new
+                    {
+                        PropertyName = prop.Name,
+                        Order = GetValidationErrorOrder(prop)
+                    })
+                    .OrderBy(o => o.Order)
+                    .Select(o => o.PropertyName)
                     .ToList();
 
-                errors.Add(key, errorsList);
+                foreach (var propertyName in propertiesOrder)
+                {
+                    if (context.ModelState.TryGetValue(propertyName, out var propertyErrors))
+                    {
+                        orderedErrors.AddRange(propertyErrors.Errors.Select(error => error.ErrorMessage));
+                    }
+                }
+
+                var result = new ObjectResult(new { errors = orderedErrors })
+                {
+                    StatusCode = 400,
+                };
+
+                context.Result = result;
             }
+        }
 
-            var customErrorResponse = new
-            {
-                errors = errors
-            };
-
-            context.Result = new BadRequestObjectResult(customErrorResponse);
+        private int GetValidationErrorOrder(PropertyInfo property)
+        {
+            var validationErrorOrderAttribute = property.GetCustomAttribute<ValidationErrorOrderAttribute>();
+            return validationErrorOrderAttribute?.Order ?? int.MaxValue;
         }
 
         public void OnResultExecuted(ResultExecutedContext context)
         {
-            // Implementation not needed for this example
+            // No action needed after the action method executes
         }
     }
 }

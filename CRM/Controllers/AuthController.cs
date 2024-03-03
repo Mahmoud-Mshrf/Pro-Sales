@@ -36,7 +36,8 @@ namespace CRM.Controllers
             var result = await _authService.RegisterAsync(dto);
             if (!result.IsSuccess)
             {
-                return BadRequest(result.Message);
+                var errors = new { errors = result.Errors };
+                return BadRequest(errors);
             }
             return Ok(result);
         }
@@ -54,7 +55,7 @@ namespace CRM.Controllers
             }
             if (!string.IsNullOrEmpty(result.RefreshToken))
             {
-                setrefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
+                setRefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
             }
             return Ok(result);
         }
@@ -74,17 +75,20 @@ namespace CRM.Controllers
             }
             if (!string.IsNullOrEmpty(result.RefreshToken))
             {
-                setrefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
+                setRefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
             }
             return Ok(result);
         }
 
-        private void setrefreshTokenInCookie(string refreshToken, DateTime refreshTokenExpiration)
+        private void setRefreshTokenInCookie(string refreshToken, DateTime refreshTokenExpiration)
         {
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Expires = refreshTokenExpiration.ToLocalTime()
+                Expires = refreshTokenExpiration.ToLocalTime(),
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Path = "/; SameSite=None; Secure; Partitioned;"
             };
             Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
         }
@@ -102,7 +106,7 @@ namespace CRM.Controllers
             }
                 
 
-            setrefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
+            setRefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
             return Ok(result);
         }
 
@@ -110,12 +114,21 @@ namespace CRM.Controllers
         public async Task<IActionResult> RevokeToken()
         {
             var refreshToken = Request.Cookies["refreshToken"];
-            if (string.IsNullOrEmpty(refreshToken))
-                return BadRequest("Token Is Required");
-            var result = await _authService.RevokeToken(refreshToken);
-            if (!result)
-                return BadRequest("Invalid Token");
-            return Ok("Token Revoked");
+            if (!string.IsNullOrEmpty(refreshToken))
+            {
+                await _authService.RevokeToken(refreshToken);
+                var cookieOptions = new CookieOptions
+                {
+                    Expires = DateTime.UtcNow.AddDays(-1),
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.None,
+                    Path = "/; SameSite=None; Secure; Partitioned;"
+                };
+                Request.HttpContext.Response.Cookies.Delete("refreshToken", cookieOptions);
+                return NoContent();
+            }
+            return NoContent();
         }
 
 
