@@ -21,7 +21,7 @@ namespace CRM.Controllers
             var result = await _sharedService.GetAllInterests();
             if (!result.IsSuccess)
             {
-                return BadRequest(result.Message);
+                return BadRequest(result);
             }
             return Ok(result.Interests);
         }
@@ -31,7 +31,7 @@ namespace CRM.Controllers
             var result = await _sharedService.GetAllSources();
             if (!result.IsSuccess)
             {
-                return BadRequest(result.Message);
+                return BadRequest(result);
             }
             return Ok(result.Sources);
         }
