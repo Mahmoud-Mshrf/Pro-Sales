@@ -58,7 +58,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = "Sales Representative not found"
+                    Errors = ["Sales Representative not found"]
                 };
             }
             var MarketingModerator = await _unitOfWork.UserManager.FindByEmailAsync(marketingModeratorEmail);
@@ -67,7 +67,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto 
                 {
                     IsSuccess = false,
-                    Message = "Marketing Moderator not found"
+                    Errors = ["Marketing Moderator not found"]
                 };
             }
             var source = await _unitOfWork.Sources.GetByIdAsync(customerDto.sourceId);
@@ -76,7 +76,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = "Source not found"
+                    Errors = ["Source not found"]
                 };
             }
             foreach (var interestt in customerDto.UserInterests)
@@ -87,7 +87,7 @@ namespace CRM.Core.Services.Implementations
                     return new ResultDto
                     {
                         IsSuccess = false,
-                        Message = "Interest not found"
+                        Errors = ["Interest not found"]
                     };
                 }
                 customer.Interests.Add(interest);
@@ -131,7 +131,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = "Customer not found"
+                    Errors = ["Customer not found"]
                 };
             }
             var salesRep = await _unitOfWork.UserManager.FindByIdAsync(customerDto.SalesRepresntativeId);
@@ -140,7 +140,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = "Sales Representative not found"
+                    Errors = ["Sales Representative not found"]
                 };
             }
             var source = await _unitOfWork.Sources.GetByIdAsync(customerDto.sourceId);
@@ -149,7 +149,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = "Source not found"
+                    Errors = ["Source not found"]
                 };
             }
             //var interest = await _unitOfWork.Interests.GetAllAsync(customerDto.);
@@ -161,7 +161,7 @@ namespace CRM.Core.Services.Implementations
                     return new ResultDto
                     {
                         IsSuccess = false,
-                        Message = "Interest not found"
+                        Errors = ["Interest not found"]
                     };
                 }
                 if (customer.Interests.Any(i => i.InterestID == interest.InterestID) && interestt.IsSelected)
@@ -200,7 +200,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = e.Message
+                    Errors = [e.Message]
                 };
             }
             return new ResultDto
