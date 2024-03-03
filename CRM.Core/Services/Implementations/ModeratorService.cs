@@ -27,7 +27,7 @@ namespace CRM.Core.Services.Implementations
                 return new ReturnUsersDto
                 {
                     IsSuccess = false,
-                    Message = "No sales representatives found",
+                    Errors = ["No sales representatives found"]
                 };
             }
             var Representatives = new List<UserDto>();
@@ -44,7 +44,6 @@ namespace CRM.Core.Services.Implementations
             return new ReturnUsersDto
             {
                 IsSuccess = true,
-                Message = "Sales representatives found",
                 Users = Representatives
             };
         }
