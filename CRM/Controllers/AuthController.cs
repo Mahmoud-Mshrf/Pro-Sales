@@ -36,7 +36,8 @@ namespace CRM.Controllers
             var result = await _authService.RegisterAsync(dto);
             if (!result.IsSuccess)
             {
-                return BadRequest(result.Message);
+                var errors = new { errors = result.Errors };
+                return BadRequest(errors);
             }
             return Ok(result);
         }
