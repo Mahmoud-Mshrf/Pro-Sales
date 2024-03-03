@@ -17,6 +17,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CRM.Core.Services.Implementations
 {
@@ -416,7 +417,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResetTokenDto
                 {
                     IsSuccess = false,
-                    Errors = new Dictionary<string, List<string>> { { "Invalid Email", new List<string> { "Email is incorrect or not found !!" } } }
+                    Errors = ["Email is incorrect or not found"]
                 };
             };
             var result = await _unitOfWork.VerificationCodes.FindAsync(c => c.UserId == user.Id && c.Code == codeDto.Code);
@@ -439,7 +440,7 @@ namespace CRM.Core.Services.Implementations
             return new ResetTokenDto
             {
                 IsSuccess = false,
-                Errors = new Dictionary<string, List<string>> { { "Invalid Code", new List<string> { "Verification code is not correct" } } }
+                Errors = ["Verification code is not correct"]
             };
         }
     }
