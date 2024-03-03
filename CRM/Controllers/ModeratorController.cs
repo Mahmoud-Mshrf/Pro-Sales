@@ -25,7 +25,7 @@ namespace CRM.Controllers
             var result = await _moderatorService.GetAllSalesRepresentatives();
             if (!result.IsSuccess)
             {
-                return BadRequest(result.Message);
+                return BadRequest(result);
             }
             return Ok(result.Users);
         }
@@ -41,7 +41,7 @@ namespace CRM.Controllers
             var result = await _moderatorService.AddCustomer(customerDto,marketingModeratorEmail);
             if (!result.IsSuccess)
             {
-                return BadRequest(result.Message);
+                return BadRequest(result);
             }
             return Ok(result);
         }
@@ -56,7 +56,7 @@ namespace CRM.Controllers
             var result = await _moderatorService.UpdateCustomer(customerDto, CustomerId);
             if (!result.IsSuccess)
             {
-                return BadRequest(result.Message);
+                return BadRequest(result);
             }
             return Ok(result);
         }
