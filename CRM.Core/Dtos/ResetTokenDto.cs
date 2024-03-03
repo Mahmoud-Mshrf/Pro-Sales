@@ -6,6 +6,7 @@ namespace CRM.Core.Dtos
     {
         public string Token { get; set; }
         public string Email { get; set; }
+        [JsonIgnore]
         public bool IsSuccess { get; set; }
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string Message { get; set; }
@@ -14,6 +15,7 @@ namespace CRM.Core.Dtos
         public ResetTokenDto()
         {
             Errors = null;
+            Message = null;
         }
 
     }

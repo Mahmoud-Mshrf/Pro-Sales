@@ -13,6 +13,7 @@ namespace CRM.Core.Dtos
         public ResultDto()
         {
             Errors = null;
+            Message = null;
         }
 
     }
