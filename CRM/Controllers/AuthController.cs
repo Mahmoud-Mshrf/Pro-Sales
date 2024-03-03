@@ -55,7 +55,7 @@ namespace CRM.Controllers
             }
             if (!string.IsNullOrEmpty(result.RefreshToken))
             {
-                setrefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
+                setRefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
             }
             return Ok(result);
         }
@@ -75,17 +75,20 @@ namespace CRM.Controllers
             }
             if (!string.IsNullOrEmpty(result.RefreshToken))
             {
-                setrefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
+                setRefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
             }
             return Ok(result);
         }
 
-        private void setrefreshTokenInCookie(string refreshToken, DateTime refreshTokenExpiration)
+        private void setRefreshTokenInCookie(string refreshToken, DateTime refreshTokenExpiration)
         {
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Expires = refreshTokenExpiration.ToLocalTime()
+                Expires = refreshTokenExpiration.ToLocalTime(),
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Path = "/; SameSite=None; Secure; Partitioned;"
             };
             Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
         }
@@ -103,7 +106,7 @@ namespace CRM.Controllers
             }
                 
 
-            setrefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
+            setRefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
             return Ok(result);
         }
 
