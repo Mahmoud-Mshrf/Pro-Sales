@@ -100,7 +100,7 @@ namespace CRM.Core.Services.Implementations
             issuer: _jwt.Issuer,
             audience: _jwt.Audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddDays(_jwt.DurationInDays),
+            expires: DateTime.UtcNow.AddSeconds(_jwt.DurationInDays),
             signingCredentials: credentials
             );
             return token;
@@ -114,7 +114,7 @@ namespace CRM.Core.Services.Implementations
             return new RefreshToken
             {
                 Token = Convert.ToBase64String(randomNumber),
-                ExpiresOn = DateTime.UtcNow.AddDays(10),
+                ExpiresOn = DateTime.UtcNow.AddMinutes(1.5),
                 CreatedOn = DateTime.UtcNow
             };
         }
@@ -389,7 +389,7 @@ namespace CRM.Core.Services.Implementations
 
             Random rnd = new Random();
             var randomNum = (rnd.Next(100000, 999999)).ToString();
-            string message = "Hi " + user.UserName + " Your Password verification code is: " + randomNum;
+            string message = "Hi " + user.UserName + " Your password verification code is: " + randomNum;
             var result = await _mailingService.SendEmailAsync(user.Email, "Password Reset Code ", message, null);
             if (result)
             {

@@ -145,7 +145,6 @@ namespace CRM.Controllers
             }
             return BadRequest(result);
         }
-
         [HttpPost("verify-code")]
         [AllowAnonymous]
         public async Task<IActionResult> VerifyCode(VerifyCodeDto codeDto)
@@ -154,13 +153,57 @@ namespace CRM.Controllers
             {
                 return BadRequest(ModelState);
             }
-            var result = await _authService.VerifyCodeAsync(codeDto);
-            if (result.IsSuccess)
+            if (codeDto.Purpose == "ResetPassword")
             {
-                return Ok(result);
+                var result = await _authService.VerifyCodeAsync(codeDto);
+                if (result.IsSuccess)
+                {
+                    return Ok(result);
 
+                }
+                var errors = new { errors = result.Errors };
+                return BadRequest(errors);
             }
-            return NotFound(result);
+            else if (codeDto.Purpose == "ConfirmEmail")
+            {
+                var result = await _authService.ConfirmEmailAsync(codeDto);
+                if (!result.IsAuthenticated)
+                {
+                    var errors = new { errors = result.Errors };
+                    return BadRequest(errors);
+                }
+                if (!string.IsNullOrEmpty(result.RefreshToken))
+                {
+                    setRefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
+                }
+                return Ok(result);
+            }
+            else if (codeDto.Purpose == "ConfirmNewEmail")
+            {
+                var result = await _authService.ConfirmNewEmailAsync(codeDto);
+                if (!result.IsAuthenticated)
+                {
+                    var errors = new { errors = result.Errors };
+                    return BadRequest(errors);
+                }
+                if (!string.IsNullOrEmpty(result.RefreshToken))
+                {
+                    setRefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
+                }
+                return Ok(result);
+            }
+            else
+            {
+                var errors = new { errors = new string[] { "Invalid Purpose" } };
+                return BadRequest(errors);
+            }
+            //var result = await _authService.VerifyCodeAsync(codeDto);
+            //if (result.IsSuccess)
+            //{
+            //    return Ok(result);
+
+            //}
+            //return NotFound(result);
         }
 
         [HttpPost("reset-password")]
