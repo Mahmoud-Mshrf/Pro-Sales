@@ -33,7 +33,7 @@ namespace CRM.Controllers
             var result = await _salesRepresntative.AddCall(callDto, SalesRepresntativeEmail);
             if (!result.IsSuccess)
             {
-                return BadRequest(result.Message);
+                return BadRequest(result);
             }
             return Ok(result);
         }
@@ -49,7 +49,7 @@ namespace CRM.Controllers
             var result = await _salesRepresntative.UpdateCallInfo(callDto, CallId);
             if (!result.IsSuccess)
             {
-                return BadRequest(result.Message);
+                return BadRequest(result);
             }
             return Ok(result);
         }
@@ -58,7 +58,9 @@ namespace CRM.Controllers
         {
             var result = await _salesRepresntative.GetAllCalls();
             if (!result.IsSuccess)
-                return BadRequest(result.Message);
+            {
+                return BadRequest(result.Errors);
+            }
             return Ok(result.Calls);
         }
 
@@ -68,7 +70,7 @@ namespace CRM.Controllers
             var result = await _salesRepresntative.GetCallById(callId);
             if (!result.IsSuccess)
             {
-                return NotFound(result.Message);
+                return NotFound(result.Errors);
             }
             return Ok(result);
         }
@@ -78,7 +80,7 @@ namespace CRM.Controllers
             var result = await _salesRepresntative.DeleteCallById(callId);
             if (!result.IsSuccess)
             {
-                return NotFound(result.Message);
+                return NotFound(result);
             }
             return Ok(result);
         }
@@ -96,7 +98,7 @@ namespace CRM.Controllers
             var result = await _salesRepresntative.AddMessage(messageDto, SalesRepresntativeEmail);
             if (!result.IsSuccess)
             {
-                return BadRequest(result.Message);
+                return BadRequest(result);
             }
             return Ok(result);
         }
@@ -112,7 +114,7 @@ namespace CRM.Controllers
             var result = await _salesRepresntative.UpdateMessageInfo(messageDto, MessageId);
             if (!result.IsSuccess)
             {
-                return BadRequest(result.Message);
+                return BadRequest(result);
             }
             return Ok(result);
         }
@@ -122,7 +124,7 @@ namespace CRM.Controllers
         {
             var result = await _salesRepresntative.GetAllMessages();
             if (!result.IsSuccess)
-                return BadRequest(result.Message);
+                return BadRequest(result.Errors);
             return Ok(result.Messages);
         }
 
@@ -132,9 +134,9 @@ namespace CRM.Controllers
             var result = await _salesRepresntative.GetMessageById(MessageId);
             if (!result.IsSuccess)
             {
-                return NotFound(result.Message);
+                return NotFound(result.Errors);
             }
-            return Ok(result);
+            return Ok(result.Messages);
         }
 
         [HttpDelete("[action]/{MessageId}")]
@@ -143,7 +145,7 @@ namespace CRM.Controllers
             var result = await _salesRepresntative.DeleteMessageById(messageId);
             if (!result.IsSuccess)
             {
-                return NotFound(result.Message);
+                return NotFound(result);
             }
             return Ok(result);
         }
@@ -167,7 +169,7 @@ namespace CRM.Controllers
             var result = await _salesRepresntative.AddMeeting(meetingDto, SalesRepEmail);
             if (!result.IsSuccess)
             {
-                return BadRequest(result.Message);
+                return BadRequest(result);
             }
             return Ok(result);
         }
@@ -184,7 +186,7 @@ namespace CRM.Controllers
             var result = await _salesRepresntative.UpdateMeeting(meetingDto, MeetingId);
             if (!result.IsSuccess)
             {
-                return BadRequest(result.Message);
+                return BadRequest(result);
             }
             return Ok(result);
         }
@@ -194,7 +196,7 @@ namespace CRM.Controllers
         {
             var result = await _salesRepresntative.GetAllMeetings();
             if (!result.IsSuccess)
-                return BadRequest(result.Message);
+                return BadRequest(result.Errors);
             return Ok(result.Meetings);
         }
 
@@ -204,7 +206,7 @@ namespace CRM.Controllers
             var result = await _salesRepresntative.GetMeetingByID(MeetingId);
             if (!result.IsSuccess)
             {
-                return NotFound(result.Message);
+                return NotFound(result.Errors);
             }
             return Ok(result);
         }
@@ -215,7 +217,7 @@ namespace CRM.Controllers
             var result = await _salesRepresntative.DeleteMeeting(meetingId);
             if (!result.IsSuccess)
             {
-                return NotFound(result.Message);
+                return NotFound(result);
             }
             return Ok(result);
         }
@@ -235,7 +237,7 @@ namespace CRM.Controllers
             var result = await _salesRepresntative.AddDeal(dealDto, SalesRepresntativeEmail);
             if (!result.IsSuccess)
             {
-                return BadRequest(result.Message);
+                return BadRequest(result);
             }
             return Ok(result);
         }
@@ -250,7 +252,7 @@ namespace CRM.Controllers
             var result = await _salesRepresntative.UpdateDeal(dealDto, DealId);
             if (!result.IsSuccess)
             {
-                return BadRequest(result.Message);
+                return BadRequest(result);
             }
             return Ok(result);
         }
@@ -259,7 +261,7 @@ namespace CRM.Controllers
         {
             var result = await _salesRepresntative.GetAllDeals();
             if (!result.IsSuccess)
-                return BadRequest(result.Message);
+                return BadRequest(result.Errors);
             return Ok(result.Deals);
         }
 
@@ -269,7 +271,7 @@ namespace CRM.Controllers
             var result = await _salesRepresntative.GetDealById(dealId);
             if (!result.IsSuccess)
             {
-                return NotFound(result.Message);
+                return NotFound(result.Errors);
             }
             return Ok(result);
         }
@@ -279,7 +281,7 @@ namespace CRM.Controllers
             var result = await _salesRepresntative.DeleteDeal(dealId);
             if (!result.IsSuccess)
             {
-                return NotFound(result.Message);
+                return NotFound(result);
             }
             return Ok(result);
         }
