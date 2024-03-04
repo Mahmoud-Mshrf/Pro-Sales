@@ -225,6 +225,7 @@ namespace CRM.Controllers
         }
         [AllowAnonymous]
         [EnableCors("AllowAnyOrigin")] // Apply a different CORS policy for this endpoint
+        [ApiExplorerSettings(IgnoreApi = true)]
         [HttpGet("test-endpoint")]
         public IActionResult TestEndpoint()
         {
