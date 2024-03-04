@@ -14,9 +14,9 @@ namespace CRM.Infrastructure.Data
         override protected void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            builder.Entity<ApplicationUser>().ToTable("Users");
-            builder.Entity<IdentityRole>().ToTable("Roles");
-            builder.Entity<IdentityUserRole<string>>().ToTable("UserRoles");
+            //builder.Entity<ApplicationUser>().ToTable("Users");
+            //builder.Entity<IdentityRole>().ToTable("Roles");
+            //builder.Entity<IdentityUserRole<string>>().ToTable("UserRoles");
             builder.Entity<Customer>()
             .HasMany(c => c.Interests)
             .WithMany(i => i.Customers)
