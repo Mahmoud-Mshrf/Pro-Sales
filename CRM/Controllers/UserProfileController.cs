@@ -55,7 +55,7 @@ namespace CRM.Controllers
         }
         
         [AllowAnonymous]
-        [HttpPost("ConfirmNewEmail")]
+        [HttpPost("confirm-new-email")]
         public async Task<IActionResult> ConfirmNewEmail(VerifyCodeDto codeDto)
         {
             var result = await _authService.ConfirmNewEmailAsync(codeDto);

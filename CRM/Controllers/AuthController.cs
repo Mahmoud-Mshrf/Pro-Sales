@@ -16,7 +16,7 @@ namespace CRM.Controllers
         {
             _authService = authService;
         }
-        [HttpPost("[action]")]
+        [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto dto)
         {
             if (!ModelState.IsValid)
@@ -44,7 +44,7 @@ namespace CRM.Controllers
 
 
         
-        [HttpPost("[action]")]
+        [HttpPost("confirm-email")]
         public async Task<IActionResult> ConfirmEmail(VerifyCodeDto codeDto)
         {
             var result = await _authService.ConfirmEmailAsync(codeDto);
@@ -60,7 +60,7 @@ namespace CRM.Controllers
             return Ok(result);
         }
 
-        [HttpPost("[action]")]
+        [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] TokenRequestDto dto)
         {
             if (!ModelState.IsValid)
@@ -93,7 +93,7 @@ namespace CRM.Controllers
             Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
         }
 
-        [HttpGet("[action]")]
+        [HttpGet("refresh-token")]
         public async Task<IActionResult> RefreshToken()
         {
             var refreshToken = Request.Cookies["refreshToken"];
@@ -110,7 +110,7 @@ namespace CRM.Controllers
             return Ok(result);
         }
 
-        [HttpPost("[action]")]
+        [HttpPost("revoke-token")]
         public async Task<IActionResult> RevokeToken()
         {
             var refreshToken = Request.Cookies["refreshToken"];
@@ -132,7 +132,7 @@ namespace CRM.Controllers
         }
 
 
-        [HttpPost("ForgotPassword")]
+        [HttpPost("forgot-password")]
         [AllowAnonymous]
         public async Task<IActionResult> ForgotPassword([FromForm] string Email)
         {
@@ -148,7 +148,7 @@ namespace CRM.Controllers
             return BadRequest(result);
         }
 
-        [HttpPost("VerifyCode")]
+        [HttpPost("verify-code")]
         [AllowAnonymous]
         public async Task<IActionResult> VerifyCode(VerifyCodeDto codeDto)
         {
@@ -165,7 +165,7 @@ namespace CRM.Controllers
             return NotFound(result);
         }
 
-        [HttpPost("ResetPassword")]
+        [HttpPost("reset-password")]
         [AllowAnonymous]
         public async Task<IActionResult> ResetPassword(ResetPasswordDto model)
         {

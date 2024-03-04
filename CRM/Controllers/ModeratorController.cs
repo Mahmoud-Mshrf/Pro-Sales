@@ -19,7 +19,7 @@ namespace CRM.Controllers
         }
 
         // Will be used after adding Manager module
-        [HttpGet("[action]")]
+        [HttpGet("get-all-sales")]
         public async Task<IActionResult> GetAllSalesRepresentatives()
         {
             var result = await _moderatorService.GetAllSalesRepresentatives();
@@ -30,7 +30,7 @@ namespace CRM.Controllers
             return Ok(result.Users);
         }
 
-        [HttpPost("[action]")]
+        [HttpPost("add-customer")]
         public async Task<IActionResult> AddCustomer([FromBody] CustomerDto customerDto)
         {
             if (!ModelState.IsValid)
@@ -45,7 +45,7 @@ namespace CRM.Controllers
             }
             return Ok(result);
         }
-        [HttpPut("[action]")]
+        [HttpPut("update-customer")]
         public async Task<IActionResult> UpdateCustomer([FromBody] CustomerDto customerDto,int CustomerId)
         {
             if (!ModelState.IsValid)
