@@ -12,8 +12,8 @@ namespace CRM.Infrastructure.Migrations
         {
             // Insert Admin Role and Moderator Role and Sales_Representative Role in AspNetRoles Table
             migrationBuilder.Sql("INSERT INTO AspNetRoles (Id, [Name], NormalizedName) VALUES ('1', 'Manager', 'MANAGER')");
-            migrationBuilder.Sql("INSERT INTO AspNetRoles (Id, [Name], NormalizedName) VALUES ('2', 'Marketing_Moderator', 'MARKETING_MODERATOR')");
-            migrationBuilder.Sql("INSERT INTO AspNetRoles (Id, [Name], NormalizedName) VALUES ('3', 'Sales_Representative', 'SALES_REPRESENTATIVE')");
+            migrationBuilder.Sql("INSERT INTO AspNetRoles (Id, [Name], NormalizedName) VALUES ('2', 'Marketing Moderator', 'MARKETING MODERATOR')");
+            migrationBuilder.Sql("INSERT INTO AspNetRoles (Id, [Name], NormalizedName) VALUES ('3', 'Sales Representative', 'SALES REPRESENTATIVE')");
 
         }
 
