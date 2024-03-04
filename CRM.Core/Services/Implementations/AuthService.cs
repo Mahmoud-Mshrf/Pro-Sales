@@ -210,10 +210,10 @@ namespace CRM.Core.Services.Implementations
 
         public async Task<ResultDto> RegisterAsync(RegisterDto dto)
         {
-            if (await _unitOfWork.UserManager.FindByEmailAsync(dto.Email) is not null)
-                return new ResultDto() { Errors = ["Email is already registered"] };
             if (await _unitOfWork.UserManager.FindByNameAsync(dto.UserName) is not null)
-                return new ResultDto() { Errors = ["UserName is already registered"] };
+                return new ResultDto() { Errors = ["Username is already used"] };
+            if (await _unitOfWork.UserManager.FindByEmailAsync(dto.Email) is not null)
+                return new ResultDto() { Errors = ["Email is already used"] };
 
             var user = new ApplicationUser
             {
