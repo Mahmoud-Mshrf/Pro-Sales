@@ -42,5 +42,29 @@ namespace CRM.Core.Services.Implementations
                 Message = "Source added successfully"
             };
         }
+        public async Task<ResultDto> AddInterest(string name)
+        {
+
+            var interest = new Interest
+            {
+                InterestName = name
+            };
+            var interests = await _unitOfWork.Interests.GetAllAsync();
+            if (interests.Any(interests => interests.InterestName == name))
+            {
+                return new ResultDto
+                {
+                    IsSuccess = false,
+                    Message = "Interest already exists"
+                };
+            }
+            var result = await _unitOfWork.Interests.AddAsync(interest);
+            _unitOfWork.complete();
+            return new ResultDto
+            {
+                IsSuccess = true,
+                Message = "Interest added successfully"
+            };
+        }
     }
 }
