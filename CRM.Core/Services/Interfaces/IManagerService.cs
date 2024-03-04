@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CRM.Core.Dtos;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,5 +9,6 @@ namespace CRM.Core.Services.Interfaces
 {
     public interface IManagerService
     {
+        Task<ResultDto> AddSource(string name);
     }
 }
