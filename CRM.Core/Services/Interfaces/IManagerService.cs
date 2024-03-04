@@ -13,7 +13,7 @@ namespace CRM.Core.Services.Interfaces
         Task<ResultDto> AddInterest(string name);
         Task<List<UserViewModel>> GetAllUsers();
         List<string> GetAllRoles();
-        Task<UserRolesDTO> ViewUserRoles(string userId);
-        Task<UserRolesDTO> ManageUserRoles(UserRolesDTO dto);
+        Task<ReturnUserRolesDto> ViewUserRoles(string userId);
+        Task<ReturnUserRolesDto> ManageUserRoles(UserRolesDTO dto);
     }
 }

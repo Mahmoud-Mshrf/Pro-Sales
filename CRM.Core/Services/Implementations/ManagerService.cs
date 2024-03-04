@@ -88,35 +88,38 @@ namespace CRM.Core.Services.Implementations
             var roles = _unitOfWork.RoleManager.Roles.Select(x => x.Name).ToList();
             return roles;
         }
-        public async Task<UserRolesDTO> ViewUserRoles(string userId)
+        public async Task<ReturnUserRolesDto> ViewUserRoles(string userId)
         {
             var user = await _unitOfWork.UserManager.FindByIdAsync(userId);
-            var userRolesdto = new UserRolesDTO();
+            var returnUserRolesdto = new ReturnUserRolesDto();
             if (user is null)
             {
-                userRolesdto.Errors = ["User not found"];
-                return userRolesdto;
+                returnUserRolesdto.IsSucces = false;
+                returnUserRolesdto.Errors = ["User not found"];
+                return returnUserRolesdto;
             }
             var roles = await _unitOfWork.RoleManager.Roles.ToListAsync();
 
-            userRolesdto.Errors = null;
-            userRolesdto.Id = user.Id;
-            userRolesdto.UserName = user.UserName;
-            userRolesdto.Roles = roles.Select(r => new RoleModel
+            returnUserRolesdto.Errors = null;
+            returnUserRolesdto.Id = user.Id;
+            returnUserRolesdto.UserName = user.UserName;
+            returnUserRolesdto.Roles = roles.Select(r => new RoleModel
             {
                 Id = r.Id,
                 Name = r.Name,
                 IsSelected = _unitOfWork.UserManager.IsInRoleAsync(user, r.Name).Result
             });
-            return userRolesdto;
+            return returnUserRolesdto;
         }
-        public async Task<UserRolesDTO> ManageUserRoles(UserRolesDTO dto)
+        public async Task<ReturnUserRolesDto> ManageUserRoles(UserRolesDTO dto)
         {
             var user = await _unitOfWork.UserManager.FindByIdAsync(dto.Id);
+            var returnUserRolesdto = new ReturnUserRolesDto();
+
             if (user is null)
             {
-                dto.Errors = ["User not found"];
-                return dto;
+                returnUserRolesdto.Errors = ["User not found"];
+                return returnUserRolesdto;
             }
 
             var UserRoles = await _unitOfWork.UserManager.GetRolesAsync(user);
@@ -130,7 +133,7 @@ namespace CRM.Core.Services.Implementations
 
             var roles = await _unitOfWork.RoleManager.Roles.ToListAsync();
 
-            var UserRolesDto = new UserRolesDTO
+            var UserRolesDto = new ReturnUserRolesDto
             {
                 Id = dto.Id,
                 UserName = dto.UserName,
