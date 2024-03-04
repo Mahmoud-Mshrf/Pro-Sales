@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace CRM.Core.Dtos
@@ -11,6 +12,7 @@ namespace CRM.Core.Dtos
         public string Id { get; set; }
         public string UserName { get; set; }
         public IEnumerable<RoleModel> Roles { get; set; }
-        public string ErrorMessage { get; set; }
+        [JsonIgnore(Condition =JsonIgnoreCondition.WhenWritingNull)]
+        public string[] Errors { get; set; }
     }
 }

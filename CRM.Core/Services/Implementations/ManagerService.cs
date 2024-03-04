@@ -94,12 +94,12 @@ namespace CRM.Core.Services.Implementations
             var userRolesdto = new UserRolesDTO();
             if (user is null)
             {
-                userRolesdto.ErrorMessage = "No user with this id";
+                userRolesdto.Errors = ["User not found"];
                 return userRolesdto;
             }
             var roles = await _unitOfWork.RoleManager.Roles.ToListAsync();
 
-            userRolesdto.ErrorMessage = string.Empty;
+            userRolesdto.Errors = null;
             userRolesdto.Id = user.Id;
             userRolesdto.UserName = user.UserName;
             userRolesdto.Roles = roles.Select(r => new RoleModel
@@ -115,7 +115,7 @@ namespace CRM.Core.Services.Implementations
             var user = await _unitOfWork.UserManager.FindByIdAsync(dto.Id);
             if (user is null)
             {
-                dto.ErrorMessage = "No User With This Id";
+                dto.Errors = ["User not found"];
                 return dto;
             }
 
@@ -134,7 +134,7 @@ namespace CRM.Core.Services.Implementations
             {
                 Id = dto.Id,
                 UserName = dto.UserName,
-                ErrorMessage = string.Empty,
+                Errors = null,
                 Roles = roles.Select(r => new RoleModel
                 {
                     Id = r.Id,
