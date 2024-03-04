@@ -35,7 +35,7 @@ namespace CRM.Core.Services.Implementations
                     return new ResultDto
                     {
                         IsSuccess = false,
-                        Message = "Customer not found"
+                        Errors = ["Customer not found"]
                     };
                 }
 
@@ -44,7 +44,7 @@ namespace CRM.Core.Services.Implementations
                     return new ResultDto
                     {
                         IsSuccess = false,
-                        Message = "Sales Representative email is null or empty"
+                        Errors = ["Sales Representative email is null or empty"]
                     };
                 }
 
@@ -54,7 +54,7 @@ namespace CRM.Core.Services.Implementations
                     return new ResultDto
                     {
                         IsSuccess = false,
-                        Message = "Sales Representative not found"
+                        Errors = ["Sales Representative not found"]
                     };
                 }
 
@@ -90,7 +90,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = ex.Message
+                    Errors = [ex.Message]
                 };
             }
         }
@@ -103,7 +103,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = "Call not found"
+                    Errors=["Call not Found"]
                 };
             }
             var customer = await _unitOfWork.Customers.GetByIdAsync(callDto.CustomerId);
@@ -112,7 +112,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = "Customer not found"
+                    Errors = ["Customer not Found"]
                 };
             }
             call.CallSummery= callDto.CallSummery;
@@ -126,7 +126,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = e.Message
+                   Errors = [e.Message]
                 };
             }
             return new ResultDto
@@ -149,7 +149,8 @@ namespace CRM.Core.Services.Implementations
                     return new ReturnCallsDto
                     {
                         IsSuccess = false,
-                        Message = "No Calls found"
+                        Errors = ["Calls not Found"]
+                        
                     };
                 }
 
@@ -181,7 +182,7 @@ namespace CRM.Core.Services.Implementations
                 return new ReturnCallsDto
                 {
                     IsSuccess = false,
-                    Message = ex.Message
+                    Errors=[ex.Message]
                 };
             }
         }
@@ -197,7 +198,7 @@ namespace CRM.Core.Services.Implementations
                     return new ReturnCallsDto
                     {
                         IsSuccess = false,
-                        Message = "Call not found"
+                      Errors = ["Call not Found"]
                     };
                 }
 
@@ -223,7 +224,7 @@ namespace CRM.Core.Services.Implementations
                 return new ReturnCallsDto
                 {
                     IsSuccess = false,
-                    Message = ex.Message
+                   Errors = [ex.Message]    
                 };
             }
         }
@@ -237,7 +238,7 @@ namespace CRM.Core.Services.Implementations
                     return new ResultDto
                     {
                         IsSuccess = false,
-                        Message = "Call not found"
+                        Errors = ["Call not Found"]
                     };
                 }
 
@@ -251,7 +252,7 @@ namespace CRM.Core.Services.Implementations
                     return new ResultDto
                     {
                         IsSuccess = false,
-                        Message = e.Message
+                       Errors = [e.Message] 
                     };
                 }
 
@@ -266,7 +267,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = ex.Message
+                    Errors = [ ex.Message]
                 };
             }
         }
@@ -290,7 +291,7 @@ namespace CRM.Core.Services.Implementations
                     return new ResultDto
                     {
                         IsSuccess = false,
-                        Message = "Customer not found"
+                       Errors = ["Customer not Found"]
                     };
                 }
 
@@ -299,7 +300,8 @@ namespace CRM.Core.Services.Implementations
                     return new ResultDto
                     {
                         IsSuccess = false,
-                        Message = "Sales Representative email is null or empty"
+                        Errors = ["Sales Representative email is null or empty"]
+
                     };
                 }
 
@@ -309,7 +311,7 @@ namespace CRM.Core.Services.Implementations
                     return new ResultDto
                     {
                         IsSuccess = false,
-                        Message = "Sales Representative not found"
+                        Errors = ["Sales Representative not found"]
                     };
                 }
 
@@ -329,7 +331,7 @@ namespace CRM.Core.Services.Implementations
                     return new ResultDto
                     {
                         IsSuccess = false,
-                        Message = e.Message
+                        Errors = [e.Message]
                     };
                 }
 
@@ -344,7 +346,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = ex.Message
+                    Errors = [ex.Message]   
                 };
             }
 
@@ -358,7 +360,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = "Message not found"
+                   Errors = ["Message not Found"]
                 };
             }
             var customer = await _unitOfWork.Customers.GetByIdAsync(messageDto.CustomerId);
@@ -367,7 +369,8 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = "Customer not found"
+                    Errors = ["Customer not Found"]
+
                 };
             }
             message.MessageContent = messageDto.MessageContent;
@@ -382,7 +385,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = e.Message
+                    Errors = [e.Message]
                 };
             }
             return new ResultDto
@@ -405,7 +408,7 @@ namespace CRM.Core.Services.Implementations
                     return new ReturnMessagesDto
                     {
                         IsSuccess = false,
-                        Message = "No  found"
+                        Errors = ["Message not Found"]
                     };
                 }
 
@@ -436,7 +439,7 @@ namespace CRM.Core.Services.Implementations
                 return new ReturnMessagesDto
                 {
                     IsSuccess = false,
-                    Message = ex.Message
+                   Errors = [ex.Message]
                 };
             }
         }
@@ -453,7 +456,7 @@ namespace CRM.Core.Services.Implementations
                     return new ReturnMessagesDto
                     {
                         IsSuccess = false,
-                        Message = "Message not found"
+                       Errors = ["Message not Found"]
                     };
                 }
 
@@ -478,7 +481,7 @@ namespace CRM.Core.Services.Implementations
                 return new ReturnMessagesDto
                 {
                     IsSuccess = false,
-                    Message = ex.Message
+                    Errors = [ex.Message]   
                 };
             }
         }
@@ -493,7 +496,7 @@ namespace CRM.Core.Services.Implementations
                     return new ResultDto
                     {
                         IsSuccess = false,
-                        Message = "Message not found"
+                        Errors = ["Message not Found"]
                     };
                 }
 
@@ -507,14 +510,14 @@ namespace CRM.Core.Services.Implementations
                     return new ResultDto
                     {
                         IsSuccess = false,
-                        Message = e.Message
+                       Errors = [e.Message]
                     };
                 }
 
                 return new ResultDto
                 {
                     IsSuccess = true,
-                    Message = "Call deleted successfully"
+                    Message = " Message deleted successfully"
                 };
             }
             catch (Exception ex)
@@ -522,7 +525,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = ex.Message
+                    Errors = [ex.Message]   
                 };
             }
         }
@@ -545,7 +548,7 @@ namespace CRM.Core.Services.Implementations
                     return new ResultDto
                     {
                         IsSuccess = false,
-                        Message = "Customer Not Found"
+                        Errors=["Customer not Found"]
                     };
                 }
 
@@ -554,7 +557,7 @@ namespace CRM.Core.Services.Implementations
                     return new ResultDto
                     {
                         IsSuccess = false,
-                        Message = "Sales Representative email is null or empty"
+                        Errors = ["Sales Representative email is null or empty"]
 
                     };
                 }
@@ -564,7 +567,10 @@ namespace CRM.Core.Services.Implementations
                 if (salesRep == null)
                 {
                     return new ResultDto
-                    { IsSuccess = false, Message = "Sales Represntative Not Found" };
+                    {
+                        IsSuccess = false,
+                        Errors = ["Sales Representative not found"]
+                    };
                 }
 
                 meeting.connectionState = meetingDto.connectionState;
@@ -586,7 +592,7 @@ namespace CRM.Core.Services.Implementations
                     return new ResultDto
                     {
                         IsSuccess = false,
-                        Message = e.Message
+                        Errors = [e.Message]
                     };
 
                 }
@@ -605,7 +611,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = e.Message
+                    Errors = [e.Message]
                 };
             }
         }
@@ -618,7 +624,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = "Meeting not found"
+                    Errors=["Meeting not Found"]
                 };
             }
             var customer = await _unitOfWork.Customers.GetByIdAsync(meetingDto.CustomerId);
@@ -627,7 +633,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = "Customer not found"
+                    Errors = ["Customer not Found"]
                 };
             }
             meeting.connectionState = meetingDto.connectionState;
@@ -643,7 +649,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = e.Message
+                    Errors = [e.Message]
                 };
             }
             return new ResultDto
@@ -665,7 +671,8 @@ namespace CRM.Core.Services.Implementations
                     return new ReturnMeetingsDto
                     {
                         IsSuccess = false,
-                        Message = "No  found"
+                        Errors = ["Meetings not Found"]
+                        
                     };
                 }
 
@@ -687,7 +694,7 @@ namespace CRM.Core.Services.Implementations
                 return new ReturnMeetingsDto
                 {
                     IsSuccess = true,
-                    Message = "Message found",
+                    Message = "Meeting found",
                     Meetings = Meetings
                 };
             }
@@ -696,7 +703,7 @@ namespace CRM.Core.Services.Implementations
                 return new ReturnMeetingsDto
                 {
                     IsSuccess = false,
-                    Message = ex.Message
+                    Errors=[ex.Message]
                 };
             }
 
@@ -714,7 +721,7 @@ namespace CRM.Core.Services.Implementations
                     return new ReturnMeetingsDto
                     {
                         IsSuccess = false,
-                        Message = "Meeting not found"
+                        Errors = ["Meeting not Found"]
                     };
                 }
 
@@ -739,7 +746,7 @@ namespace CRM.Core.Services.Implementations
                 return new ReturnMeetingsDto
                 {
                     IsSuccess = false,
-                    Message = ex.Message
+                   Errors = [ex.Message]
                 };
             }
         }
@@ -754,7 +761,7 @@ namespace CRM.Core.Services.Implementations
                     return new ResultDto
                     {
                         IsSuccess = false,
-                        Message = "Meeting not found"
+                        Errors = ["Meeting not Found"]
                     };
                 }
 
@@ -768,7 +775,7 @@ namespace CRM.Core.Services.Implementations
                     return new ResultDto
                     {
                         IsSuccess = false,
-                        Message = e.Message
+                        Errors = [e.Message]
                     };
                 }
 
@@ -783,7 +790,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = ex.Message
+                    Errors = [ex.Message]
                 };
             }
         }
@@ -807,7 +814,7 @@ namespace CRM.Core.Services.Implementations
                     return new ResultDto
                     {
                         IsSuccess = false,
-                        Message = "Customer not found"
+                       Errors = ["Customer not Found"]
                     };
                 }
                 var interest = await _unitOfWork.Interests.GetByIdAsync(dealsDto.InterestId);
@@ -816,7 +823,7 @@ namespace CRM.Core.Services.Implementations
                     return new ResultDto
                     {
                         IsSuccess = false,
-                        Message = "Interest not found"
+                        Errors=[ "Interest not found"]
                     };
                 }
 
@@ -825,7 +832,7 @@ namespace CRM.Core.Services.Implementations
                     return new ResultDto
                     {
                         IsSuccess = false,
-                        Message = "Sales Representative email is null or empty"
+                        Errors = ["Sales Representative email is null or empty"]
                     };
                 }
 
@@ -835,7 +842,7 @@ namespace CRM.Core.Services.Implementations
                     return new ResultDto
                     {
                         IsSuccess = false,
-                        Message = "Sales Representative not found"
+                        Errors = ["Sales Representative not found"]
                     };
                 }
 
@@ -857,7 +864,7 @@ namespace CRM.Core.Services.Implementations
                     return new ResultDto
                     {
                         IsSuccess = false,
-                        Message = e.Message
+                       Errors = [e.Message]
                     };
                 }
 
@@ -872,7 +879,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = ex.Message
+                    Errors =[ ex.Message]
                 };
             }
         }
@@ -886,7 +893,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = "Deal not found"
+                    Errors =[ "Deal not found"]
                 };
             }
             var customer = await _unitOfWork.Customers.GetByIdAsync(dealsDto.CustomerId);
@@ -895,7 +902,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = "Customer not found"
+                    Errors =[ "Customer not found"]
                 };
             }
             var interest = await _unitOfWork.Interests.GetByIdAsync(dealsDto.InterestId);
@@ -904,7 +911,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = "Interest not found"
+                    Errors =[ "Interest not found"]
                 };
             }
 
@@ -923,7 +930,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = e.Message
+                    Errors =[e.Message]
                 };
             }
             return new ResultDto
@@ -945,10 +952,10 @@ namespace CRM.Core.Services.Implementations
                     return new ReturnDealsDto
                     {
                         IsSuccess = false,
-                        Message = "No Deals found"
+                        Errors = ["Deals not Found"]
                     };
                 }
-
+                 
                 var Deals = new List<DealsDto>();
                 foreach (var deal in deals)
                 {
@@ -978,7 +985,7 @@ namespace CRM.Core.Services.Implementations
                 return new ReturnDealsDto
                 {
                     IsSuccess = false,
-                    Message = ex.Message
+                    Errors =[ ex.Message]
                 };
             }
         }
@@ -995,7 +1002,7 @@ namespace CRM.Core.Services.Implementations
                     return new ReturnDealsDto
                     {
                         IsSuccess = false,
-                        Message = "Deal not found"
+                       Errors =[ "Deal not found"]
                     };
                 }
 
@@ -1022,7 +1029,7 @@ namespace CRM.Core.Services.Implementations
                 return new ReturnDealsDto
                 {
                     IsSuccess = false,
-                    Message = ex.Message
+                    Errors =[ ex.Message]
                 };
             }
         }
@@ -1037,7 +1044,7 @@ namespace CRM.Core.Services.Implementations
                     return new ResultDto
                     {
                         IsSuccess = false,
-                        Message = "Deal not found"
+                        Errors =[ "Deal not found"]
                     };
                 }
 
@@ -1051,7 +1058,7 @@ namespace CRM.Core.Services.Implementations
                     return new ResultDto
                     {
                         IsSuccess = false,
-                        Message = e.Message
+                        Errors =[e.Message]
                     };
                 }
 
@@ -1066,7 +1073,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = ex.Message
+                    Errors =[ex.Message]
                 };
             }
         }
