@@ -5,9 +5,9 @@ namespace CRM.Core.Dtos
 {
     public class TokenRequestDto
     {
+        [Required(ErrorMessage = "Enter your username or email.")]
         [ValidationErrorOrder(1)]
-        [Required, EmailAddress]
-        public string Email { get; set; }
+        public string LoginIdentifier { get; set; }
         [ValidationErrorOrder(2)]
         [Required]
         public string Password { get; set; }

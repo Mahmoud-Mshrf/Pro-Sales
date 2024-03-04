@@ -36,9 +36,8 @@ namespace CRM.Core.Services.Implementations
         // This method is used to generate a new Access Token for the user (will be called by Login Endpoint)
         public async Task<AuthModel> GetTokenAsync(TokenRequestDto dto)
         {
-
             var authModel = new AuthModel();
-            var user = await _unitOfWork.UserManager.FindByEmailAsync(dto.Email);
+            var user = await _unitOfWork.UserManager.FindByEmailAsync(dto.LoginIdentifier) ?? await _unitOfWork.UserManager.FindByNameAsync(dto.LoginIdentifier);
             if (user is null || !await _unitOfWork.UserManager.CheckPasswordAsync(user, dto.Password))
             {
                 authModel.Errors = ["Please check your username (or email) and password and try again."];
@@ -54,7 +53,7 @@ namespace CRM.Core.Services.Implementations
             authModel.AccessToken = token;
             authModel.IsAuthenticated = true;
             authModel.Email = user.Email;
-            authModel.UserName = user.UserName;
+            authModel.Username = user.UserName;
             authModel.FirstName = user.FirstName;
             authModel.LastName = user.LastName;
             authModel.Roles = JwtToken.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => x.Value).ToList();
@@ -187,7 +186,7 @@ namespace CRM.Core.Services.Implementations
             authModel.RefreshToken = refreshToken.Token;
             authModel.RefreshTokenExpiration = refreshToken.ExpiresOn;
             authModel.Email = user.Email;
-            authModel.UserName = user.UserName;
+            authModel.Username = user.UserName;
             authModel.Roles = JwtToken.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => x.Value).ToList();
             return authModel;
 
@@ -210,7 +209,7 @@ namespace CRM.Core.Services.Implementations
 
         public async Task<ResultDto> RegisterAsync(RegisterDto dto)
         {
-            if (await _unitOfWork.UserManager.FindByNameAsync(dto.UserName) is not null)
+            if (await _unitOfWork.UserManager.FindByNameAsync(dto.Username) is not null)
                 return new ResultDto() { Errors = ["Username is already used"] };
             if (await _unitOfWork.UserManager.FindByEmailAsync(dto.Email) is not null)
                 return new ResultDto() { Errors = ["Email is already used"] };
@@ -218,7 +217,7 @@ namespace CRM.Core.Services.Implementations
             var user = new ApplicationUser
             {
                 Email = dto.Email,
-                UserName = dto.UserName,
+                UserName = dto.Username,
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
                 EmailConfirmed = false
@@ -302,7 +301,7 @@ namespace CRM.Core.Services.Implementations
                 authModel.AccessToken = token;
                 authModel.IsAuthenticated = true;
                 authModel.Email = user.Email;
-                authModel.UserName = user.UserName;
+                authModel.Username = user.UserName;
                 authModel.FirstName = user.FirstName;
                 authModel.LastName = user.LastName;
                 authModel.Roles = JwtToken.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => x.Value).ToList();
@@ -354,7 +353,7 @@ namespace CRM.Core.Services.Implementations
             authModel.AccessToken = token;
             authModel.IsAuthenticated = true;
             authModel.Email = user.Email;
-            authModel.UserName = user.UserName;
+            authModel.Username = user.UserName;
             authModel.FirstName = user.FirstName;
             authModel.LastName = user.LastName;
             authModel.Roles = JwtToken.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => x.Value).ToList();
