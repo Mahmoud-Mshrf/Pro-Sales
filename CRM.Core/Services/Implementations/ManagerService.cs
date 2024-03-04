@@ -1,6 +1,7 @@
 ﻿using CRM.Core.Dtos;
 using CRM.Core.Models;
 using CRM.Core.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -65,6 +66,22 @@ namespace CRM.Core.Services.Implementations
                 IsSuccess = true,
                 Message = "Interest added successfully"
             };
+        }
+        public async Task<List<UserViewModel>> GetAllUsers()
+        {
+            var users = await _unitOfWork.UserManager.Users.ToListAsync();
+
+            var userViewModels = users.Select(user => new UserViewModel
+            {
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                UserName = user.UserName,
+                Email = user.Email,
+                Roles = _unitOfWork.UserManager.GetRolesAsync(user).Result
+            }).ToList();
+
+            return userViewModels;
         }
     }
 }
