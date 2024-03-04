@@ -83,5 +83,10 @@ namespace CRM.Core.Services.Implementations
 
             return userViewModels;
         }
+        public List<string> GetAllRoles()
+        {
+            var roles = _unitOfWork.RoleManager.Roles.Select(x => x.Name).ToList();
+            return roles;
+        }
     }
 }
