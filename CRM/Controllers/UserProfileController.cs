@@ -43,10 +43,10 @@ namespace CRM.Controllers
             return Ok(result);
         }
         [HttpPut("update-email")]
-        public async Task<IActionResult> UpdateEmail([FromForm] string NewEmail )
+        public async Task<IActionResult> UpdateEmail([FromBody] EmailDto dto )
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
-            var result = await _userProfileService.UpdateEmailAsync(email, NewEmail);
+            var result = await _userProfileService.UpdateEmailAsync(email, dto.Email);
             if (!result.IsSuccess)
             {
                 return BadRequest(result);

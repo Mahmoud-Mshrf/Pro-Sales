@@ -132,13 +132,13 @@ namespace CRM.Controllers
 
         [HttpPost("forgot-password")]
         [AllowAnonymous]
-        public async Task<IActionResult> ForgotPassword([FromForm] string Email)
+        public async Task<IActionResult> ForgotPassword([FromBody] EmailDto dto)
         {
-            if (string.IsNullOrEmpty(Email))
+            if(!ModelState.IsValid)
             {
-                return NotFound(Email);
+                return BadRequest(ModelState);
             }
-            var result = await _authService.ForgotPasswordAsync(Email);
+            var result = await _authService.ForgotPasswordAsync(dto.Email);
             if (result.IsSuccess)
             {
                 return Ok(result);
