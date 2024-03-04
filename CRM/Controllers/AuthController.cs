@@ -1,6 +1,7 @@
 ﻿using CRM.Core.Dtos;
 using CRM.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -221,6 +222,13 @@ namespace CRM.Controllers
             }
             return BadRequest(result);
 
+        }
+        [AllowAnonymous]
+        [EnableCors("AllowAnyOrigin")] // Apply a different CORS policy for this endpoint
+        [HttpGet("test-endpoint")]
+        public IActionResult TestEndpoint()
+        {
+            return Ok("Test Endpoint");
         }
     }
 }

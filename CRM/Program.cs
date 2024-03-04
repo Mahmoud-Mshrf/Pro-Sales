@@ -86,8 +86,25 @@ namespace CRM
                 });
             });
             builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
-            builder.Services.AddCors();
+            //builder.Services.AddCors();
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowSpecificOrigins", builder =>
+                {
+                    builder.WithOrigins("http://localhost:3000", "http://localhost:3001", "http://localhost:3002")
+                           .AllowAnyHeader()
+                           .AllowAnyMethod()
+                           .AllowCredentials()
+                           .SetIsOriginAllowed((host) => true);// Allow any other origin, but handle in the controller
+                });
 
+                options.AddPolicy("AllowAnyOrigin", builder =>
+                {
+                    builder.AllowAnyOrigin()
+                           .AllowAnyMethod()
+                           .AllowAnyHeader();
+                });
+            });
             // Add Hangfire to the container
             builder.Services.AddHangfire(x => x.UseSqlServerStorage(builder.Configuration.GetConnectionString("HangfireConnection")));
             builder.Services.AddHangfireServer();
@@ -152,15 +169,16 @@ namespace CRM
             }
 
             app.UseHttpsRedirection();
-            app.UseCors(builder =>
-            {
-                builder.WithOrigins("http://localhost:3000","http://localhost:3001","http://localhost:3002")
-                       .AllowAnyHeader()
-                       .AllowAnyMethod()
-                       .AllowCredentials()
-                       .SetIsOriginAllowed(host=>true) // Allow any other origin, but handle in the controller
-                       .Build();
-            });
+            //app.UseCors(builder =>
+            //{
+            //    builder.WithOrigins("http://localhost:3000","http://localhost:3001","http://localhost:3002")
+            //           .AllowAnyHeader()
+            //           .AllowAnyMethod()
+            //           .AllowCredentials()
+            //           .SetIsOriginAllowed(host=>true) // Allow any other origin, but handle in the controller
+            //           .Build();
+            //});
+            app.UseCors("AllowSpecificOrigins");
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseHangfireDashboard("/HangfireDashboard");
