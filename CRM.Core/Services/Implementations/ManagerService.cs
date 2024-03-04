@@ -88,5 +88,27 @@ namespace CRM.Core.Services.Implementations
             var roles = _unitOfWork.RoleManager.Roles.Select(x => x.Name).ToList();
             return roles;
         }
+        public async Task<UserRolesDTO> ViewUserRoles(string userId)
+        {
+            var user = await _unitOfWork.UserManager.FindByIdAsync(userId);
+            var userRolesdto = new UserRolesDTO();
+            if (user is null)
+            {
+                userRolesdto.ErrorMessage = "No user with this id";
+                return userRolesdto;
+            }
+            var roles = await _unitOfWork.RoleManager.Roles.ToListAsync();
+
+            userRolesdto.ErrorMessage = string.Empty;
+            userRolesdto.Id = user.Id;
+            userRolesdto.UserName = user.UserName;
+            userRolesdto.Roles = roles.Select(r => new RoleModel
+            {
+                Id = r.Id,
+                Name = r.Name,
+                IsSelected = _unitOfWork.UserManager.IsInRoleAsync(user, r.Name).Result
+            });
+            return userRolesdto;
+        }
     }
 }
