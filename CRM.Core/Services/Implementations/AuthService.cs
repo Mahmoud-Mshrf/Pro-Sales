@@ -41,7 +41,7 @@ namespace CRM.Core.Services.Implementations
             var user = await _unitOfWork.UserManager.FindByEmailAsync(dto.Email);
             if (user is null || !await _unitOfWork.UserManager.CheckPasswordAsync(user, dto.Password))
             {
-                authModel.Errors = ["Invalid Credintials"];
+                authModel.Errors = ["Please check your username (or email) and password and try again."];
                 return authModel;
             }
             if (!user.EmailConfirmed)
@@ -100,7 +100,7 @@ namespace CRM.Core.Services.Implementations
             issuer: _jwt.Issuer,
             audience: _jwt.Audience,
             claims: claims,
-            expires: DateTime.Now.AddDays(_jwt.DurationInDays),
+            expires: DateTime.UtcNow.AddDays(_jwt.DurationInDays),
             signingCredentials: credentials
             );
             return token;
@@ -114,8 +114,8 @@ namespace CRM.Core.Services.Implementations
             return new RefreshToken
             {
                 Token = Convert.ToBase64String(randomNumber),
-                ExpiresOn = DateTime.Now.AddDays(10),
-                CreatedOn = DateTime.Now
+                ExpiresOn = DateTime.UtcNow.AddDays(10),
+                CreatedOn = DateTime.UtcNow
             };
         }
 
@@ -136,7 +136,7 @@ namespace CRM.Core.Services.Implementations
         //        authModel.Errors = ["Inactive Token"];
         //        return authModel;
         //    }
-        //    refreshToken.RevokedOn = DateTime.Now;
+        //    refreshToken.RevokedOn = DateTime.UtcNow;
 
         //    var newRefreshToken = GenerateRefreshToken();
         //    user.RefreshTokens.Add(newRefreshToken);
