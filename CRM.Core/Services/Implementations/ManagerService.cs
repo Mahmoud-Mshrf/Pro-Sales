@@ -31,7 +31,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = "Source already exists"
+                    Errors = ["Source already exists"]
                 };
             }
             var result = await _unitOfWork.Sources.AddAsync(interest);
@@ -55,7 +55,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = "Interest already exists"
+                    Errors = ["Interest already exists"]
                 };
             }
             var result = await _unitOfWork.Interests.AddAsync(interest);

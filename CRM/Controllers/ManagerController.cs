@@ -1,4 +1,5 @@
-﻿using CRM.Core.Services.Interfaces;
+﻿using CRM.Core.Dtos;
+using CRM.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,22 +17,22 @@ namespace CRM.Controllers
         }
 
         [HttpPost("add-interest")]
-        public async Task<IActionResult> AddInterest([FromForm] string name)
+        public async Task<IActionResult> AddInterest([FromBody] NameDto dto)
         {
-            var result = await _managerService.AddInterest(name);
+            var result = await _managerService.AddInterest(dto.Name);
             if (!result.IsSuccess)
             {
-                return BadRequest(result.Message);
+                return BadRequest(result);
             }
             return Ok(result);
         }
         [HttpPost("add-source")]
-        public async Task<IActionResult> AddSource([FromForm] string name)
+        public async Task<IActionResult> AddSource([FromBody] NameDto dto)
         {
-            var result = await _managerService.AddSource(name);
+            var result = await _managerService.AddSource(dto.Name);
             if (!result.IsSuccess)
             {
-                return BadRequest(result.Message);
+                return BadRequest(result);
             }
             return Ok(result);
         }
