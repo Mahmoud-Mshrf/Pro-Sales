@@ -104,8 +104,6 @@ namespace CRM.Controllers
                 var errors = new { errors = result.Errors };
                 return BadRequest(errors);
             }
-                
-
             setRefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
             return Ok(result);
         }

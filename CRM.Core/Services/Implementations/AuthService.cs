@@ -120,6 +120,42 @@ namespace CRM.Core.Services.Implementations
         }
 
 
+        //public async Task<AuthModel> RefreshTokenAsync(string token)// this method is used to revoke the current refresh token and return a new refresh token 
+        //{
+        //    var authModel = new AuthModel();
+
+        //    var user = await _unitOfWork.UserManager.Users.SingleOrDefaultAsync(u => u.RefreshTokens.Any(t => t.Token == token));
+        //    if (user is null)
+        //    {
+        //        authModel.Errors = ["Invalid Token"];
+        //        return authModel;
+        //    }
+        //    var refreshToken = user.RefreshTokens.Single(x => x.Token == token);
+        //    if (!refreshToken.IsActive)
+        //    {
+        //        authModel.Errors = ["Inactive Token"];
+        //        return authModel;
+        //    }
+        //    refreshToken.RevokedOn = DateTime.Now;
+
+        //    var newRefreshToken = GenerateRefreshToken();
+        //    user.RefreshTokens.Add(newRefreshToken);
+        //    await _unitOfWork.UserManager.UpdateAsync(user);
+
+        //    var JwtToken = await CreateToken(user);
+        //    authModel.AccessToken = new JwtSecurityTokenHandler().WriteToken(JwtToken);
+        //    authModel.IsAuthenticated = true;
+        //    authModel.FirstName = user.FirstName;
+        //    authModel.LastName = user.LastName;
+        //    authModel.RefreshToken = newRefreshToken.Token;
+        //    authModel.RefreshTokenExpiration = newRefreshToken.ExpiresOn;
+        //    authModel.Email = user.Email;
+        //    authModel.UserName = user.UserName;
+        //    authModel.Roles = JwtToken.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => x.Value).ToList();
+        //    return authModel;
+
+        //}
+
         public async Task<AuthModel> RefreshTokenAsync(string token)// this method is used to revoke the current refresh token and return a new refresh token 
         {
             var authModel = new AuthModel();
@@ -127,19 +163,20 @@ namespace CRM.Core.Services.Implementations
             var user = await _unitOfWork.UserManager.Users.SingleOrDefaultAsync(u => u.RefreshTokens.Any(t => t.Token == token));
             if (user is null)
             {
-                authModel.Errors = ["Invalid Token"];
+                authModel.Errors = ["Invalid token"];
                 return authModel;
             }
             var refreshToken = user.RefreshTokens.Single(x => x.Token == token);
             if (!refreshToken.IsActive)
             {
-                authModel.Errors = ["Inactive Token"];
+                authModel.Errors = ["Inactive token"];
                 return authModel;
             }
-            refreshToken.RevokedOn = DateTime.Now;
+            //refreshToken.RevokedOn = DateTime.UtcNow;
 
-            var newRefreshToken = GenerateRefreshToken();
-            user.RefreshTokens.Add(newRefreshToken);
+            //var newRefreshToken = GenerateRefreshToken();
+            //user.RefreshTokens.Remove(refreshToken);
+            //user.RefreshTokens.Add(newRefreshToken);
             await _unitOfWork.UserManager.UpdateAsync(user);
 
             var JwtToken = await CreateToken(user);
@@ -147,8 +184,8 @@ namespace CRM.Core.Services.Implementations
             authModel.IsAuthenticated = true;
             authModel.FirstName = user.FirstName;
             authModel.LastName = user.LastName;
-            authModel.RefreshToken = newRefreshToken.Token;
-            authModel.RefreshTokenExpiration = newRefreshToken.ExpiresOn;
+            authModel.RefreshToken = refreshToken.Token;
+            authModel.RefreshTokenExpiration = refreshToken.ExpiresOn;
             authModel.Email = user.Email;
             authModel.UserName = user.UserName;
             authModel.Roles = JwtToken.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => x.Value).ToList();
