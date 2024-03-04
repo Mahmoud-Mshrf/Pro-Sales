@@ -36,12 +36,11 @@ namespace CRM.Core.Services.Implementations
         // This method is used to generate a new Access Token for the user (will be called by Login Endpoint)
         public async Task<AuthModel> GetTokenAsync(TokenRequestDto dto)
         {
-
             var authModel = new AuthModel();
-            var user = await _unitOfWork.UserManager.FindByEmailAsync(dto.Email);
+            var user = await _unitOfWork.UserManager.FindByEmailAsync(dto.LoginIdentifier) ?? await _unitOfWork.UserManager.FindByNameAsync(dto.LoginIdentifier);
             if (user is null || !await _unitOfWork.UserManager.CheckPasswordAsync(user, dto.Password))
             {
-                authModel.Errors = ["Invalid Credintials"];
+                authModel.Errors = ["Please check your username (or email) and password and try again."];
                 return authModel;
             }
             if (!user.EmailConfirmed)
@@ -54,7 +53,7 @@ namespace CRM.Core.Services.Implementations
             authModel.AccessToken = token;
             authModel.IsAuthenticated = true;
             authModel.Email = user.Email;
-            authModel.UserName = user.UserName;
+            authModel.Username = user.UserName;
             authModel.FirstName = user.FirstName;
             authModel.LastName = user.LastName;
             authModel.Roles = JwtToken.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => x.Value).ToList();
@@ -100,7 +99,7 @@ namespace CRM.Core.Services.Implementations
             issuer: _jwt.Issuer,
             audience: _jwt.Audience,
             claims: claims,
-            expires: DateTime.Now.AddDays(_jwt.DurationInDays),
+            expires: DateTime.UtcNow.AddSeconds(_jwt.DurationInDays),
             signingCredentials: credentials
             );
             return token;
@@ -114,11 +113,47 @@ namespace CRM.Core.Services.Implementations
             return new RefreshToken
             {
                 Token = Convert.ToBase64String(randomNumber),
-                ExpiresOn = DateTime.Now.AddDays(10),
-                CreatedOn = DateTime.Now
+                ExpiresOn = DateTime.UtcNow.AddMinutes(1.5),
+                CreatedOn = DateTime.UtcNow
             };
         }
 
+
+        //public async Task<AuthModel> RefreshTokenAsync(string token)// this method is used to revoke the current refresh token and return a new refresh token 
+        //{
+        //    var authModel = new AuthModel();
+
+        //    var user = await _unitOfWork.UserManager.Users.SingleOrDefaultAsync(u => u.RefreshTokens.Any(t => t.Token == token));
+        //    if (user is null)
+        //    {
+        //        authModel.Errors = ["Invalid Token"];
+        //        return authModel;
+        //    }
+        //    var refreshToken = user.RefreshTokens.Single(x => x.Token == token);
+        //    if (!refreshToken.IsActive)
+        //    {
+        //        authModel.Errors = ["Inactive Token"];
+        //        return authModel;
+        //    }
+        //    refreshToken.RevokedOn = DateTime.UtcNow;
+
+        //    var newRefreshToken = GenerateRefreshToken();
+        //    user.RefreshTokens.Add(newRefreshToken);
+        //    await _unitOfWork.UserManager.UpdateAsync(user);
+
+        //    var JwtToken = await CreateToken(user);
+        //    authModel.AccessToken = new JwtSecurityTokenHandler().WriteToken(JwtToken);
+        //    authModel.IsAuthenticated = true;
+        //    authModel.FirstName = user.FirstName;
+        //    authModel.LastName = user.LastName;
+        //    authModel.RefreshToken = newRefreshToken.Token;
+        //    authModel.RefreshTokenExpiration = newRefreshToken.ExpiresOn;
+        //    authModel.Email = user.Email;
+        //    authModel.UserName = user.UserName;
+        //    authModel.Roles = JwtToken.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => x.Value).ToList();
+        //    return authModel;
+
+        //}
 
         public async Task<AuthModel> RefreshTokenAsync(string token)// this method is used to revoke the current refresh token and return a new refresh token 
         {
@@ -127,19 +162,20 @@ namespace CRM.Core.Services.Implementations
             var user = await _unitOfWork.UserManager.Users.SingleOrDefaultAsync(u => u.RefreshTokens.Any(t => t.Token == token));
             if (user is null)
             {
-                authModel.Errors = ["Invalid Token"];
+                authModel.Errors = ["Invalid token"];
                 return authModel;
             }
             var refreshToken = user.RefreshTokens.Single(x => x.Token == token);
             if (!refreshToken.IsActive)
             {
-                authModel.Errors = ["Inactive Token"];
+                authModel.Errors = ["Inactive token"];
                 return authModel;
             }
-            refreshToken.RevokedOn = DateTime.Now;
+            //refreshToken.RevokedOn = DateTime.UtcNow;
 
-            var newRefreshToken = GenerateRefreshToken();
-            user.RefreshTokens.Add(newRefreshToken);
+            //var newRefreshToken = GenerateRefreshToken();
+            //user.RefreshTokens.Remove(refreshToken);
+            //user.RefreshTokens.Add(newRefreshToken);
             await _unitOfWork.UserManager.UpdateAsync(user);
 
             var JwtToken = await CreateToken(user);
@@ -147,10 +183,10 @@ namespace CRM.Core.Services.Implementations
             authModel.IsAuthenticated = true;
             authModel.FirstName = user.FirstName;
             authModel.LastName = user.LastName;
-            authModel.RefreshToken = newRefreshToken.Token;
-            authModel.RefreshTokenExpiration = newRefreshToken.ExpiresOn;
+            authModel.RefreshToken = refreshToken.Token;
+            authModel.RefreshTokenExpiration = refreshToken.ExpiresOn;
             authModel.Email = user.Email;
-            authModel.UserName = user.UserName;
+            authModel.Username = user.UserName;
             authModel.Roles = JwtToken.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => x.Value).ToList();
             return authModel;
 
@@ -173,15 +209,15 @@ namespace CRM.Core.Services.Implementations
 
         public async Task<ResultDto> RegisterAsync(RegisterDto dto)
         {
+            if (await _unitOfWork.UserManager.FindByNameAsync(dto.Username) is not null)
+                return new ResultDto() { Errors = ["Username is already used"] };
             if (await _unitOfWork.UserManager.FindByEmailAsync(dto.Email) is not null)
-                return new ResultDto() { Errors = ["Email is already registered"] };
-            if (await _unitOfWork.UserManager.FindByNameAsync(dto.UserName) is not null)
-                return new ResultDto() { Errors = ["UserName is already registered"] };
+                return new ResultDto() { Errors = ["Email is already used"] };
 
             var user = new ApplicationUser
             {
                 Email = dto.Email,
-                UserName = dto.UserName,
+                UserName = dto.Username,
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
                 EmailConfirmed = false
@@ -265,7 +301,7 @@ namespace CRM.Core.Services.Implementations
                 authModel.AccessToken = token;
                 authModel.IsAuthenticated = true;
                 authModel.Email = user.Email;
-                authModel.UserName = user.UserName;
+                authModel.Username = user.UserName;
                 authModel.FirstName = user.FirstName;
                 authModel.LastName = user.LastName;
                 authModel.Roles = JwtToken.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => x.Value).ToList();
@@ -317,7 +353,7 @@ namespace CRM.Core.Services.Implementations
             authModel.AccessToken = token;
             authModel.IsAuthenticated = true;
             authModel.Email = user.Email;
-            authModel.UserName = user.UserName;
+            authModel.Username = user.UserName;
             authModel.FirstName = user.FirstName;
             authModel.LastName = user.LastName;
             authModel.Roles = JwtToken.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => x.Value).ToList();
@@ -352,7 +388,7 @@ namespace CRM.Core.Services.Implementations
 
             Random rnd = new Random();
             var randomNum = (rnd.Next(100000, 999999)).ToString();
-            string message = "Hi " + user.UserName + " Your Password verification code is: " + randomNum;
+            string message = "Hi " + user.UserName + " Your password verification code is: " + randomNum;
             var result = await _mailingService.SendEmailAsync(user.Email, "Password Reset Code ", message, null);
             if (result)
             {

@@ -19,7 +19,7 @@ namespace CRM.Controllers
         }
 
         // Will be used after adding Manager module
-        [HttpGet("[action]")]
+        [HttpGet("get-all-sales")]
         public async Task<IActionResult> GetAllSalesRepresentatives()
         {
             var result = await _moderatorService.GetAllSalesRepresentatives();
@@ -30,7 +30,7 @@ namespace CRM.Controllers
             return Ok(result.Users);
         }
 
-        [HttpPost("[action]")]
+        [HttpPost("add-customer")]
         public async Task<IActionResult> AddCustomer([FromBody] CustomerDto customerDto)
         {
             if (!ModelState.IsValid)
@@ -45,7 +45,7 @@ namespace CRM.Controllers
             }
             return Ok(result);
         }
-        [HttpPut("[action]")]
+        [HttpPut("update-customer")]
         public async Task<IActionResult> UpdateCustomer([FromBody] CustomerDto customerDto,int CustomerId)
         {
             if (!ModelState.IsValid)
@@ -61,22 +61,28 @@ namespace CRM.Controllers
             return Ok(result);
         }
 
-        //[HttpGet("[action]")]
-        //public async Task<IActionResult> GetAllSources()
-        //{
-        //    var result = await _moderatorService.GetAllSources();
-        //    if(!result.IsSuccess)
-        //        return BadRequest(result.Message);
-        //    return Ok(result.Sources);
-        //}
-        //[HttpGet("[action]")]
-        //public async Task<IActionResult> GetAllInterests()
-        //{
-        //    var result = await _moderatorService.GetAllInterests();
-        //    if (!result.IsSuccess)
-        //        return BadRequest(result.Message);
-        //    return Ok(result.Interests);
-        //}
-
+        [HttpGet("get-all-customers")]
+        public async Task<IActionResult> GetAllCustomers()
+        {
+            var moderatorEmail = User.FindFirstValue(ClaimTypes.Email);
+            var result = await _moderatorService.GetAllCustomers(moderatorEmail);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result.Customers);
+        }
+        [HttpGet("get-customer/{CustomerId}")]
+        public async Task<IActionResult> GetCustomer(int CustomerId)
+        {
+            var moderatorEmail = User.FindFirstValue(ClaimTypes.Email);
+            var result = await _moderatorService.GetCustomer(CustomerId, moderatorEmail);
+            if (!result.IsSuccess)
+            {
+                var errors = new { errors = result.Errors };
+                return BadRequest(errors);
+            }
+            return Ok(result);
+        }
     }
 }

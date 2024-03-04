@@ -48,6 +48,70 @@ namespace CRM.Core.Services.Implementations
             };
         }
 
+        public async Task<ReturnCustomerDto> GetCustomer(int customerId, string moderatorEmail)
+        {
+            var moderator = await _unitOfWork.UserManager.FindByEmailAsync(moderatorEmail);
+            var customerDto = new ReturnCustomerDto();
+            var customer = await _unitOfWork.Customers.FindAsync(c => c.CustomerId == customerId && c.MarketingModerator == moderator, ["Interests", "Source"]);
+            if (customer == null)
+            {
+                customerDto.IsSuccess = false;
+                customerDto.Errors = ["Customer not found"];
+                return customerDto;
+            }
+            customerDto.IsSuccess = true;
+            customerDto.FirstName = customer.FirstName;
+            customerDto.LastName = customer.LastName;
+            customerDto.Email = customer.Email;
+            customerDto.Phone = customer.Phone;
+            customerDto.City = customer.City;
+            customerDto.Age = customer.Age;
+            customerDto.Gender = customer.Gender;
+            customerDto.SalesRepresntativeId = customer.SalesRepresntative.Id;
+            customerDto.sourceId = customer.Source.SourceId;
+            customerDto.UserInterests = customer.Interests.Select(i => new UserInterestDto { Id = i.InterestID, Name = i.InterestName }).ToList();
+            return customerDto;
+        }
+
+        public async Task<ReturnAllCustomersDto> GetAllCustomers(string moderatorEmail)
+        {
+            var moderator = await _unitOfWork.UserManager.FindByEmailAsync(moderatorEmail);
+            var customers = await _unitOfWork.Customers.GetAllAsync(c => c.MarketingModerator == moderator, ["Interests", "Source"]);
+            if (customers == null)
+            {
+                return new ReturnAllCustomersDto
+                {
+                    IsSuccess = false,
+                    Errors = ["No customers found"]
+                };
+            }
+            var customersDto = new List<ReturnCustomerDto>();
+            foreach (var customer in customers)
+            {
+                var customerDto = new ReturnCustomerDto
+                {
+                    CustomerId = customer.CustomerId,
+                    FirstName = customer.FirstName,
+                    LastName = customer.LastName,
+                    Email = customer.Email,
+                    Phone = customer.Phone,
+                    City = customer.City,
+                    Age = customer.Age,
+                    Gender = customer.Gender,
+                    SalesRepresntativeId = customer.SalesRepresntative.Id,
+                    sourceId = customer.Source.SourceId,
+                    UserInterests = customer.Interests.Select(i => new UserInterestDto { Id = i.InterestID, Name = i.InterestName }).ToList()
+                };
+                customersDto.Add(customerDto);
+            }
+            return new ReturnAllCustomersDto
+            {
+                IsSuccess = true,
+                Customers = customersDto
+            };
+
+        }
+
         public async Task<ResultDto> AddCustomer(CustomerDto customerDto,string marketingModeratorEmail)
         {
             var customer = new Customer();

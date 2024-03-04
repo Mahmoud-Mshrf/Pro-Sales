@@ -15,7 +15,7 @@ namespace CRM.Controllers
         {
             _sharedService = sharedService;
         }
-        [HttpGet("[action]")]
+        [HttpGet("get-all-interests")]
         public async Task<IActionResult> GetAllInterests()
         {
             var result = await _sharedService.GetAllInterests();
@@ -25,7 +25,7 @@ namespace CRM.Controllers
             }
             return Ok(result.Interests);
         }
-        [HttpGet("[action]")]
+        [HttpGet("get-all-sources")]
         public async Task<IActionResult> GetAllSources()
         {
             var result = await _sharedService.GetAllSources();

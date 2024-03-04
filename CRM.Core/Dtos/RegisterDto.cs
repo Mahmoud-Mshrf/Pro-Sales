@@ -14,7 +14,7 @@ namespace CRM.Core.Dtos
         public string LastName { get; set; }
         [ValidationErrorOrder(3)]
         [Required, StringLength(50)]
-        public string UserName { get; set; }
+        public string Username { get; set; }
         [ValidationErrorOrder(4)]
         [Required, StringLength(128), EmailAddress]
         public string Email { get; set; }

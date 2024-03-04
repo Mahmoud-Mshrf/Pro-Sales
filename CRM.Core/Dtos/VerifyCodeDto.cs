@@ -9,5 +9,7 @@ namespace CRM.Core.Dtos
         public string Email { get; set; }
         [Required]
         public string Code { get; set; }
+        [Required]
+        public string Purpose { get; set; }
     }
 }
