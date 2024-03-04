@@ -44,21 +44,21 @@ namespace CRM.Controllers
 
 
         
-        [HttpPost("confirm-email")]
-        public async Task<IActionResult> ConfirmEmail(VerifyCodeDto codeDto)
-        {
-            var result = await _authService.ConfirmEmailAsync(codeDto);
-            if (!result.IsAuthenticated)
-            {
-                var errors = new { errors = result.Errors };
-                return BadRequest(errors);
-            }
-            if (!string.IsNullOrEmpty(result.RefreshToken))
-            {
-                setRefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
-            }
-            return Ok(result);
-        }
+        //[HttpPost("confirm-email")]
+        //public async Task<IActionResult> ConfirmEmail(VerifyCodeDto codeDto)
+        //{
+        //    var result = await _authService.ConfirmEmailAsync(codeDto);
+        //    if (!result.IsAuthenticated)
+        //    {
+        //        var errors = new { errors = result.Errors };
+        //        return BadRequest(errors);
+        //    }
+        //    if (!string.IsNullOrEmpty(result.RefreshToken))
+        //    {
+        //        setRefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
+        //    }
+        //    return Ok(result);
+        //}
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] TokenRequestDto dto)
