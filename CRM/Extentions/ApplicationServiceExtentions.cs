@@ -15,6 +15,7 @@ namespace CRM.Extentions
             services.AddScoped<IModeratorService, ModeratorService>(); // Add IModeratorService to the container
             services.AddScoped<ISalesRepresntative, SalesService>();
             services.AddScoped<ISharedService, SharedService>();
+            services.AddScoped<IManagerService, ManagerService>();
 
             return services;
         }
