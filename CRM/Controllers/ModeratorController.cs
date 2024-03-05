@@ -7,7 +7,7 @@ using System.Security.Claims;
 
 namespace CRM.Controllers
 {
-    [Authorize] // later will be [Authorize(Roles ="MarketingModerator")]
+    [Authorize(Roles ="Marketing Moderator")] // later will be [Authorize(Roles ="MarketingModerator")]
     [Route("api/[controller]")]
     [ApiController]
     public class ModeratorController : ControllerBase

@@ -167,7 +167,6 @@ namespace CRM
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
             app.UseHttpsRedirection();
             //app.UseCors(builder =>
             //{
