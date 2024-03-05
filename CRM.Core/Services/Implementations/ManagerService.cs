@@ -76,7 +76,7 @@ namespace CRM.Core.Services.Implementations
                 Id = user.Id,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
-                UserName = user.UserName,
+                Username = user.UserName,
                 Email = user.Email,
                 Roles = _unitOfWork.UserManager.GetRolesAsync(user).Result
             }).ToList();
@@ -102,7 +102,7 @@ namespace CRM.Core.Services.Implementations
 
             returnUserRolesdto.Errors = null;
             returnUserRolesdto.Id = user.Id;
-            returnUserRolesdto.UserName = user.UserName;
+            returnUserRolesdto.Username = user.UserName;
             returnUserRolesdto.Roles = roles.Select(r => new RoleModel
             {
                 Id = r.Id,
@@ -136,7 +136,7 @@ namespace CRM.Core.Services.Implementations
             var UserRolesDto = new ReturnUserRolesDto
             {
                 Id = dto.Id,
-                UserName = dto.UserName,
+                Username = dto.Username,
                 Errors = null,
                 Roles = roles.Select(r => new RoleModel
                 {

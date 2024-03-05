@@ -19,6 +19,6 @@ namespace CRM.Core.Dtos
         [EmailAddress]
         public string Email { get; set; }
         [Required]
-        public string UserName { get; set; }
+        public string Username { get; set; }
     }
 }

@@ -21,7 +21,7 @@ namespace CRM.Core.Services.Implementations
          // Will be used after adding Manager module
         public async Task<ReturnUsersDto> GetAllSalesRepresentatives()
         {
-            var salesReps = await _unitOfWork.UserManager.GetUsersInRoleAsync("SalesRepresentative");
+            var salesReps = await _unitOfWork.UserManager.GetUsersInRoleAsync("Sales Representative");
             if (salesReps == null)
             {
                 return new ReturnUsersDto
