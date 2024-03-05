@@ -12,7 +12,5 @@ namespace CRM.Core.Dtos
         public string Id { get; set; }
         public string UserName { get; set; }
         public IEnumerable<RoleModel> Roles { get; set; }
-        [JsonIgnore(Condition =JsonIgnoreCondition.WhenWritingNull)]
-        public string[] Errors { get; set; }
     }
 }

@@ -37,6 +37,12 @@ namespace CRM.Controllers
             }
             return Ok(result);
         }
+        [HttpGet("get-all-roles")]
+        public IActionResult GetAllRoles()
+        {
+            var result = _managerService.GetAllRoles();
+            return Ok(result);
+        }
         [HttpGet("get-all-users")]
         public async Task<IActionResult> GetAllUsers()
         {
