@@ -55,7 +55,7 @@ namespace CRM.Controllers
         public async Task<IActionResult> ViewUserRoles(string userId)
         {
             var result = await _managerService.ViewUserRoles(userId);
-            if(result.Errors != null)
+            if(!result.IsSucces)
             {
                 var errors = new { errors = result.Errors };
                 return BadRequest(errors);
@@ -71,7 +71,7 @@ namespace CRM.Controllers
             }
 
             var result = await _managerService.ManageUserRoles(dto);
-            if (result.Errors != null)
+            if(!result.IsSucces)
             {
                 var errors = new { errors = result.Errors };
                 return BadRequest(errors);

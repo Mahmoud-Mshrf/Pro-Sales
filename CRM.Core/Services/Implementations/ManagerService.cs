@@ -99,13 +99,13 @@ namespace CRM.Core.Services.Implementations
                 return returnUserRolesdto;
             }
             var roles = await _unitOfWork.RoleManager.Roles.ToListAsync();
-
+            returnUserRolesdto.IsSucces = true;
             returnUserRolesdto.Errors = null;
             returnUserRolesdto.Id = user.Id;
-            returnUserRolesdto.Username = user.UserName;
+            //returnUserRolesdto.Username = user.UserName;
             returnUserRolesdto.Roles = roles.Select(r => new RoleModel
             {
-                Id = r.Id,
+                //Id = r.Id,
                 Name = r.Name,
                 IsSelected = _unitOfWork.UserManager.IsInRoleAsync(user, r.Name).Result
             });
@@ -118,10 +118,20 @@ namespace CRM.Core.Services.Implementations
 
             if (user is null)
             {
+                returnUserRolesdto.IsSucces = false;
                 returnUserRolesdto.Errors = ["User not found"];
                 return returnUserRolesdto;
             }
-
+            foreach(var role in dto.Roles)
+            {
+                if(!await _unitOfWork.RoleManager.RoleExistsAsync(role.Name))
+                {
+                    returnUserRolesdto.IsSucces = false;
+                    returnUserRolesdto.Errors = [$"{role.Name} role not found"];
+                    return returnUserRolesdto;
+                }
+            }
+            returnUserRolesdto.IsSucces = true;
             var UserRoles = await _unitOfWork.UserManager.GetRolesAsync(user);
             foreach (var role in dto.Roles)
             {
@@ -132,15 +142,14 @@ namespace CRM.Core.Services.Implementations
             }
 
             var roles = await _unitOfWork.RoleManager.Roles.ToListAsync();
-
             var UserRolesDto = new ReturnUserRolesDto
             {
                 Id = dto.Id,
-                Username = dto.Username,
+                //Username = dto.Username,
                 Errors = null,
                 Roles = roles.Select(r => new RoleModel
                 {
-                    Id = r.Id,
+                    //Id = r.Id,
                     Name = r.Name,
                     IsSelected = _unitOfWork.UserManager.IsInRoleAsync(user, r.Name).Result
                 })

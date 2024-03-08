@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace CRM.Core.Dtos
 {
-    public class RoleModel
+    public class UpdateUsernameDto
     {
-        public string Name { get; set; }
-        //public string Id { get; set; }
-        public bool IsSelected { get; set; }
+        [Required, MaxLength(56)]
+        public string Username { get; set; }
     }
 }
