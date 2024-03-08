@@ -13,6 +13,7 @@ namespace CRM.Core.Services.Interfaces
         Task<ResultDto> UpdateNameAsync(string email, UpdateNameDto dto);
         Task<ResultDto> UpdateEmailAsync(string userName, string newEmail);
         Task<ResultDto> UpdatePasswordAsync(string email, UpdatePasswordDto dto);
+        Task<ResultDto> UpdateUsername(string email, string username);
 
 
     }

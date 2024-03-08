@@ -52,6 +52,17 @@ namespace CRM.Controllers
             }
             return Ok(result);
         }
+        [HttpPut("update-username")]
+        public async Task<IActionResult> UpdateUsername([FromBody] UpdateUsernameDto dto)
+        {
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var result = await _userProfileService.UpdateUsername(email, dto.Username);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
         
         //[AllowAnonymous]
         //[HttpPost("confirm-new-email")]

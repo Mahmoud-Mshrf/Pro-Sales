@@ -118,6 +118,7 @@ namespace CRM.Core.Services.Implementations
 
             if (user is null)
             {
+                returnUserRolesdto.IsSucces = false;
                 returnUserRolesdto.Errors = ["User not found"];
                 return returnUserRolesdto;
             }

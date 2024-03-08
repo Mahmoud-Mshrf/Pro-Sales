@@ -71,7 +71,7 @@ namespace CRM.Controllers
             }
 
             var result = await _managerService.ManageUserRoles(dto);
-            if (result.Errors != null)
+            if(!result.IsSucces)
             {
                 var errors = new { errors = result.Errors };
                 return BadRequest(errors);

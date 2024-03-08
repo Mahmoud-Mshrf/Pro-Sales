@@ -62,6 +62,33 @@ namespace CRM.Core.Services.Implementations
 
             };
         }
+        public async Task<ResultDto> UpdateUsername(string email, string username)
+        {
+            var user = await _unitOfWork.UserManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                return new ResultDto
+                {
+                    IsSuccess = false,
+                    Errors = ["User not found"]
+                };
+            }
+            user.UserName = username;
+            var result = await _unitOfWork.UserManager.UpdateAsync(user);
+            if (result.Succeeded)
+            {
+                return new ResultDto
+                {
+                    IsSuccess = true,
+                    Message = "Username updated successfully"
+                };
+            }
+            return new ResultDto
+            {
+                IsSuccess = false,
+                Errors = ["Something wrong, username was not updated"]
+            };
+        }
         public async Task<ResultDto> UpdatePasswordAsync(string email, UpdatePasswordDto dto)
         {
             var user = await _unitOfWork.UserManager.FindByEmailAsync(email);
