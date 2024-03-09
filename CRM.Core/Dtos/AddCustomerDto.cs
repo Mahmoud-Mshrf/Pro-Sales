@@ -18,13 +18,12 @@ namespace CRM.Core.Dtos
             [MaxLength(50)]
             public string LastName { get; set; }
 
-            [Phone]
+            [Phone][Required]
             public string Phone { get; set; }
 
             [EmailAddress]
             public string Email { get; set; }
 
-            [Range(18, 100)]
             public int Age { get; set; }
 
             [EnumDataType(typeof(Gender))]

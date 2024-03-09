@@ -20,12 +20,11 @@ namespace CRM.Core.Dtos
         public string LastName { get; set; }
 
         [Phone]
+        [Required]
         public string Phone { get; set; }
 
         [EmailAddress]
         public string Email { get; set; }
-
-        [Range(18, 100)]
         public int Age { get; set; }
 
         [EnumDataType(typeof(Gender))]
