@@ -174,8 +174,10 @@ namespace CRM.Core.Services.Implementations
                     Errors = ["Marketing Moderator not found"]
                 };
             }
-            var source = await _unitOfWork.Sources.FindAsync(x=>x.SourceName==customerDto.sourceName);
-            if(source == null)
+            //var source = await _unitOfWork.Sources.FindAsync(x=>x.SourceName==customerDto.sourceName);
+            var source = await _unitOfWork.Sources.FindAsync(x =>x.SourceName.ToLower() == customerDto.sourceName.ToLower());
+
+            if (source == null)
             {
                 return new ResultDto
                 {
@@ -185,7 +187,7 @@ namespace CRM.Core.Services.Implementations
             }
             foreach (var interestt in customerDto.Interests)
             {
-                var interest = await _unitOfWork.Interests.FindAsync(x => x.InterestName == interestt);
+                var interest = await _unitOfWork.Interests.FindAsync(x => x.InterestName.ToLower()== interestt.ToLower());
                 if (interest == null)
                 {
                     return new ResultDto
@@ -248,7 +250,8 @@ namespace CRM.Core.Services.Implementations
                     Errors = ["Sales Representative not found"]
                 };
             }
-            var source = await _unitOfWork.Sources.FindAsync(x => x.SourceName == customerDto.sourceName);
+            //var source = await _unitOfWork.Sources.FindAsync(x => x.SourceName == customerDto.sourceName);
+            var source = await _unitOfWork.Sources.FindAsync(x => x.SourceName.ToLower() == customerDto.sourceName.ToLower());
             if (source == null)
             {
                 return new ResultDto
@@ -260,7 +263,8 @@ namespace CRM.Core.Services.Implementations
             //var interest = await _unitOfWork.Interests.GetAllAsync(customerDto.);
             foreach(var interestt in customerDto.UserInterests)
             {
-                var interest = await _unitOfWork.Interests.FindAsync(x => x.InterestName == interestt.Name);
+                //var interest = await _unitOfWork.Interests.FindAsync(x => x.InterestName == interestt.Name);
+                var interest = await _unitOfWork.Interests.FindAsync(x => x.InterestName.ToLower() == interestt.Name.ToLower());
                 if (interest == null)
                 {
                     return new ResultDto

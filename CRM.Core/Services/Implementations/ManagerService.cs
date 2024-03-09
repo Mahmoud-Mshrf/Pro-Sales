@@ -27,7 +27,7 @@ namespace CRM.Core.Services.Implementations
                 SourceName = name
             };
             var sources = await _unitOfWork.Sources.GetAllAsync();
-            if (sources.Any(sources => sources.SourceName == name))
+            if (sources.Any(sources => sources.SourceName.ToLower() == name.ToLower()))
             {
                 return new ResultDto
                 {
@@ -51,7 +51,7 @@ namespace CRM.Core.Services.Implementations
                 InterestName = name
             };
             var interests = await _unitOfWork.Interests.GetAllAsync();
-            if (interests.Any(interests => interests.InterestName == name))
+            if (interests.Any(interests => interests.InterestName.ToLower() == name.ToLower()))
             {
                 return new ResultDto
                 {
