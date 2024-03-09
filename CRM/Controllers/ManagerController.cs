@@ -3,6 +3,7 @@ using CRM.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CRM.Controllers
@@ -75,6 +76,39 @@ namespace CRM.Controllers
             {
                 var errors = new { errors = result.Errors };
                 return BadRequest(errors);
+            }
+            return Ok(result);
+        }
+        [HttpGet("get-business-info")]
+        public async Task<IActionResult> GetBusinessInfo()
+        {
+            var result = await _managerService.GetBussinesInfo();
+            if (string.IsNullOrEmpty(result.CompanyName))
+            {
+                var errors = new { errors = new string[] { "The business information has not been added yet." } };
+                return BadRequest(errors);
+            }
+            return Ok(result);
+        }
+        [HttpPost("add-business-info")]
+        public async Task<IActionResult> AddBusinessInfo([FromBody] BusinessDto dto)
+        {
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var result = await _managerService.AddBusinessInfo(email, dto);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+        [HttpPut("update-business-info")]
+        public async Task<IActionResult> UpdateBusinessInfo([FromBody] BusinessDto dto)
+        {
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var result = await _managerService.UpdateBusinessInfo(email, dto);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
             }
             return Ok(result);
         }
