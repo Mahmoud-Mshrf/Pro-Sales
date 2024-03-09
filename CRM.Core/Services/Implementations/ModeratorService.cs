@@ -47,7 +47,29 @@ namespace CRM.Core.Services.Implementations
                 Users = Representatives
             };
         }
+        public async Task<ResultDto> DeleteCustomer(int customerId)
+        {
+            var customer =await _unitOfWork.Customers.GetByIdAsync(customerId);
+            if (customer == null)
+                return new ResultDto { IsSuccess = false, Errors = ["User not found"] };
 
+            _unitOfWork.Customers.Delete(customerId);
+            try
+            {
+                _unitOfWork.complete();
+            }
+            catch (Exception e)
+            {
+                return new ResultDto
+                {
+                    IsSuccess = false,
+                    Errors = [e.Message]
+                };
+            }
+
+            return new ResultDto { IsSuccess = true, Message = "Customer deleted successfully" };
+
+        }
         public async Task<ReturnCustomerDto> GetCustomer(int customerId, string moderatorEmail)
         {
             var moderator = await _unitOfWork.UserManager.FindByEmailAsync(moderatorEmail);
@@ -68,8 +90,27 @@ namespace CRM.Core.Services.Implementations
             customerDto.Age = customer.Age;
             customerDto.Gender = customer.Gender;
             customerDto.SalesRepresntativeId = customer.SalesRepresntative.Id;
-            customerDto.sourceId = customer.Source.SourceId;
-            customerDto.UserInterests = customer.Interests.Select(i => new UserInterestDto { Id = i.InterestID, Name = i.InterestName }).ToList();
+            customerDto.sourceName = customer.Source.SourceName;
+            var interests = await _unitOfWork.Interests.GetAllAsync();
+            if(interests == null)
+            {
+                customerDto.IsSuccess = false;
+                customerDto.Errors = ["No interests found"];
+                return customerDto;
+            }
+            customerDto.UserInterests = new List<UserInterestDto>();
+            foreach(var interest in interests)
+            {
+                if(customer.Interests.Any(i=>i.InterestID==interest.InterestID))
+                {
+                    customerDto.UserInterests.Add(new UserInterestDto { /*Id = interest.InterestID,*/ Name = interest.InterestName, IsSelected = true });
+                }
+                else
+                {
+                    customerDto.UserInterests.Add(new UserInterestDto { /*Id = interest.InterestID,*/ Name = interest.InterestName, IsSelected = false });
+                }
+            }
+            //customerDto.UserInterests = customer.Interests.Select(i => new UserInterestDto { /*Id = i.InterestID,*/ Name = i.InterestName }).ToList();
             return customerDto;
         }
 
@@ -99,8 +140,8 @@ namespace CRM.Core.Services.Implementations
                     Age = customer.Age,
                     Gender = customer.Gender,
                     SalesRepresntativeId = customer.SalesRepresntative.Id,
-                    sourceId = customer.Source.SourceId,
-                    UserInterests = customer.Interests.Select(i => new UserInterestDto { Id = i.InterestID, Name = i.InterestName }).ToList()
+                    sourceName = customer.Source.SourceName,
+                    UserInterests = customer.Interests.Select(i => new UserInterestDto { /*Id = i.InterestID,*/ Name = i.InterestName , IsSelected=true}).ToList()
                 };
                 customersDto.Add(customerDto);
             }
@@ -112,7 +153,7 @@ namespace CRM.Core.Services.Implementations
 
         }
 
-        public async Task<ResultDto> AddCustomer(CustomerDto customerDto,string marketingModeratorEmail)
+        public async Task<ResultDto> AddCustomer(AddCustomerDto customerDto,string marketingModeratorEmail)
         {
             var customer = new Customer();
             var salesRep = await _unitOfWork.UserManager.FindByIdAsync(customerDto.SalesRepresntativeId);
@@ -133,7 +174,7 @@ namespace CRM.Core.Services.Implementations
                     Errors = ["Marketing Moderator not found"]
                 };
             }
-            var source = await _unitOfWork.Sources.GetByIdAsync(customerDto.sourceId);
+            var source = await _unitOfWork.Sources.FindAsync(x=>x.SourceName==customerDto.sourceName);
             if(source == null)
             {
                 return new ResultDto
@@ -142,18 +183,19 @@ namespace CRM.Core.Services.Implementations
                     Errors = ["Source not found"]
                 };
             }
-            foreach (var interestt in customerDto.UserInterests)
+            foreach (var interestt in customerDto.Interests)
             {
-                var interest = await _unitOfWork.Interests.GetByIdAsync(interestt.Id);
+                var interest = await _unitOfWork.Interests.FindAsync(x => x.InterestName == interestt);
                 if (interest == null)
                 {
                     return new ResultDto
                     {
                         IsSuccess = false,
-                        Errors = ["Interest not found"]
+                        Errors = [$"{interest} Interest not found"]
                     };
                 }
                 customer.Interests.Add(interest);
+
             }
             customer.FirstName = customerDto.FirstName;
             customer.LastName = customerDto.LastName;
@@ -177,7 +219,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Message = e.Message
+                    Errors = [e.Message]
                 };
             }
             return new ResultDto
@@ -206,7 +248,7 @@ namespace CRM.Core.Services.Implementations
                     Errors = ["Sales Representative not found"]
                 };
             }
-            var source = await _unitOfWork.Sources.GetByIdAsync(customerDto.sourceId);
+            var source = await _unitOfWork.Sources.FindAsync(x => x.SourceName == customerDto.sourceName);
             if (source == null)
             {
                 return new ResultDto
@@ -218,8 +260,8 @@ namespace CRM.Core.Services.Implementations
             //var interest = await _unitOfWork.Interests.GetAllAsync(customerDto.);
             foreach(var interestt in customerDto.UserInterests)
             {
-                var interest = await _unitOfWork.Interests.GetByIdAsync(interestt.Id);
-                if(interest == null)
+                var interest = await _unitOfWork.Interests.FindAsync(x => x.InterestName == interestt.Name);
+                if (interest == null)
                 {
                     return new ResultDto
                     {
@@ -243,8 +285,6 @@ namespace CRM.Core.Services.Implementations
                 {
                     customer.Interests.Remove(interest);
                 }
-
-
             }
             customer.FirstName = customerDto.FirstName;
             customer.LastName = customerDto.LastName;

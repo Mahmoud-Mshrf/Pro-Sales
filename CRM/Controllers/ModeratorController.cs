@@ -31,7 +31,7 @@ namespace CRM.Controllers
         }
 
         [HttpPost("add-customer")]
-        public async Task<IActionResult> AddCustomer([FromBody] CustomerDto customerDto)
+        public async Task<IActionResult> AddCustomer([FromBody] AddCustomerDto customerDto)
         {
             if (!ModelState.IsValid)
             {
@@ -72,15 +72,25 @@ namespace CRM.Controllers
             }
             return Ok(result.Customers);
         }
-        [HttpGet("get-customer/{CustomerId}")]
-        public async Task<IActionResult> GetCustomer(int CustomerId)
+        [HttpGet("get-customer/{customerId}")]
+        public async Task<IActionResult> GetCustomer(int customerId)
         {
             var moderatorEmail = User.FindFirstValue(ClaimTypes.Email);
-            var result = await _moderatorService.GetCustomer(CustomerId, moderatorEmail);
+            var result = await _moderatorService.GetCustomer(customerId, moderatorEmail);
             if (!result.IsSuccess)
             {
                 var errors = new { errors = result.Errors };
                 return BadRequest(errors);
+            }
+            return Ok(result);
+        }
+        [HttpDelete("delete-customer/{customerId}")]
+        public async Task<IActionResult> DeletCustomer(int customerId)
+        {
+            var result = await _moderatorService.DeleteCustomer(customerId);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
             }
             return Ok(result);
         }
