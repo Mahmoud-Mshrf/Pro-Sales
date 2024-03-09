@@ -21,6 +21,7 @@ namespace CRM.Core
         IBaseRepository<Message> Messages { get; }
         IBaseRepository<Meeting>Meetings { get; } 
         IBaseRepository<Deal> Deals { get; }
+        IBaseRepository<Business> Businesses { get; }
         int complete();
     }
 }

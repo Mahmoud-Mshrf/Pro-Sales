@@ -73,6 +73,22 @@ namespace CRM.Core.Services.Implementations
                     Errors = ["User not found"]
                 };
             }
+            if(user.UserName == username)
+            {
+                return new ResultDto
+                {
+                    IsSuccess = false,
+                    Errors = ["Username is the same as the current username"]
+                };
+            }
+            if(_unitOfWork.UserManager.Users.Any(u => u.UserName == username))
+            {
+                return new ResultDto
+                {
+                    IsSuccess = false,
+                    Errors = ["Username already used"]
+                };
+            }
             user.UserName = username;
             var result = await _unitOfWork.UserManager.UpdateAsync(user);
             if (result.Succeeded)

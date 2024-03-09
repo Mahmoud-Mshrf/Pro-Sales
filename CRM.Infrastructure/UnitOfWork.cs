@@ -30,6 +30,7 @@ namespace CRM.Infrastructure
         public IBaseRepository<Message> Messages { get; private set; }
         public IBaseRepository<Meeting> Meetings { get; private set; }
         public IBaseRepository<Deal> Deals { get; private set; }    
+        public IBaseRepository<Business> Businesses { get; private set; }
 
         public UnitOfWork(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
         {
@@ -44,7 +45,7 @@ namespace CRM.Infrastructure
             Messages =new BaseRepository<Message>(_context); 
             Meetings = new BaseRepository<Meeting>(_context);
             Deals=new BaseRepository<Deal>(_context);
-            
+            Businesses = new BaseRepository<Business>(_context);
         }
 
         public int complete()
