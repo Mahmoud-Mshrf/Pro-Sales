@@ -9,7 +9,7 @@ namespace CRM.Core.Dtos
     public class UserInterestDto
     {
         public string Name { get; set; }
-        public int Id { get; set; }
+        //public int Id { get; set; }
         public bool IsSelected { get; set; }
     }
 }

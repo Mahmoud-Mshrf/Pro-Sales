@@ -131,7 +131,6 @@ namespace CRM.Core.Services.Implementations
                     return returnUserRolesdto;
                 }
             }
-            returnUserRolesdto.IsSucces = true;
             var UserRoles = await _unitOfWork.UserManager.GetRolesAsync(user);
             foreach (var role in dto.Roles)
             {
@@ -144,6 +143,7 @@ namespace CRM.Core.Services.Implementations
             var roles = await _unitOfWork.RoleManager.Roles.ToListAsync();
             var UserRolesDto = new ReturnUserRolesDto
             {
+                IsSucces = true,
                 Id = dto.Id,
                 //Username = dto.Username,
                 Errors = null,
