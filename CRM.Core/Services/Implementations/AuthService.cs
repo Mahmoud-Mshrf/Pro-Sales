@@ -239,6 +239,7 @@ namespace CRM.Core.Services.Implementations
             try
             {
                 BackgroundJob.Schedule(() => DeleteUnConfirmedUser(user.Id), TimeSpan.FromMinutes(10));
+                BackgroundJob.Schedule(() => DeletUserWithoutRoles(user.Id), TimeSpan.FromDays(5));
                 var emailResult = await _mailingService.SendEmailAsync(user.Email, "Email Confirmation Code ", message, null);
                 if (emailResult)
                 {
@@ -270,12 +271,22 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto { Errors = ["Confirmation Email Failed to send"] };
             }
         }
-
+        public async Task DeletUserWithoutRoles(string id)
+        {
+            var user = await _unitOfWork.UserManager.FindByIdAsync(id);
+            var roles = await _unitOfWork.UserManager.GetRolesAsync(user);
+            if(user is not null && roles.IsNullOrEmpty())
+            {
+                await _unitOfWork.UserManager.DeleteAsync(user);
+            }
+        }
         public async Task DeleteUnConfirmedUser(string id)
         {
             var user = await _unitOfWork.UserManager.FindByIdAsync(id);
             if (user != null && !user.EmailConfirmed)
             {
+                // delete the verification code for this user
+                var code = await _unitOfWork.VerificationCodes.FindAsync(c => c.UserId == user.Id);
                 await _unitOfWork.UserManager.DeleteAsync(user);
             }
         }
