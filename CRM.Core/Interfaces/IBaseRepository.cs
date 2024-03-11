@@ -28,7 +28,6 @@ namespace CRM.Core.Interfaces
         void Delete(T entity);
         Task<int> CountAsync();
         Task<int> CountAsync(Expression<Func<T, bool>> predicate);
-
-
+        Task<IEnumerable<T>> GetAllAsync(string[] includes);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using CRM.Core.Dtos;
 using CRM.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -93,6 +94,7 @@ namespace CRM.Controllers
                 return BadRequest(result);
             }
             return Ok(result);
+        }
         }
     }
 }
