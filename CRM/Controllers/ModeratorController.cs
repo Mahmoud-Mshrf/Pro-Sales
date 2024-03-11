@@ -107,5 +107,11 @@ namespace CRM.Controllers
             }
             return Ok(result);
         }
+        [HttpGet("search")]
+        public async Task<IActionResult> Search([FromQuery]  string query)
+        {
+            var result = await _moderatorService.Search(query);
+            return Ok(result);
+        } 
     }
 }
