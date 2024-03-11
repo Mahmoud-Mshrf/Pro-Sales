@@ -45,7 +45,6 @@ namespace CRM.Infrastructure.Repositories
         {
             return await _context.Set<T>().SingleOrDefaultAsync(predicate);
         }
-
         public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>> predicate, string[] includes = null)
         {
             IQueryable<T> query = _context.Set<T>();
@@ -70,6 +69,16 @@ namespace CRM.Infrastructure.Repositories
                     query = query.Include(include);
                 }
             return await query.Where(predicate).Take(take).Skip(skip).ToListAsync();
+        }
+        public async Task<IEnumerable<T>> GetAllAsync(string[] includes)
+        {
+            IQueryable<T> query = _context.Set<T>();
+            if (includes != null)
+                foreach (var include in includes)
+                {
+                    query = query.Include(include);
+                }
+            return await query.ToListAsync();
         }
 
         public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>> predicate, int? take, int? skip,

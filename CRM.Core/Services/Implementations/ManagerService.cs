@@ -1,7 +1,9 @@
 ﻿using CRM.Core.Dtos;
 using CRM.Core.Models;
 using CRM.Core.Services.Interfaces;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,30 +21,6 @@ namespace CRM.Core.Services.Implementations
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<ResultDto> AddSource(string name)
-        {
-
-            var interest = new Source
-            {
-                SourceName = name
-            };
-            var sources = await _unitOfWork.Sources.GetAllAsync();
-            if (sources.Any(sources => sources.SourceName.ToLower() == name.ToLower()))
-            {
-                return new ResultDto
-                {
-                    IsSuccess = false,
-                    Errors = ["Source already exists"]
-                };
-            }
-            var result = await _unitOfWork.Sources.AddAsync(interest);
-            _unitOfWork.complete();
-            return new ResultDto
-            {
-                IsSuccess = true,
-                Message = "Source added successfully"
-            };
-        }
         public async Task<ResultDto> AddInterest(string name)
         {
 
@@ -139,7 +117,7 @@ namespace CRM.Core.Services.Implementations
                 if (!UserRoles.Any(r => r == role.Name) && role.IsSelected)
                     await _unitOfWork.UserManager.AddToRoleAsync(user, role.Name);
             }
-
+            BackgroundJob.Schedule(() => DeletUserWithoutRoles(dto.Id), TimeSpan.FromDays(5));
             var roles = await _unitOfWork.RoleManager.Roles.ToListAsync();
             var UserRolesDto = new ReturnUserRolesDto
             {
@@ -155,6 +133,16 @@ namespace CRM.Core.Services.Implementations
                 })
             };
             return UserRolesDto;
+        }
+
+        public async Task DeletUserWithoutRoles(string id)
+        {
+            var user = await _unitOfWork.UserManager.FindByIdAsync(id);
+            var roles = await _unitOfWork.UserManager.GetRolesAsync(user);
+            if (user is not null && !roles.IsNullOrEmpty())
+            {
+                await _unitOfWork.UserManager.DeleteAsync(user);
+            }
         }
         public async Task<ResultDto> AddBusinessInfo(string email,BusinessDto dto)
         {

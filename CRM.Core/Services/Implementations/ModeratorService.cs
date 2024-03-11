@@ -316,6 +316,29 @@ namespace CRM.Core.Services.Implementations
                 Message = "Customer updated successfully"
             };
         }
-        
+        public async Task<ResultDto> AddSource(string name)
+        {
+
+            var interest = new Source
+            {
+                SourceName = name
+            };
+            var sources = await _unitOfWork.Sources.GetAllAsync();
+            if (sources.Any(sources => sources.SourceName.ToLower() == name.ToLower()))
+            {
+                return new ResultDto
+                {
+                    IsSuccess = false,
+                    Errors = ["Source already exists"]
+                };
+            }
+            var result = await _unitOfWork.Sources.AddAsync(interest);
+            _unitOfWork.complete();
+            return new ResultDto
+            {
+                IsSuccess = true,
+                Message = "Source added successfully"
+            };
+        }
     }
 }

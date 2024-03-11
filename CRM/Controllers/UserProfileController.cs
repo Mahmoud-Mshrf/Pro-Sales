@@ -42,7 +42,7 @@ namespace CRM.Controllers
             return Ok(result);
         }
         [HttpPut("update-email")]
-        public async Task<IActionResult> UpdateEmail([FromBody] EmailDto dto )
+        public async Task<IActionResult> UpdateEmail([FromBody] EmailDto dto)
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
             var result = await _userProfileService.UpdateEmailAsync(email, dto.Email);
@@ -62,6 +62,17 @@ namespace CRM.Controllers
                 return BadRequest(result);
             }
             return Ok(result);
+        }
+        [HttpDelete("delete-my-account")]
+        public async Task<IActionResult> DeleteMyAccount([FromBody] PasswordDto dto)
+        {
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var result = await _userProfileService.DeleteMyAccount(email, dto.Password);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return NoContent();
         }
         
         //[AllowAnonymous]

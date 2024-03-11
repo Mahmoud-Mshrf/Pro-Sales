@@ -195,6 +195,42 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto { Errors =["Something wrong, confirmation email failed to send"] };
             }
         }
-
+        public async Task<ResultDto> DeleteMyAccount(string email,string password)
+        {
+            var user = await _unitOfWork.UserManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                return new ResultDto
+                {
+                    IsSuccess = false,
+                    Errors = ["User not found"]
+                };
+            }
+            var result = await _unitOfWork.UserManager.CheckPasswordAsync(user, password);
+            if (!result)
+            {
+                return new ResultDto
+                {
+                    IsSuccess = false,
+                    Errors = ["Password is incorrect"]
+                };
+            }
+            var result2 = await _unitOfWork.UserManager.DeleteAsync(user);
+            if (result2.Succeeded)
+            {
+                // invalidate the user token if the account was deleted
+                await _authService.RevokeToken(user.RefreshTokens.FirstOrDefault(r => r.IsActive).Token);
+                return new ResultDto
+                {
+                    IsSuccess = true,
+                    Message = "Account deleted successfully"
+                };
+            }
+            return new ResultDto
+            {
+                IsSuccess = false,
+                Errors = ["Something wrong, account was not deleted"]
+            };
+        }
     }
 }
