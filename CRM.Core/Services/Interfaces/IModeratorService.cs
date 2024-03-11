@@ -18,5 +18,6 @@ namespace CRM.Core.Services.Interfaces
         Task<ReturnCustomerDto> GetCustomer(int CustomerId, string moderatorEmail);
         Task<ReturnAllCustomersDto> GetAllCustomers(string moderatorEmail);
         Task<ResultDto> DeleteCustomer(int CustomerId);
+        Task<ResultDto> AddSource(string name);
     }
 }

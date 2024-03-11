@@ -1,4 +1,5 @@
 ﻿using CRM.Core.Dtos;
+using CRM.Core.Services.Implementations;
 using CRM.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
@@ -95,6 +96,16 @@ namespace CRM.Controllers
             }
             return Ok(result);
         }
+
+        [HttpPost("add-source")]
+        public async Task<IActionResult> AddSource([FromBody] NameDto dto)
+        {
+            var result = await _moderatorService.AddSource(dto.Name);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
         }
     }
 }

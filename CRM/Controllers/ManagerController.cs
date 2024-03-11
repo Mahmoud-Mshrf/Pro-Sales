@@ -30,16 +30,6 @@ namespace CRM.Controllers
             }
             return Ok(result);
         }
-        [HttpPost("add-source")]
-        public async Task<IActionResult> AddSource([FromBody] NameDto dto)
-        {
-            var result = await _managerService.AddSource(dto.Name);
-            if (!result.IsSuccess)
-            {
-                return BadRequest(result);
-            }
-            return Ok(result);
-        }
         [HttpGet("get-all-roles")]
         public IActionResult GetAllRoles()
         {

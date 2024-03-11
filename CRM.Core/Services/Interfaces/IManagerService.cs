@@ -9,7 +9,6 @@ namespace CRM.Core.Services.Interfaces
 {
     public interface IManagerService
     {
-        Task<ResultDto> AddSource(string name);
         Task<ResultDto> AddInterest(string name);
         Task<List<UserViewModel>> GetAllUsers();
         List<string> GetAllRoles();
