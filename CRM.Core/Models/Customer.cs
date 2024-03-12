@@ -10,7 +10,8 @@ namespace CRM.Core.Models
 {
     public enum Gender
     {
-        Male
+        None
+        ,Male
         , Female
     }
     public class Customer
