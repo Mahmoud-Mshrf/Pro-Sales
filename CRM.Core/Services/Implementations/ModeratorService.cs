@@ -33,11 +33,13 @@ namespace CRM.Core.Services.Implementations
             var Representatives = new List<UserDto>();
             foreach (var rep in salesReps)
             {
+                var customersCount = await _unitOfWork.Customers.CountAsync(c => c.SalesRepresntative.Id == rep.Id);
                 var user = new UserDto
                 {
                     Name = rep.FirstName + " " + rep.LastName,
                     Email = rep.Email,
-                    UserId = rep.Id
+                    UserId = rep.Id,
+                    customers=customersCount
                 };
                 Representatives.Add(user);
             }
@@ -426,6 +428,23 @@ namespace CRM.Core.Services.Implementations
                 customerResult.Add(dto);
             }
             return customerResult.ToList();
+        }
+        public async Task<UserDto> GetSalesById(string id)
+        {
+            var user = await _unitOfWork.UserManager.FindByIdAsync(id);
+            var customersNumber = await _unitOfWork.Customers.CountAsync(c => c.SalesRepresntative.Id == id);
+            if (user == null)
+            {
+                return null;
+            }
+            var userDto = new UserDto
+            {
+                Name = user.FirstName + " " + user.LastName,
+                Email = user.Email,
+                UserId = user.Id,
+                customers = customersNumber
+            };
+            return userDto;
         }
     }
 }
