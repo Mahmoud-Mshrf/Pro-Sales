@@ -27,7 +27,7 @@ namespace CRM.Core.Dtos
             public int Age { get; set; }
 
             [EnumDataType(typeof(Gender))]
-            public Gender Gender { get; set; }
+            public Gender Gender { get; set; } = Gender.None;
 
             [MaxLength(50)]
             public string City { get; set; }

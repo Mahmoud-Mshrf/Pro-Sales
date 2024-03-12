@@ -107,5 +107,23 @@ namespace CRM.Controllers
             }
             return Ok(result);
         }
+        [HttpGet("search")]
+        public async Task<IActionResult> Search([FromQuery]  string query)
+        {
+            var result = await _moderatorService.Search(query);
+            return Ok(result);
+        }
+        [HttpGet("get-sales/{id}")]
+        public async Task<IActionResult> GetSalesById(string id)
+        {
+            var result = await _moderatorService.GetSalesById(id);
+            if (result == null)
+            {
+                var errors = new { errors = "Sales representative not found" };
+                return BadRequest(errors);
+            }
+            return Ok(result);
+        }
+        
     }
 }
