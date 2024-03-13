@@ -76,7 +76,7 @@ namespace CRM.Core.Services.Implementations
         {
             var moderator = await _unitOfWork.UserManager.FindByEmailAsync(moderatorEmail);
             var customerDto = new ReturnCustomerDto();
-            var customer = await _unitOfWork.Customers.FindAsync(c => c.CustomerId == customerId && c.MarketingModerator == moderator, ["Interests", "Source"]);
+            var customer = await _unitOfWork.Customers.FindAsync(c => c.CustomerId == customerId && c.MarketingModerator == moderator, ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
             if (customer == null)
             {
                 customerDto.IsSuccess = false;
@@ -116,10 +116,9 @@ namespace CRM.Core.Services.Implementations
             return customerDto;
         }
 
-        public async Task<ReturnAllCustomersDto> GetAllCustomers(string moderatorEmail)
+        public async Task<ReturnAllCustomersDto> GetAllCustomers()
         {
-            var moderator = await _unitOfWork.UserManager.FindByEmailAsync(moderatorEmail);
-            var customers = await _unitOfWork.Customers.GetAllAsync(c => c.MarketingModerator == moderator, ["Interests", "Source"]);
+            var customers = await _unitOfWork.Customers.GetAllAsync(["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
             if (customers == null)
             {
                 return new ReturnAllCustomersDto
@@ -235,7 +234,7 @@ namespace CRM.Core.Services.Implementations
         }
         public async Task<ResultDto> UpdateCustomer(CustomerDto customerDto,int customerId)
         {
-            var customer = await _unitOfWork.Customers.FindAsync(c => c.CustomerId == customerId, ["Interests"]);
+            var customer = await _unitOfWork.Customers.FindAsync(c => c.CustomerId == customerId, ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
             if (customer == null)
             {
                 return new ResultDto

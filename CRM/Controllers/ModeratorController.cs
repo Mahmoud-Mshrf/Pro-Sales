@@ -66,8 +66,7 @@ namespace CRM.Controllers
         [HttpGet("get-all-customers")]
         public async Task<IActionResult> GetAllCustomers()
         {
-            var moderatorEmail = User.FindFirstValue(ClaimTypes.Email);
-            var result = await _moderatorService.GetAllCustomers(moderatorEmail);
+            var result = await _moderatorService.GetAllCustomers();
             if (!result.IsSuccess)
             {
                 return BadRequest(result);
