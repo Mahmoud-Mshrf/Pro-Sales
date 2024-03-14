@@ -2,7 +2,6 @@
 using CRM.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CRM.Controllers
@@ -12,7 +11,7 @@ namespace CRM.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
-        
+
         public AuthController(IAuthService authService)
         {
             _authService = authService;
@@ -44,7 +43,7 @@ namespace CRM.Controllers
         }
 
 
-        
+
         //[HttpPost("confirm-email")]
         //public async Task<IActionResult> ConfirmEmail(VerifyCodeDto codeDto)
         //{
@@ -135,7 +134,7 @@ namespace CRM.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> ForgotPassword([FromBody] EmailDto dto)
         {
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }

@@ -116,9 +116,10 @@ namespace CRM.Core.Services.Implementations
             return customerDto;
         }
 
-        public async Task<ReturnAllCustomersDto> GetAllCustomers()
+        public async Task<ReturnAllCustomersDto> GetAllCustomers(string email)
         {
-            var customers = await _unitOfWork.Customers.GetAllAsync(["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
+            var marketingModerator = await _unitOfWork.UserManager.FindByEmailAsync(email);
+            var customers = await _unitOfWork.Customers.GetAllAsync(c=>c.MarketingModerator==marketingModerator,["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
             if (customers == null)
             {
                 return new ReturnAllCustomersDto
@@ -381,29 +382,30 @@ namespace CRM.Core.Services.Implementations
         //    }
         //    return customerResult.ToList();
         //}
-        public async Task<IEnumerable<ReturnCustomerDto>> Search(string query)
+        public async Task<IEnumerable<ReturnCustomerDto>> Search(string query,string email)
         {
+            var marketingModerator = await _unitOfWork.UserManager.FindByEmailAsync(email);
             //var customers = await _unitOfWork.Customers.GetAllAsync(c => c.FirstName.ToLower().Contains(query.ToLower()), ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
             //if (!customers.Any())
             //{
             //    customers = await _unitOfWork.Customers.GetAllAsync(c => c.LastName.ToLower().Contains(query.ToLower()), ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
             //}
-            var customers = await _unitOfWork.Customers.GetAllAsync(c => (c.FirstName.ToLower() + " " + c.LastName.ToLower()).Contains(query.ToLower()),["Interests","Source","MarketingModerator","SalesRepresntative"]);
+            var customers = await _unitOfWork.Customers.GetAllAsync(c => (c.FirstName.ToLower() + " " + c.LastName.ToLower()).Contains(query.ToLower()) && c.MarketingModerator==marketingModerator,["Interests","Source","MarketingModerator","SalesRepresntative"]);
             if (!customers.Any())
             {
-                customers = await _unitOfWork.Customers.GetAllAsync(c => c.FirstName.ToLower().Contains(query.ToLower()), ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
+                customers = await _unitOfWork.Customers.GetAllAsync(c => c.FirstName.ToLower().Contains(query.ToLower()) && c.MarketingModerator == marketingModerator, ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
             }
             if (!customers.Any())
             {
-                customers = await _unitOfWork.Customers.GetAllAsync(c => c.LastName.ToLower().Contains(query.ToLower()), ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
+                customers = await _unitOfWork.Customers.GetAllAsync(c => c.LastName.ToLower().Contains(query.ToLower()) && c.MarketingModerator == marketingModerator, ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
             }
             if (!customers.Any())
             {
-                customers = await _unitOfWork.Customers.GetAllAsync(c => c.Email.ToLower().Contains(query.ToLower()), ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
+                customers = await _unitOfWork.Customers.GetAllAsync(c => c.Email.ToLower().Contains(query.ToLower()) && c.MarketingModerator == marketingModerator, ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
             }
             if (!customers.Any())
             {
-                customers = await _unitOfWork.Customers.GetAllAsync(c => c.Phone.ToLower().Contains(query.ToLower()), ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
+                customers = await _unitOfWork.Customers.GetAllAsync(c => c.Phone.ToLower().Contains(query.ToLower()) && c.MarketingModerator == marketingModerator, ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
             }
 
             var customerResult = new List<ReturnCustomerDto>();

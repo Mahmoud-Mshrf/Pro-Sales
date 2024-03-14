@@ -1,10 +1,8 @@
 ﻿using CRM.Core.Dtos;
 using CRM.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CRM.Controllers
 {
@@ -46,7 +44,7 @@ namespace CRM.Controllers
         public async Task<IActionResult> ViewUserRoles(string userId)
         {
             var result = await _managerService.ViewUserRoles(userId);
-            if(!result.IsSucces)
+            if (!result.IsSucces)
             {
                 var errors = new { errors = result.Errors };
                 return BadRequest(errors);
@@ -62,7 +60,7 @@ namespace CRM.Controllers
             }
 
             var result = await _managerService.ManageUserRoles(dto);
-            if(!result.IsSucces)
+            if (!result.IsSucces)
             {
                 var errors = new { errors = result.Errors };
                 return BadRequest(errors);
