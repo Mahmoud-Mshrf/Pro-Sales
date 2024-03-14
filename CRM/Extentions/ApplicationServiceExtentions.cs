@@ -1,6 +1,5 @@
 ﻿using CRM.Core.Services.Implementations;
 using CRM.Core.Services.Interfaces;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace CRM.Extentions
 {

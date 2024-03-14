@@ -1,24 +1,22 @@
 ﻿using CRM.Core.Dtos;
-using CRM.Core.Models;
-using CRM.Core.Services.Implementations;
 using CRM.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 namespace CRM.Controllers
 {
-    [Authorize(Roles ="Sales Representative,Marketing Moderator")] // later will be [Authorize(Roles ="MarketingModerator")]
+    [Authorize(Roles = "Sales Representative,Marketing Moderator")] // later will be [Authorize(Roles ="MarketingModerator")]
     [Route("api/[controller]")]
     [ApiController]
     public class SalesRepController : ControllerBase
     {
 
-        
+
         private readonly ISalesRepresntative _salesRepresntative;
-        public SalesRepController(ISalesRepresntative salesRepresntative) {
-            _salesRepresntative=salesRepresntative;
+        public SalesRepController(ISalesRepresntative salesRepresntative)
+        {
+            _salesRepresntative = salesRepresntative;
         }
 
         #region Manage Calls
@@ -190,7 +188,7 @@ namespace CRM.Controllers
             }
             return Ok(result);
         }
-       
+
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllMeetings()
         {

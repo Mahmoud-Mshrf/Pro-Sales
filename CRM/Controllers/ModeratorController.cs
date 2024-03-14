@@ -1,15 +1,12 @@
 ﻿using CRM.Core.Dtos;
-using CRM.Core.Services.Implementations;
 using CRM.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 namespace CRM.Controllers
 {
-    [Authorize(Roles ="Marketing Moderator")] // later will be [Authorize(Roles ="MarketingModerator")]
+    [Authorize(Roles = "Marketing Moderator")] // later will be [Authorize(Roles ="MarketingModerator")]
     [Route("api/[controller]")]
     [ApiController]
     public class ModeratorController : ControllerBase
@@ -40,7 +37,7 @@ namespace CRM.Controllers
                 return BadRequest(ModelState);
             }
             var marketingModeratorEmail = User.FindFirstValue(ClaimTypes.Email);
-            var result = await _moderatorService.AddCustomer(customerDto,marketingModeratorEmail);
+            var result = await _moderatorService.AddCustomer(customerDto, marketingModeratorEmail);
             if (!result.IsSuccess)
             {
                 return BadRequest(result);
@@ -48,7 +45,7 @@ namespace CRM.Controllers
             return Ok(result);
         }
         [HttpPut("update-customer")]
-        public async Task<IActionResult> UpdateCustomer([FromBody] CustomerDto customerDto,int CustomerId)
+        public async Task<IActionResult> UpdateCustomer([FromBody] CustomerDto customerDto, int CustomerId)
         {
             if (!ModelState.IsValid)
             {
@@ -66,7 +63,8 @@ namespace CRM.Controllers
         [HttpGet("get-all-customers")]
         public async Task<IActionResult> GetAllCustomers()
         {
-            var result = await _moderatorService.GetAllCustomers();
+            var moderatorEmail = User.FindFirstValue(ClaimTypes.Email);
+            var result = await _moderatorService.GetAllCustomers(moderatorEmail);
             if (!result.IsSuccess)
             {
                 return BadRequest(result);
@@ -107,9 +105,10 @@ namespace CRM.Controllers
             return Ok(result);
         }
         [HttpGet("search")]
-        public async Task<IActionResult> Search([FromQuery]  string query)
+        public async Task<IActionResult> Search([FromQuery] string query)
         {
-            var result = await _moderatorService.Search(query);
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var result = await _moderatorService.Search(query,email);
             return Ok(result);
         }
         [HttpGet("get-sales/{id}")]
@@ -123,6 +122,6 @@ namespace CRM.Controllers
             }
             return Ok(result);
         }
-        
+
     }
 }

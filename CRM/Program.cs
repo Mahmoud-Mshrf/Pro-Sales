@@ -2,8 +2,6 @@ using CRM.Core;
 using CRM.Core.Filters;
 using CRM.Core.Helpers;
 using CRM.Core.Models;
-using CRM.Core.Services.Implementations;
-using CRM.Core.Services.Interfaces;
 using CRM.Core.Settings;
 using CRM.Extentions;
 using CRM.Infrastructure;
@@ -26,11 +24,12 @@ namespace CRM
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-             builder.Services.AddDbContext<ApplicationDbContext>(
-             options => {
-             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-             }
-            );
+            builder.Services.AddDbContext<ApplicationDbContext>(
+            options =>
+            {
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+            }
+           );
             builder.Services.AddControllers(options =>
             {
                 options.Filters.Add<CustomValidationResultFilter>();
@@ -162,7 +161,7 @@ namespace CRM
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
-            
+
             app.UseSwagger();
             app.UseSwaggerUI();
             app.UseHttpsRedirection();
