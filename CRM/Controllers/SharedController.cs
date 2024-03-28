@@ -14,6 +14,8 @@ namespace CRM.Controllers
         {
             _sharedService = sharedService;
         }
+        [AllowAnonymous]
+        [Authorize]
         [HttpGet("get-all-interests")]
         public async Task<IActionResult> GetAllInterests()
         {
