@@ -67,17 +67,17 @@ namespace CRM.Controllers
             }
             return Ok(result);
         }
-        [HttpGet("get-business-info")]
-        public async Task<IActionResult> GetBusinessInfo()
-        {
-            var result = await _managerService.GetBussinesInfo();
-            if (string.IsNullOrEmpty(result.CompanyName))
-            {
-                var errors = new { errors = new string[] { "The business information has not been added yet." } };
-                return BadRequest(errors);
-            }
-            return Ok(result);
-        }
+        //[HttpGet("get-business-info")]
+        //public async Task<IActionResult> GetBusinessInfo()
+        //{
+        //    var result = await _managerService.GetBussinesInfo();
+        //    if (string.IsNullOrEmpty(result.CompanyName))
+        //    {
+        //        var errors = new { errors = new string[] { "The business information has not been added yet." } };
+        //        return BadRequest(errors);
+        //    }
+        //    return Ok(result);
+        //}
         [HttpPost("add-business-info")]
         public async Task<IActionResult> AddBusinessInfo([FromBody] BusinessDto dto)
         {

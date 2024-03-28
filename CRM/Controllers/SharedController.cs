@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CRM.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Sales Representative,Marketing Moderator,Manager")]
     [Route("api/[controller]")]
     [ApiController]
     public class SharedController : ControllerBase
@@ -33,6 +33,19 @@ namespace CRM.Controllers
                 return BadRequest(result);
             }
             return Ok(result.Sources);
+        }
+        [AllowAnonymous]
+        [Authorize]
+        [HttpGet("get-business-info")]
+        public async Task<IActionResult> GetBusinessInfo()
+        {
+            var result = await _sharedService.GetBussinesInfo();
+            if (string.IsNullOrEmpty(result.CompanyName))
+            {
+                var errors = new { errors = new string[] { "The business information has not been added yet." } };
+                return BadRequest(errors);
+            }
+            return Ok(result);
         }
     }
 }
