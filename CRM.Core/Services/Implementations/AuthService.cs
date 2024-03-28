@@ -99,7 +99,7 @@ namespace CRM.Core.Services.Implementations
             issuer: _jwt.Issuer,
             audience: _jwt.Audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddSeconds(_jwt.DurationInDays),
+            expires: DateTime.UtcNow.AddMinutes(_jwt.DurationInDays),
             signingCredentials: credentials
             );
             return token;
@@ -113,7 +113,7 @@ namespace CRM.Core.Services.Implementations
             return new RefreshToken
             {
                 Token = Convert.ToBase64String(randomNumber),
-                ExpiresOn = DateTime.UtcNow.AddMinutes(1.5),
+                ExpiresOn = DateTime.UtcNow.AddDays(15),
                 CreatedOn = DateTime.UtcNow
             };
         }
