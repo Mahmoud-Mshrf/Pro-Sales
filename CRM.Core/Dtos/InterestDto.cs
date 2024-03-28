@@ -10,8 +10,8 @@ namespace CRM.Core.Dtos
     public class InterestDto
     {
         [Required]
-        public int InterestID { get; set; }
+        public int Id { get; set; }
         [Required]
-        public string InterestName { get; set; }
+        public string Name { get; set; }=string.Empty;
     }
 }

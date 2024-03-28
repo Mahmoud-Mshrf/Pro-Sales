@@ -34,8 +34,8 @@ namespace CRM.Core.Services.Implementations
             {
                 var interestDto = new InterestDto
                 {
-                    InterestID = interest.InterestID,
-                    InterestName = interest.InterestName
+                    Id = interest.InterestID,
+                    Name = interest.InterestName
                 };
                 Interests.Add(interestDto);
             }
@@ -45,6 +45,7 @@ namespace CRM.Core.Services.Implementations
                 Interests = Interests
             };
         }
+        
 
 
 
@@ -65,8 +66,8 @@ namespace CRM.Core.Services.Implementations
             {
                 var sourceDto = new SourceDto
                 {
-                    SourceName = source.SourceName,
-                    SourceId = source.SourceId
+                    Name = source.SourceName,
+                    Id = source.SourceId
                 };
                 Sources.Add(sourceDto);
             }
