@@ -15,6 +15,7 @@ namespace CRM.Core.Dtos
         public int CustomerId { get; set; }
         [JsonIgnore]
         public bool IsSuccess { get; set; }
+        public int Id { get; set; }
         public DateTime AdditionDate { get; set; }
 
         public ReturnCustomerDto()

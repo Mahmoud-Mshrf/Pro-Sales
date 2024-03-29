@@ -72,11 +72,10 @@ namespace CRM.Core.Services.Implementations
             return new ResultDto { IsSuccess = true, Message = "Customer deleted successfully" };
 
         }
-        public async Task<ReturnCustomerDto> GetCustomer(int customerId, string moderatorEmail)
+        public async Task<ReturnCustomerDto> GetCustomer(int customerId)
         {
-            var moderator = await _unitOfWork.UserManager.FindByEmailAsync(moderatorEmail);
             var customerDto = new ReturnCustomerDto();
-            var customer = await _unitOfWork.Customers.FindAsync(c => c.CustomerId == customerId && c.MarketingModerator == moderator, ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
+            var customer = await _unitOfWork.Customers.FindAsync(c => c.CustomerId == customerId ,["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
             if (customer == null)
             {
                 customerDto.IsSuccess = false;
@@ -84,6 +83,7 @@ namespace CRM.Core.Services.Implementations
                 return customerDto;
             }
             customerDto.IsSuccess = true;
+            customerDto.Id = customer.CustomerId;
             customerDto.FirstName = customer.FirstName;
             customerDto.LastName = customer.LastName;
             customerDto.Email = customer.Email;
@@ -92,7 +92,8 @@ namespace CRM.Core.Services.Implementations
             customerDto.Age = customer.Age;
             customerDto.Gender = customer.Gender;
             customerDto.SalesRepresntativeId = customer.SalesRepresntative.Id;
-            customerDto.sourceName = customer.Source.SourceName;
+            customerDto.Source = customer.Source.SourceName;
+            customerDto.AdditionDate = customer.AdditionDate;
             var interests = await _unitOfWork.Interests.GetAllAsync();
             if(interests == null)
             {
@@ -142,7 +143,7 @@ namespace CRM.Core.Services.Implementations
                     Age = customer.Age,
                     Gender = customer.Gender,
                     SalesRepresntativeId = customer.SalesRepresntative.Id,
-                    sourceName = customer.Source.SourceName,
+                    Source = customer.Source.SourceName,
                     UserInterests = customer.Interests.Select(i => new UserInterestDto { /*Id = i.InterestID,*/ Name = i.InterestName , IsSelected=true}).ToList(),
                     AdditionDate= customer.AdditionDate
                 };
@@ -254,7 +255,7 @@ namespace CRM.Core.Services.Implementations
                 };
             }
             //var source = await _unitOfWork.Sources.FindAsync(x => x.SourceName == customerDto.sourceName);
-            var source = await _unitOfWork.Sources.FindAsync(x => x.SourceName.ToLower() == customerDto.sourceName.ToLower());
+            var source = await _unitOfWork.Sources.FindAsync(x => x.SourceName.ToLower() == customerDto.Source.ToLower());
             if (source == null)
             {
                 return new ResultDto
@@ -421,7 +422,7 @@ namespace CRM.Core.Services.Implementations
                     Email = customer.Email,
                     Gender = customer.Gender,
                     Phone = customer.Phone,
-                    sourceName = customer.Source.SourceName,
+                    Source = customer.Source.SourceName,
                     SalesRepresntativeId = customer.SalesRepresntative.Id,
                     UserInterests = customer.Interests.Select(i => new UserInterestDto { /*Id = i.InterestID,*/ Name = i.InterestName, IsSelected = true }).ToList(),
                     AdditionDate = customer.AdditionDate
