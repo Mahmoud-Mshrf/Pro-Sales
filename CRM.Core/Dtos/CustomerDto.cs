@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace CRM.Core.Dtos
@@ -33,10 +34,11 @@ namespace CRM.Core.Dtos
         [MaxLength(50)]
         public string City { get; set; }
         [Required]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string SalesRepresntativeId { get; set; }
         [Required]
         public string Source { get; set; }
         [Required]
-        public IList<UserInterestDto> UserInterests { get; set; }
+        public IList<UserInterestDto> Interests { get; set; }
     }
 }

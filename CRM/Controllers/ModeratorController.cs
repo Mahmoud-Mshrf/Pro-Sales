@@ -40,7 +40,8 @@ namespace CRM.Controllers
             var result = await _moderatorService.AddCustomer(customerDto, marketingModeratorEmail);
             if (!result.IsSuccess)
             {
-                return BadRequest(result);
+                var errors = new {result.Errors};
+                return BadRequest(errors);
             }
             return Ok(result);
         }
@@ -63,8 +64,7 @@ namespace CRM.Controllers
         [HttpGet("get-all-customers")]
         public async Task<IActionResult> GetAllCustomers()
         {
-            var moderatorEmail = User.FindFirstValue(ClaimTypes.Email);
-            var result = await _moderatorService.GetAllCustomers(moderatorEmail);
+            var result = await _moderatorService.GetAllCustomers();
             if (!result.IsSuccess)
             {
                 return BadRequest(result);
@@ -74,8 +74,7 @@ namespace CRM.Controllers
         [HttpGet("get-customer/{customerId}")]
         public async Task<IActionResult> GetCustomer(int customerId)
         {
-            var moderatorEmail = User.FindFirstValue(ClaimTypes.Email);
-            var result = await _moderatorService.GetCustomer(customerId, moderatorEmail);
+            var result = await _moderatorService.GetCustomer(customerId);
             if (!result.IsSuccess)
             {
                 var errors = new { errors = result.Errors };
@@ -107,8 +106,7 @@ namespace CRM.Controllers
         [HttpGet("search")]
         public async Task<IActionResult> Search([FromQuery] string query)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
-            var result = await _moderatorService.Search(query,email);
+            var result = await _moderatorService.Search(query);
             return Ok(result);
         }
         [HttpGet("get-sales/{id}")]
