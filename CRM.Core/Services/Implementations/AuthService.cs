@@ -50,6 +50,7 @@ namespace CRM.Core.Services.Implementations
             }
             var JwtToken = await CreateToken(user);
             var token = new JwtSecurityTokenHandler().WriteToken(JwtToken);
+            authModel.Id = user.Id;
             authModel.AccessToken = token;
             authModel.IsAuthenticated = true;
             authModel.Email = user.Email;
@@ -99,7 +100,7 @@ namespace CRM.Core.Services.Implementations
             issuer: _jwt.Issuer,
             audience: _jwt.Audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddSeconds(_jwt.DurationInDays),
+            expires: DateTime.UtcNow.AddMinutes(_jwt.DurationInDays),
             signingCredentials: credentials
             );
             return token;
@@ -113,7 +114,7 @@ namespace CRM.Core.Services.Implementations
             return new RefreshToken
             {
                 Token = Convert.ToBase64String(randomNumber),
-                ExpiresOn = DateTime.UtcNow.AddMinutes(1.5),
+                ExpiresOn = DateTime.UtcNow.AddDays(15),
                 CreatedOn = DateTime.UtcNow
             };
         }
@@ -179,6 +180,7 @@ namespace CRM.Core.Services.Implementations
             await _unitOfWork.UserManager.UpdateAsync(user);
 
             var JwtToken = await CreateToken(user);
+            authModel.Id = user.Id;
             authModel.AccessToken = new JwtSecurityTokenHandler().WriteToken(JwtToken);
             authModel.IsAuthenticated = true;
             authModel.FirstName = user.FirstName;
@@ -309,6 +311,7 @@ namespace CRM.Core.Services.Implementations
                 _unitOfWork.complete();
                 var JwtToken = await CreateToken(user);
                 var token = new JwtSecurityTokenHandler().WriteToken(JwtToken);
+                authModel.Id = user.Id;
                 authModel.AccessToken = token;
                 authModel.IsAuthenticated = true;
                 authModel.Email = user.Email;
@@ -361,6 +364,7 @@ namespace CRM.Core.Services.Implementations
             _unitOfWork.complete();
             var JwtToken = await CreateToken(user);
             var token = new JwtSecurityTokenHandler().WriteToken(JwtToken);
+            authModel.Id = user.Id;
             authModel.AccessToken = token;
             authModel.IsAuthenticated = true;
             authModel.Email = user.Email;

@@ -10,8 +10,8 @@ namespace CRM.Core.Dtos
     public class SourceDto
     {
         [Required]
-        public int SourceId { get; set; }
+        public int Id { get; set; }
         [Required]
-        public string SourceName { get; set; }
+        public string Name { get; set; }
     }
 }

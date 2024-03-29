@@ -45,6 +45,102 @@ namespace CRM.Core.Services.Implementations
                 Message = "Interest added successfully"
             };
         }
+        public async Task<InterestDto> updateInterest(InterestDto dto)
+        {
+            var interest = await _unitOfWork.Interests.GetByIdAsync(dto.Id);
+            if (interest == null)
+            {
+                return new InterestDto();
+            }
+            interest.InterestName = dto.Name;
+            _unitOfWork.Interests.Update(interest);
+            _unitOfWork.complete();
+            return new InterestDto
+            {
+                Id = interest.InterestID,
+                Name = interest.InterestName
+            };
+        }
+        public async Task<InterestDto> getInterest(int id)
+        {
+            var interest = await _unitOfWork.Interests.GetByIdAsync(id);
+            if (interest == null)
+            {
+                return new InterestDto();
+            }
+            return new InterestDto
+            {
+                Id = interest.InterestID,
+                Name = interest.InterestName
+            };
+        }
+        public async Task<ResultDto> DeleteInterest(int id)
+        {
+            var interest = await _unitOfWork.Interests.GetByIdAsync(id);
+            if (interest == null)
+            {
+                return new ResultDto
+                {
+                    IsSuccess = false,
+                    Errors = ["Interest not found"]
+                };
+            }
+            _unitOfWork.Interests.Delete(interest);
+            _unitOfWork.complete();
+            return new ResultDto
+            {
+                IsSuccess = true,
+                Message = "Interest deleted successfully"
+            };
+        }
+        public async Task<SourceDto> updateSource(SourceDto dto)
+        {
+            var source = await _unitOfWork.Sources.GetByIdAsync(dto.Id);
+            if (source == null)
+            {
+                return new SourceDto();
+            }
+            source.SourceName = dto.Name;
+            _unitOfWork.Sources.Update(source);
+            _unitOfWork.complete();
+            return new SourceDto
+            {
+                Id = source.SourceId,
+                Name = source.SourceName
+            };
+        }
+        public async Task<SourceDto> getSource(int id)
+        {
+            var source = await _unitOfWork.Sources.GetByIdAsync(id);
+            if (source == null)
+            {
+                return new SourceDto();
+            }
+            return new SourceDto
+            {
+                Id = source.SourceId,
+                Name = source.SourceName
+            };
+        }
+        public async Task<ResultDto> DeleteSource(int id)
+        {
+            var source = await _unitOfWork.Sources.GetByIdAsync(id);
+            if (source == null)
+            {
+                return new ResultDto
+                {
+                    IsSuccess = false,
+                    Errors = ["Source not found"]
+                };
+            }
+            _unitOfWork.Sources.Delete(source);
+            _unitOfWork.complete();
+            return new ResultDto
+            {
+                IsSuccess = true,
+                Message = "Source deleted successfully"
+            };
+        }
         public async Task<List<UserViewModel>> GetAllUsers()
         {
             var users = await _unitOfWork.UserManager.Users.ToListAsync();
@@ -220,20 +316,20 @@ namespace CRM.Core.Services.Implementations
                 Message = "Business information updated successfully"
             };
         }
-        public async Task<BusinessDto> GetBussinesInfo()
-        {
-            var businesses = await _unitOfWork.Businesses.GetAllAsync();
-            var existingBusiness = businesses.FirstOrDefault();
-            if (existingBusiness == null)
-            {
-                return new BusinessDto();
-            }
-            var businessDto = new BusinessDto
-            {
-                CompanyName = existingBusiness.CompanyName,
-                Description = existingBusiness.Description
-            };
-            return businessDto;
-        }
+        //public async Task<BusinessDto> GetBussinesInfo()
+        //{
+        //    var businesses = await _unitOfWork.Businesses.GetAllAsync();
+        //    var existingBusiness = businesses.FirstOrDefault();
+        //    if (existingBusiness == null)
+        //    {
+        //        return new BusinessDto();
+        //    }
+        //    var businessDto = new BusinessDto
+        //    {
+        //        CompanyName = existingBusiness.CompanyName,
+        //        Description = existingBusiness.Description
+        //    };
+        //    return businessDto;
+        //}
     }
 }

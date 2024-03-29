@@ -28,6 +28,70 @@ namespace CRM.Controllers
             }
             return Ok(result);
         }
+        [HttpPut("update-interest")]
+        public async Task<IActionResult> UpdateInterest([FromBody] InterestDto dto)
+        {
+            var result = await _managerService.updateInterest(dto);
+            if (string.IsNullOrEmpty(result.Name))
+            {
+                var errors = new { errors = new string[] { "The interest does not exist." } };
+                return BadRequest(errors);
+            }
+            return Ok(result);
+        }
+        [HttpGet("get-interest/{id}")]
+        public async Task<IActionResult> GetInterest(int id)
+        {
+            var result = await _managerService.getInterest(id);
+            if (string.IsNullOrEmpty(result.Name))
+            {
+                var errors = new { errors = new string[] { "The interest does not exist." } };
+                return BadRequest(errors);
+            }
+            return Ok(result);
+        }
+        [HttpDelete("delete-interest/{id}")]
+        public async Task<IActionResult> DeleteInterest(int id)
+        {
+            var result = await _managerService.DeleteInterest(id);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+        //[HttpPut("update-source")]
+        //public async Task<IActionResult> UpdateSource([FromBody] SourceDto dto)
+        //{
+        //    var result = await _managerService.updateSource(dto);
+        //    if (string.IsNullOrEmpty(result.Name))
+        //    {
+        //        var errors = new { errors = new string[] { "The source does not exist." } };
+        //        return BadRequest(errors);
+        //    }
+        //    return Ok(result);
+        //}
+        //[HttpGet("get-source/{id}")]
+        //public async Task<IActionResult> GetSource(int id)
+        //{
+        //    var result = await _managerService.getSource(id);
+        //    if (string.IsNullOrEmpty(result.Name))
+        //    {
+        //        var errors = new { errors = new string[] { "The source does not exist." } };
+        //        return BadRequest(errors);
+        //    }
+        //    return Ok(result);
+        //}
+        //[HttpDelete("delete-source/{id}")]
+        //public async Task<IActionResult> DeleteSource(int id)
+        //{
+        //    var result = await _managerService.DeleteSource(id);
+        //    if (!result.IsSuccess)
+        //    {
+        //        return BadRequest(result);
+        //    }
+        //    return Ok(result);
+        //}
         [HttpGet("get-all-roles")]
         public IActionResult GetAllRoles()
         {
@@ -67,17 +131,17 @@ namespace CRM.Controllers
             }
             return Ok(result);
         }
-        [HttpGet("get-business-info")]
-        public async Task<IActionResult> GetBusinessInfo()
-        {
-            var result = await _managerService.GetBussinesInfo();
-            if (string.IsNullOrEmpty(result.CompanyName))
-            {
-                var errors = new { errors = new string[] { "The business information has not been added yet." } };
-                return BadRequest(errors);
-            }
-            return Ok(result);
-        }
+        //[HttpGet("get-business-info")]
+        //public async Task<IActionResult> GetBusinessInfo()
+        //{
+        //    var result = await _managerService.GetBussinesInfo();
+        //    if (string.IsNullOrEmpty(result.CompanyName))
+        //    {
+        //        var errors = new { errors = new string[] { "The business information has not been added yet." } };
+        //        return BadRequest(errors);
+        //    }
+        //    return Ok(result);
+        //}
         [HttpPost("add-business-info")]
         public async Task<IActionResult> AddBusinessInfo([FromBody] BusinessDto dto)
         {
@@ -100,5 +164,6 @@ namespace CRM.Controllers
             }
             return Ok(result);
         }
+
     }
 }
