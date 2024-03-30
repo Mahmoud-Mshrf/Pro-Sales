@@ -11,10 +11,12 @@ namespace CRM.Core.Dtos
     {
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string[] Errors { get; set; }
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-        public int CustomerId { get; set; }
+        //[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        //public int CustomerId { get; set; }
         [JsonIgnore]
         public bool IsSuccess { get; set; }
+        public UserDto SalesRepresentative { get; set; }
+        public int Id { get; set; }
         public DateTime AdditionDate { get; set; }
 
         public ReturnCustomerDto()
