@@ -155,6 +155,12 @@ namespace CRM.Controllers
             }
             return Ok(result);
         }
+        [HttpGet("get-last-action")]
+        public async Task<IActionResult> LastAction(int id)
+        {
+            var result = await _moderatorService.GetLastAction(id);
+            return Ok(result);
+        }
 
     }
 }
