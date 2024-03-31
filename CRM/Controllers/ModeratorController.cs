@@ -47,7 +47,7 @@ namespace CRM.Controllers
             return Ok(result);
         }
         [HttpPut("update-customer")]
-        public async Task<IActionResult> UpdateCustomer([FromBody] CustomerDto customerDto, int CustomerId)
+        public async Task<IActionResult> UpdateCustomer([FromBody] AddCustomerDto customerDto, int CustomerId)
         {
             if (!ModelState.IsValid)
             {

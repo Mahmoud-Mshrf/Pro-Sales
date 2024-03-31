@@ -105,17 +105,23 @@ namespace CRM.Core.Services.Implementations
                 return customerDto;
             }
             customerDto.Interests = new List<UserInterestDto>();
-            foreach(var interest in interests)
-            {
-                if(customer.Interests.Any(i=>i.InterestID==interest.InterestID))
-                {
-                    customerDto.Interests.Add(new UserInterestDto { /*Id = interest.InterestID,*/ Name = interest.InterestName, IsSelected = true });
-                }
-                else
-                {
-                    customerDto.Interests.Add(new UserInterestDto { /*Id = interest.InterestID,*/ Name = interest.InterestName, IsSelected = false });
-                }
-            }
+            //foreach(var interest in interests)
+            //{
+            //    if(customer.Interests.Any(i=>i.InterestID==interest.InterestID))
+            //    {
+            //        customerDto.Interests.Add(new UserInterestDto { /*Id = interest.InterestID,*/ Name = interest.InterestName, IsSelected = true });
+            //    }
+            //    else
+            //    {
+            //        customerDto.Interests.Add(new UserInterestDto { /*Id = interest.InterestID,*/ Name = interest.InterestName, IsSelected = false });
+            //    }
+            //}
+            //foreach (var interest in customer.Interests)
+            //{
+            //    customerDto.Interests.Add(new UserInterestDto { Id = interest.InterestID, Name = interest.InterestName });
+            //}
+            customerDto.Interests = customer.Interests.Select(i => new UserInterestDto { Id = i.InterestID, Name = i.InterestName }).ToList();
+
             var userdto = new UserDto
             {
                 Id = customer.SalesRepresntative.Id,
@@ -162,9 +168,14 @@ namespace CRM.Core.Services.Implementations
                     Gender = customer.Gender,
                     SalesRepresntativeId = customer.SalesRepresntative.Id,
                     Source = customer.Source.SourceName,
-                    Interests = customer.Interests.Select(i => new UserInterestDto { /*Id = i.InterestID,*/ Name = i.InterestName, IsSelected = true }).ToList(),
+                    //Interests = customer.Interests.Select(i => new UserInterestDto { /*Id = i.InterestID,*/ Name = i.InterestName, IsSelected = true }).ToList(),
                     AdditionDate = customer.AdditionDate
                 };
+                //foreach (var interest in customer.Interests)
+                //{
+                //    customerDto.Interests.Add(new UserInterestDto { Id = interest.InterestID, Name = interest.InterestName });
+                //}
+                customerDto.Interests = customer.Interests.Select(i => new UserInterestDto { Id = i.InterestID, Name = i.InterestName }).ToList();
                 var userdto = new UserDto
                 {
                     Id = customer.SalesRepresntative.Id,
@@ -347,7 +358,7 @@ namespace CRM.Core.Services.Implementations
                 };
             }
             //var source = await _unitOfWork.Sources.FindAsync(x=>x.SourceName==customerDto.sourceName);
-            var source = await _unitOfWork.Sources.FindAsync(x => x.SourceName.ToLower() == customerDto.sourceName.ToLower());
+            var source = await _unitOfWork.Sources.FindAsync(x => x.SourceName.ToLower() == customerDto.Source.ToLower());
 
             if (source == null)
             {
@@ -359,13 +370,13 @@ namespace CRM.Core.Services.Implementations
             }
             foreach (var interestt in customerDto.Interests)
             {
-                var interest = await _unitOfWork.Interests.FindAsync(x => x.InterestName.ToLower() == interestt.ToLower());
+                var interest = await _unitOfWork.Interests.FindAsync(x => x.InterestID == interestt.Id);
                 if (interest == null)
                 {
                     return new ReturnCustomerDto
                     {
                         IsSuccess = false,
-                        Errors = [$"{interest} Interest not found"]
+                        Errors = [$"{interest}  Interest not found"]
                     };
                 }
                 customer.Interests.Add(interest);
@@ -428,20 +439,26 @@ namespace CRM.Core.Services.Implementations
             };
             ReturnCustomerDto.AddedBy = userdto2;
             ReturnCustomerDto.Interests = new List<UserInterestDto>();
-            foreach (var interest in customer.Interests)
-            {
-                if (customer.Interests.Any(i => i.InterestID == interest.InterestID))
-                {
-                    ReturnCustomerDto.Interests.Add(new UserInterestDto { /*Id = interest.InterestID,*/ Name = interest.InterestName, IsSelected = true });
-                }
-                else
-                {
-                    ReturnCustomerDto.Interests.Add(new UserInterestDto { /*Id = interest.InterestID,*/ Name = interest.InterestName, IsSelected = false });
-                }
-            }
+            //foreach (var interest in customer.Interests)
+            //{
+            //    if (customer.Interests.Any(i => i.InterestID == interest.InterestID))
+            //    {
+            //        ReturnCustomerDto.Interests.Add(new UserInterestDto { /*Id = interest.InterestID,*/ Name = interest.InterestName, IsSelected = true });
+            //    }
+            //    else
+            //    {
+            //        ReturnCustomerDto.Interests.Add(new UserInterestDto { /*Id = interest.InterestID,*/ Name = interest.InterestName, IsSelected = false });
+            //    }
+            //}
+            //foreach(var interest in customer.Interests)
+            //{
+            //    ReturnCustomerDto.Interests.Add(new UserInterestDto { Id = interest.InterestID, Name = interest.InterestName });
+            //}
+            ReturnCustomerDto.Interests = customer.Interests.Select(i => new UserInterestDto { Id = i.InterestID, Name = i.InterestName }).ToList();
+
             return ReturnCustomerDto;
         }
-        public async Task<ResultDto> UpdateCustomer(CustomerDto customerDto,int customerId)
+        public async Task<ResultDto> UpdateCustomer(AddCustomerDto customerDto,int customerId)
         {
             var customer = await _unitOfWork.Customers.FindAsync(c => c.CustomerId == customerId, ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
             if (customer == null)
@@ -472,10 +489,11 @@ namespace CRM.Core.Services.Implementations
                 };
             }
             //var interest = await _unitOfWork.Interests.GetAllAsync(customerDto.);
+            var BussinesInterests =await _unitOfWork.Interests.GetAllAsync();
             foreach(var interestt in customerDto.Interests)
             {
                 //var interest = await _unitOfWork.Interests.FindAsync(x => x.InterestName == interestt.Name);
-                var interest = await _unitOfWork.Interests.FindAsync(x => x.InterestName.ToLower() == interestt.Name.ToLower());
+                var interest = await _unitOfWork.Interests.FindAsync(x => x.InterestID== interestt.Id);
                 if (interest == null)
                 {
                     return new ResultDto
@@ -484,22 +502,37 @@ namespace CRM.Core.Services.Implementations
                         Errors = ["Interest not found"]
                     };
                 }
-                if (customer.Interests.Any(i => i.InterestID == interest.InterestID) && interestt.IsSelected)
+                if (customer.Interests.Any(i => i.InterestID == interest.InterestID))
                 {
                     continue;
                 }
-                if (!customer.Interests.Any(i => i.InterestID == interest.InterestID) && !interestt.IsSelected)
-                {
-                    continue;
-                }
-                if ((!customer.Interests.Any(i => i.InterestID == interest.InterestID)) && interestt.IsSelected)
-                {
+                if (!customer.Interests.Any(i => i.InterestID == interest.InterestID))
                     customer.Interests.Add(interest);
-                }
-                if (customer.Interests.Any(i => i.InterestID == interest.InterestID) && !interestt.IsSelected)
+                //if (customer.Interests.Any(i => i.InterestID == interest.InterestID) && interestt.IsSelected)
+                //{
+                //    continue;
+                //}
+                //if (!customer.Interests.Any(i => i.InterestID == interest.InterestID) && !interestt.IsSelected)
+                //{
+                //    continue;
+                //}
+                //if ((!customer.Interests.Any(i => i.InterestID == interest.InterestID)) && interestt.IsSelected)
+                //{
+                //    customer.Interests.Add(interest);
+                //}
+                //if (customer.Interests.Any(i => i.InterestID == interest.InterestID) && !interestt.IsSelected)
+                //{
+                //    customer.Interests.Remove(interest);
+                //}
+            }
+            foreach(var bisInterest in BussinesInterests)
+            {
+                if (customer.Interests.Any(i => i.InterestID == bisInterest.InterestID) && customerDto.Interests.Any(i=>i.Id==bisInterest.InterestID)) { continue; }
+                if (customer.Interests.Any(i => i.InterestID == bisInterest.InterestID) && !customerDto.Interests.Any(i => i.Id == bisInterest.InterestID))
                 {
-                    customer.Interests.Remove(interest);
+                    customer.Interests.Remove(bisInterest);
                 }
+
             }
             customer.FirstName = customerDto.FirstName;
             customer.LastName = customerDto.LastName;
@@ -684,7 +717,7 @@ namespace CRM.Core.Services.Implementations
             {
                 var dto = new ReturnCustomerDto
                 {
-
+                    Id=customer.CustomerId,
                     FirstName = customer.FirstName,
                     LastName = customer.LastName,
                     Age = customer.Age,
@@ -694,9 +727,15 @@ namespace CRM.Core.Services.Implementations
                     Phone = customer.Phone,
                     Source = customer.Source.SourceName,
                     //SalesRepresntativeId = customer.SalesRepresntative.Id,
-                    Interests = customer.Interests.Select(i => new UserInterestDto { /*Id = i.InterestID,*/ Name = i.InterestName, IsSelected = true }).ToList(),
+                    //Interests = customer.Interests.Select(i => new UserInterestDto { /*Id = i.InterestID,*/ Name = i.InterestName, IsSelected = true }).ToList(),
                     AdditionDate = customer.AdditionDate
                 };
+                //foreach (var interest in customer.Interests)
+                //{
+                //    dto.Interests.Add(new UserInterestDto { Id = interest.InterestID, Name = interest.InterestName });
+                //}
+                dto.Interests = customer.Interests.Select(i => new UserInterestDto { Id = i.InterestID, Name = i.InterestName }).ToList();
+
                 var userdto = new UserDto
                 {
                     Id = customer.SalesRepresntative.Id,
@@ -768,9 +807,14 @@ namespace CRM.Core.Services.Implementations
                     Gender = customer.Gender,
                     SalesRepresntativeId = customer.SalesRepresntative.Id,
                     Source = customer.Source.SourceName,
-                    Interests = customer.Interests.Select(i => new UserInterestDto { /*Id = i.InterestID,*/ Name = i.InterestName, IsSelected = true }).ToList(),
+                    //Interests = customer.Interests.Select(i => new UserInterestDto { /*Id = i.InterestID,*/ Name = i.InterestName, IsSelected = true }).ToList(),
                     AdditionDate = customer.AdditionDate
                 };
+                //foreach (var interest in customer.Interests)
+                //{
+                //    customerDto.Interests.Add(new UserInterestDto { Id = interest.InterestID, Name = interest.InterestName });
+                //}
+                customerDto.Interests = customer.Interests.Select(i => new UserInterestDto { Id = i.InterestID, Name = i.InterestName }).ToList();
                 var userdto = new UserDto
                 {
                     Id = customer.SalesRepresntative.Id,

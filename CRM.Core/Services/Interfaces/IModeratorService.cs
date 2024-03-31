@@ -14,7 +14,7 @@ namespace CRM.Core.Services.Interfaces
         Task<ReturnUsersDto> GetAllSalesRepresentatives();
         Task<ReturnCustomerDto> AddCustomer(AddCustomerDto customerDto, string marketingModeratorEmail);
         //Task<ResultDto> AddCustomer(CustomerDto customerDto, string marketingModeratorEmail);
-        Task<ResultDto> UpdateCustomer(CustomerDto customerDto, int CustomerId);
+        Task<ResultDto> UpdateCustomer(AddCustomerDto customerDto, int customerId);
         Task<ReturnCustomerDto> GetCustomer(int customerId);
         Task<ReturnAllCustomersDto> GetAllCustomers(int page, int size);
         Task<ReturnAllCustomersDto> GetLastWeekCustomers(int page, int size);
