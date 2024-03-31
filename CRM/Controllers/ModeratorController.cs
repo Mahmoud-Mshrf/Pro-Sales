@@ -2,6 +2,7 @@
 using CRM.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Drawing;
 using System.Security.Claims;
 
 namespace CRM.Controllers
@@ -61,16 +62,17 @@ namespace CRM.Controllers
             return Ok(result);
         }
 
-        [HttpGet("get-all-customers")]
-        public async Task<IActionResult> GetAllCustomers()
-        {
-            var result = await _moderatorService.GetAllCustomers();
-            if (!result.IsSuccess)
-            {
-                return BadRequest(result);
-            }
-            return Ok(result.Customers);
-        }
+        
+        //[HttpGet("get-all-customers")]
+        //public async Task<IActionResult> GetAllCustomers()
+        //{
+        //    var result = await _moderatorService.GetAllCustomers();
+        //    if (!result.IsSuccess)
+        //    {
+        //        return BadRequest(result);
+        //    }
+        //    return Ok(result);
+        //}
         [HttpGet("get-customer/{customerId}")]
         public async Task<IActionResult> GetCustomer(int customerId)
         {
@@ -103,11 +105,35 @@ namespace CRM.Controllers
             }
             return Ok(result);
         }
-        [HttpGet("search")]
-        public async Task<IActionResult> Search([FromQuery] string query)
+        //[HttpGet("search")]
+        //public async Task<IActionResult> Search([FromQuery] string query)
+        //{
+        //    var result = await _moderatorService.Search(query);
+        //    return Ok(result);
+        //}
+        //[HttpGet("search")]
+        //public async Task<IActionResult> Search([FromQuery] string query,int page ,int size)
+        //{
+        //    var result = await _moderatorService.Search(query,page,size);
+        //    return Ok(result);
+        //}
+        [HttpGet("GetCustomers")]
+        public async Task<IActionResult> GetCustomers(int page , int size, [FromQuery] string query = null)
         {
-            var result = await _moderatorService.Search(query);
-            return Ok(result);
+            if(query == null)
+            {
+                var result = await _moderatorService.GetAllCustomers(page, size);
+                if (!result.IsSuccess)
+                {
+                    return BadRequest(result);
+                }
+                return Ok(result.Pages);
+            }
+            else
+            {
+                var result = await _moderatorService.Search(query, page, size);
+                return Ok(result);
+            }
         }
         [HttpGet("get-sales/{id}")]
         public async Task<IActionResult> GetSalesById(string id)

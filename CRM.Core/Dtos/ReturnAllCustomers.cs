@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using static CRM.Core.Services.Implementations.FilterService;
 
 namespace CRM.Core.Dtos
 {
@@ -14,6 +15,7 @@ namespace CRM.Core.Dtos
         [JsonIgnore]
         public bool IsSuccess { get; set; }
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public IEnumerable<ReturnCustomerDto>? Customers { get; set; }
+        //public IEnumerable<ReturnCustomerDto>? Customers { get; set; }
+        public PagesDto<ReturnCustomerDto> Pages { get; set; }
     }
 }
