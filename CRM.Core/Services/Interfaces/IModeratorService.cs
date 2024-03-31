@@ -17,6 +17,7 @@ namespace CRM.Core.Services.Interfaces
         Task<ResultDto> UpdateCustomer(CustomerDto customerDto, int CustomerId);
         Task<ReturnCustomerDto> GetCustomer(int customerId);
         Task<ReturnAllCustomersDto> GetAllCustomers(int page, int size);
+        Task<ReturnAllCustomersDto> GetLastWeekCustomers(int page, int size);
         //Task<ReturnAllCustomersDto> GetAllCustomers();
         Task<ResultDto> DeleteCustomer(int CustomerId);
         Task<ResultDto> AddSource(string name);

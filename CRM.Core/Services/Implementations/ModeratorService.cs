@@ -741,6 +741,62 @@ namespace CRM.Core.Services.Implementations
             };
             return userDto;
         }
-        
+        public async Task<ReturnAllCustomersDto> GetLastWeekCustomers(int page, int size)
+        {
+            var customers = await _unitOfWork.Customers.GetAllAsync(c => c.AdditionDate >= DateTime.Now.AddDays(-7), ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
+            if (customers == null)
+            {
+                return new ReturnAllCustomersDto
+                {
+                    IsSuccess = false,
+                    Errors = ["No customers found"]
+                };
+            }
+            var customersDto = new List<ReturnCustomerDto>();
+            foreach (var customer in customers)
+            {
+                var customerDto = new ReturnCustomerDto
+                {
+                    //CustomerId = customer.CustomerId,
+                    Id = customer.CustomerId,
+                    FirstName = customer.FirstName,
+                    LastName = customer.LastName,
+                    Email = customer.Email,
+                    Phone = customer.Phone,
+                    City = customer.City,
+                    Age = customer.Age,
+                    Gender = customer.Gender,
+                    SalesRepresntativeId = customer.SalesRepresntative.Id,
+                    Source = customer.Source.SourceName,
+                    Interests = customer.Interests.Select(i => new UserInterestDto { /*Id = i.InterestID,*/ Name = i.InterestName, IsSelected = true }).ToList(),
+                    AdditionDate = customer.AdditionDate
+                };
+                var userdto = new UserDto
+                {
+                    Id = customer.SalesRepresntative.Id,
+                    Name = $"{customer.SalesRepresntative.FirstName} {customer.SalesRepresntative.LastName}",
+                    Email = customer.SalesRepresntative.Email,
+                    customers = await _unitOfWork.Customers.CountAsync(c => c.SalesRepresntative.Id == customer.SalesRepresntative.Id)
+                };
+                customerDto.SalesRepresentative = userdto;
+                var userdto2 = new UserDto
+                {
+                    Id = customer.MarketingModerator.Id,
+                    Name = $"{customer.MarketingModerator.FirstName} {customer.MarketingModerator.LastName}",
+                    Email = customer.MarketingModerator.Email
+                };
+                customerDto.AddedBy = userdto2;
+                customersDto.Add(customerDto);
+            }
+            var Customers = customersDto.OrderByDescending(DateTime => DateTime.AdditionDate).ToList();
+            var CustomerPage = _filterService.Paginate(Customers, page, size);
+            return new ReturnAllCustomersDto
+            {
+                IsSuccess = true,
+                Pages = CustomerPage
+                //Customers = customersDto.OrderByDescending(DateTime => DateTime.AdditionDate).ToList()
+            };
+
+        }
     }
 }

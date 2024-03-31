@@ -61,8 +61,17 @@ namespace CRM.Controllers
             }
             return Ok(result);
         }
+        [HttpGet("get-last-week-customers")]
+        public async Task<IActionResult> GetLastWeekCustomers(int page, int size)
+        {
+            var result = await _moderatorService.GetLastWeekCustomers(page, size);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result.Pages);
+        }
 
-        
         //[HttpGet("get-all-customers")]
         //public async Task<IActionResult> GetAllCustomers()
         //{
