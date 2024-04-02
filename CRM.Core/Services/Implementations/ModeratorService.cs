@@ -2,6 +2,7 @@
 using CRM.Core.Models;
 using CRM.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Org.BouncyCastle.Ocsp;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -39,8 +40,11 @@ namespace CRM.Core.Services.Implementations
                 var customersCount = await _unitOfWork.Customers.CountAsync(c => c.SalesRepresntative.Id == rep.Id);
                 var user = new UserDto
                 {
-                    Name = rep.FirstName + " " + rep.LastName,
+                    FirstName= rep.FirstName,
+                    LastName=rep.LastName,
                     Email = rep.Email,
+                    UserName=rep.UserName,
+                    Roles=await _unitOfWork.UserManager.GetRolesAsync(rep),
                     Id = rep.Id,
                     customers = customersCount
                 };
@@ -129,7 +133,10 @@ namespace CRM.Core.Services.Implementations
             var userdto = new UserDto
             {
                 Id = customer.SalesRepresntative.Id,
-                Name = $"{customer.SalesRepresntative.FirstName} {customer.SalesRepresntative.LastName}",
+                FirstName=customer.SalesRepresntative.FirstName,
+                LastName=customer.SalesRepresntative.LastName,
+                UserName = customer.SalesRepresntative.UserName,
+                Roles = await _unitOfWork.UserManager.GetRolesAsync(customer.SalesRepresntative),
                 Email = customer.SalesRepresntative.Email,
                 customers = await _unitOfWork.Customers.CountAsync(c => c.SalesRepresntative.Id == customer.SalesRepresntative.Id)
             };
@@ -137,7 +144,10 @@ namespace CRM.Core.Services.Implementations
             var userdto2 = new UserDto
             {
                 Id = customer.MarketingModerator.Id,
-                Name = $"{customer.MarketingModerator.FirstName} {customer.MarketingModerator.LastName}",
+                FirstName = customer.MarketingModerator.FirstName,
+                LastName = customer.MarketingModerator.LastName,
+                UserName = customer.MarketingModerator.UserName,
+                Roles = await _unitOfWork.UserManager.GetRolesAsync(customer.MarketingModerator),
                 Email = customer.MarketingModerator.Email
             };
             customerDto.AddedBy = userdto2;
@@ -170,7 +180,7 @@ namespace CRM.Core.Services.Implementations
                     City = customer.City,
                     Age = customer.Age,
                     Gender = customer.Gender,
-                    SalesRepresntativeId = customer.SalesRepresntative.Id,
+                    //SalesRepresntativeId = customer.SalesRepresntative.Id,
                     Source = customer.Source.SourceName,
                     //Interests = customer.Interests.Select(i => new UserInterestDto { /*Id = i.InterestID,*/ Name = i.InterestName, IsSelected = true }).ToList(),
                     AdditionDate = customer.AdditionDate
@@ -188,7 +198,10 @@ namespace CRM.Core.Services.Implementations
                 var userdto = new UserDto
                 {
                     Id = customer.SalesRepresntative.Id,
-                    Name = $"{customer.SalesRepresntative.FirstName} {customer.SalesRepresntative.LastName}",
+                    FirstName = customer.SalesRepresntative.FirstName,
+                    LastName = customer.SalesRepresntative.LastName,
+                    UserName = customer.SalesRepresntative.UserName,
+                    Roles = await _unitOfWork.UserManager.GetRolesAsync(customer.SalesRepresntative),
                     Email = customer.SalesRepresntative.Email,
                     customers = await _unitOfWork.Customers.CountAsync(c => c.SalesRepresntative.Id == customer.SalesRepresntative.Id)
                 };
@@ -196,7 +209,10 @@ namespace CRM.Core.Services.Implementations
                 var userdto2 = new UserDto
                 {
                     Id = customer.MarketingModerator.Id,
-                    Name = $"{customer.MarketingModerator.FirstName} {customer.MarketingModerator.LastName}",
+                    FirstName = customer.MarketingModerator.FirstName,
+                    LastName = customer.MarketingModerator.LastName,
+                    UserName = customer.MarketingModerator.UserName,
+                    Roles = await _unitOfWork.UserManager.GetRolesAsync(customer.MarketingModerator),
                     Email = customer.MarketingModerator.Email
                 };
                 customerDto.AddedBy = userdto2;
@@ -435,7 +451,10 @@ namespace CRM.Core.Services.Implementations
             var userdto = new UserDto
             {
                 Id = customer.SalesRepresntative.Id,
-                Name = $"{customer.SalesRepresntative.FirstName} {customer.SalesRepresntative.LastName}",
+                FirstName = customer.SalesRepresntative.FirstName,
+                LastName = customer.SalesRepresntative.LastName,
+                UserName = customer.SalesRepresntative.UserName,
+                Roles = await _unitOfWork.UserManager.GetRolesAsync(customer.SalesRepresntative),
                 Email = customer.SalesRepresntative.Email,
                 customers = await _unitOfWork.Customers.CountAsync(c => c.SalesRepresntative.Id == customer.SalesRepresntative.Id)
             };
@@ -443,7 +462,10 @@ namespace CRM.Core.Services.Implementations
             var userdto2 = new UserDto
             {
                 Id = customer.MarketingModerator.Id,
-                Name = $"{customer.MarketingModerator.FirstName} {customer.MarketingModerator.LastName}",
+                FirstName = customer.MarketingModerator.FirstName,
+                LastName = customer.MarketingModerator.LastName,
+                UserName = customer.MarketingModerator.UserName,
+                Roles = await _unitOfWork.UserManager.GetRolesAsync(customer.MarketingModerator),
                 Email = customer.MarketingModerator.Email
             };
             ReturnCustomerDto.AddedBy = userdto2;
@@ -753,7 +775,10 @@ namespace CRM.Core.Services.Implementations
                 var userdto = new UserDto
                 {
                     Id = customer.SalesRepresntative.Id,
-                    Name = $"{customer.SalesRepresntative.FirstName} {customer.SalesRepresntative.LastName}",
+                    FirstName = customer.SalesRepresntative.FirstName,
+                    LastName = customer.SalesRepresntative.LastName,
+                    UserName = customer.SalesRepresntative.UserName,
+                    Roles = await _unitOfWork.UserManager.GetRolesAsync(customer.SalesRepresntative),
                     Email = customer.SalesRepresntative.Email,
                     customers = await _unitOfWork.Customers.CountAsync(c => c.SalesRepresntative.Id == customer.SalesRepresntative.Id)
                 };
@@ -761,7 +786,10 @@ namespace CRM.Core.Services.Implementations
                 var userdto2 = new UserDto
                 {
                     Id = customer.MarketingModerator.Id,
-                    Name = $"{customer.MarketingModerator.FirstName} {customer.MarketingModerator.LastName}",
+                    FirstName = customer.MarketingModerator.FirstName,
+                    LastName = customer.MarketingModerator.LastName,
+                    UserName = customer.MarketingModerator.UserName,
+                    Roles = await _unitOfWork.UserManager.GetRolesAsync(customer.MarketingModerator),
                     Email = customer.MarketingModerator.Email
                 };
                 dto.AddedBy = userdto2;
@@ -787,7 +815,8 @@ namespace CRM.Core.Services.Implementations
             }
             var userDto = new UserDto
             {
-                Name = user.FirstName + " " + user.LastName,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
                 Email = user.Email,
                 Id = user.Id,
                 customers = customersNumber
@@ -819,7 +848,7 @@ namespace CRM.Core.Services.Implementations
                     City = customer.City,
                     Age = customer.Age,
                     Gender = customer.Gender,
-                    SalesRepresntativeId = customer.SalesRepresntative.Id,
+                    //SalesRepresntativeId = customer.SalesRepresntative.Id,
                     Source = customer.Source.SourceName,
                     //Interests = customer.Interests.Select(i => new UserInterestDto { /*Id = i.InterestID,*/ Name = i.InterestName, IsSelected = true }).ToList(),
                     AdditionDate = customer.AdditionDate
@@ -837,7 +866,10 @@ namespace CRM.Core.Services.Implementations
                 var userdto = new UserDto
                 {
                     Id = customer.SalesRepresntative.Id,
-                    Name = $"{customer.SalesRepresntative.FirstName} {customer.SalesRepresntative.LastName}",
+                    FirstName = customer.SalesRepresntative.FirstName,
+                    LastName = customer.SalesRepresntative.LastName,
+                    UserName = customer.SalesRepresntative.UserName,
+                    Roles = await _unitOfWork.UserManager.GetRolesAsync(customer.SalesRepresntative),
                     Email = customer.SalesRepresntative.Email,
                     customers = await _unitOfWork.Customers.CountAsync(c => c.SalesRepresntative.Id == customer.SalesRepresntative.Id)
                 };
@@ -845,7 +877,10 @@ namespace CRM.Core.Services.Implementations
                 var userdto2 = new UserDto
                 {
                     Id = customer.MarketingModerator.Id,
-                    Name = $"{customer.MarketingModerator.FirstName} {customer.MarketingModerator.LastName}",
+                    FirstName = customer.MarketingModerator.FirstName,
+                    LastName = customer.MarketingModerator.LastName,
+                    UserName=customer.MarketingModerator.UserName,
+                    Roles=await _unitOfWork.UserManager.GetRolesAsync(customer.MarketingModerator),
                     Email = customer.MarketingModerator.Email
                 };
                 customerDto.AddedBy = userdto2;

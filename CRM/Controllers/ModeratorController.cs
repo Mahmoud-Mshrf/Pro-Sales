@@ -126,7 +126,7 @@ namespace CRM.Controllers
         //    var result = await _moderatorService.Search(query,page,size);
         //    return Ok(result);
         //}
-        [HttpGet("GetCustomers")]
+        [HttpGet("get-customers")]
         public async Task<IActionResult> GetCustomers(int page , int size, [FromQuery] string query = null)
         {
             if(query == null)
@@ -141,7 +141,7 @@ namespace CRM.Controllers
             else
             {
                 var result = await _moderatorService.Search(query, page, size);
-                return Ok(result);
+                return Ok(result.Pages);
             }
         }
         [HttpGet("get-sales/{id}")]
