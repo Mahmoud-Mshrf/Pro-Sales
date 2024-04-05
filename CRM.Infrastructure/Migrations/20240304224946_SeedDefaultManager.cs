@@ -7,7 +7,7 @@ namespace CRM.Infrastructure.Migrations
 {
     /// <inheritdoc />
     public partial class SeedDefaultManager : Migration
-    {
+    { 
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             // Create DefaultAdmin user

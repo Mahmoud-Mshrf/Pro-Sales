@@ -1,4 +1,5 @@
 ﻿using CRM.Core.Consts;
+using CRM.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,5 +30,6 @@ namespace CRM.Core.Interfaces
         Task<int> CountAsync();
         Task<int> CountAsync(Expression<Func<T, bool>> predicate);
         Task<IEnumerable<T>> GetAllAsync(string[] includes);
+        
     }
 }

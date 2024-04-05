@@ -58,9 +58,10 @@ namespace CRM.Core.Services.Implementations
                     };
                 }
 
-                call.CallDate = callDto.CallDate;
-                call.CallStatus = callDto.CallStatus;
-                call.CallSummery = callDto.CallSummery;
+                call.CallStatus = callDto.status;
+                call.CallSummery = callDto.summary;
+                call.CallDate = callDto.date;
+                call.FollowUpDate = callDto.followUp;
                 call.SalesRepresntative = salesRep;
                 call.Customer= customer;
 
@@ -95,7 +96,7 @@ namespace CRM.Core.Services.Implementations
             }
         }
 
-        public async Task<ResultDto> UpdateCallInfo(CallDto callDto, int callId)
+        public async Task<ResultDto> UpdateCallInfo(CallDto callDto, string callId)
         {
             var call = await _unitOfWork.Calls.FindAsync(c => c.CallID == callId);
             if (call == null)
@@ -115,8 +116,12 @@ namespace CRM.Core.Services.Implementations
                     Errors = ["Customer not Found"]
                 };
             }
-            call.CallSummery= callDto.CallSummery;
-            call.FollowUpDate = callDto.FollowUpDate;
+            call.CallDate = callDto.date;
+            call.CallStatus = callDto.status;
+            call.CallSummery = callDto.summary;
+            call.Customer = customer;
+            call.FollowUpDate = callDto.followUp;
+
             try
             {
                 _unitOfWork.complete();
@@ -153,18 +158,20 @@ namespace CRM.Core.Services.Implementations
                         
                     };
                 }
-
+               
                 var Calls = new List<CallDto>();
                 foreach (var call in calls)
                 {
                     var callDto = new CallDto
                     {
-                        CallDate = call.CallDate,
-                        CallStatus = call.CallStatus,
-                        CallSummery = call.CallSummery,
-                        // Check if Customer property is not null before accessing CustomerId
-                        CustomerId = call.Customer != null ? call.Customer.CustomerId : 0, // Or default value as per your requirement
-                        FollowUpDate = call.FollowUpDate,
+                        id= call.CallID,
+                        type = ActionType.call,
+                        status = call.CallStatus,
+                        summary = call.CallSummery,
+                        date = call.CallDate,
+                        followUp = call.FollowUpDate,
+                     // CustomerId = call.Customer != null ? call.Customer.CustomerId : 0
+
                     };
                     Calls.Add(callDto);
                 }
@@ -186,7 +193,7 @@ namespace CRM.Core.Services.Implementations
                 };
             }
         }
-        public async Task<ReturnCallsDto> GetCallById(int callId)
+        public async Task<ReturnCallsDto> GetCallById(string callId)
         {
             try
             {
@@ -204,12 +211,15 @@ namespace CRM.Core.Services.Implementations
 
                 var callDto = new CallDto
                 {
-                    CallDate = call.CallDate,
-                    CallStatus = call.CallStatus,
-                    CallSummery = call.CallSummery,
-                    // Check if Customer property is not null before accessing CustomerId
-                    CustomerId = call.Customer != null ? call.Customer.CustomerId : 0, // Or default value as per your requirement
-                    FollowUpDate = call.FollowUpDate,
+                    id= call.CallID,
+                    type=ActionType.call,
+                    status = call.CallStatus,
+                    summary = call.CallSummery,
+                    date = call.CallDate,
+                    followUp = call.FollowUpDate,
+                    //CustomerId = call.Customer != null ? call.Customer.CustomerId : 0,
+
+
                 };
 
                 return new ReturnCallsDto
@@ -228,11 +238,11 @@ namespace CRM.Core.Services.Implementations
                 };
             }
         }
-         public async Task<ResultDto> DeleteCallById(int callId)
+         public async Task<ResultDto> DeleteCallById(string callId)
         {
             try
             {
-                var call = await _unitOfWork.Calls.GetByIdAsync(callId);
+                var call = await _unitOfWork.Calls.FindAsync(c => c.CallID == callId);
                 if (call == null)
                 {
                     return new ResultDto
@@ -315,8 +325,9 @@ namespace CRM.Core.Services.Implementations
                     };
                 }
 
-                message.MessageDate = messageDto.MessageDate;
-                message.MessageContent = messageDto.MessageContent;
+                message.MessageDate = messageDto.date;
+                message.FollowUpDate = messageDto.followUp;
+                message.MessageContent = messageDto.summary;
                 message.SalesRepresntative = salesRep;
                 message.Customer = customer;
 
@@ -352,7 +363,7 @@ namespace CRM.Core.Services.Implementations
 
         }
 
-        public async Task<ResultDto> UpdateMessageInfo(MessageDto messageDto, int MessageId)
+        public async Task<ResultDto> UpdateMessageInfo(MessageDto messageDto, string MessageId)
         {
             var message = await _unitOfWork.Messages.FindAsync(c => c.MessageID == MessageId);
             if (message == null)
@@ -373,8 +384,9 @@ namespace CRM.Core.Services.Implementations
 
                 };
             }
-            message.MessageContent = messageDto.MessageContent;
-            message.FollowUpDate= messageDto.FollowUpDate;
+            message.MessageContent = messageDto.summary;
+            message.MessageDate = messageDto.date;
+            message.FollowUpDate= messageDto.followUp;
             message.Customer.CustomerId = messageDto.CustomerId;
             try
             {
@@ -417,11 +429,12 @@ namespace CRM.Core.Services.Implementations
                 {
                     var messageDto = new MessageDto
                     {
-                        MessageDate = message.MessageDate,
-                        MessageContent = message.MessageContent,
-                        // Check if Customer property is not null before accessing CustomerId
-                        CustomerId = message.Customer != null ? message.Customer.CustomerId : 0, // Or default value as per your requirement
-                        FollowUpDate = message.FollowUpDate,
+                        id = message.MessageID,
+                        type = ActionType.message,
+                        summary = message.MessageContent,
+                        date = message.MessageDate,
+                        followUp = message.FollowUpDate,
+                      //  CustomerId = message.Customer != null ? message.Customer.CustomerId : 0,
                     };
                     Messages.Add(messageDto);
                 }
@@ -444,7 +457,7 @@ namespace CRM.Core.Services.Implementations
             }
         }
 
-        public async Task<ReturnMessagesDto> GetMessageById(int messageID)
+        public async Task<ReturnMessagesDto> GetMessageById(string messageID)
         {
             try
             {
@@ -462,11 +475,12 @@ namespace CRM.Core.Services.Implementations
 
                 var messageDto = new MessageDto
                 {
-                    MessageDate= message.MessageDate,
-                    MessageContent=message.MessageContent,
-                   // Check if Customer property is not null before accessing CustomerId
-                    CustomerId = message.Customer != null ? message.Customer.CustomerId : 0, // Or default value as per your requirement
-                    FollowUpDate = message.FollowUpDate,
+                    id = message.MessageID,
+                    type = ActionType.message,
+                    summary = message.MessageContent,
+                    date = message.MessageDate,
+                    followUp = message.FollowUpDate,
+                  //  CustomerId = message.Customer != null ? message.Customer.CustomerId : 0,
                 };
 
                 return new ReturnMessagesDto
@@ -486,11 +500,11 @@ namespace CRM.Core.Services.Implementations
             }
         }
 
-        public async Task<ResultDto> DeleteMessageById(int MessageId)
+        public async Task<ResultDto> DeleteMessageById(string MessageId)
         {
             try
             {
-                var message = await _unitOfWork.Messages.GetByIdAsync(MessageId);
+                var message = await _unitOfWork.Messages.FindAsync(c => c.MessageID == MessageId);
                 if (message == null)
                 {
                     return new ResultDto
@@ -573,12 +587,12 @@ namespace CRM.Core.Services.Implementations
                     };
                 }
 
-                meeting.connectionState = meetingDto.connectionState;
+                meeting.connectionState = meetingDto.online;
                 meeting.SalesRepresntative = salesRep;
                 meeting.Customer = customer;
-                meeting.FollowUpDate = meetingDto.FollowUpDate;
-                meeting.MeetingDate = meetingDto.MeetingDate;
-                meeting.MeetingSummary = meetingDto.MeetingSummary;
+                meeting.FollowUpDate = meetingDto.followUp;
+                meeting.MeetingDate = meetingDto.date;
+                meeting.MeetingSummary = meetingDto.summary;
 
                 await _unitOfWork.Meetings.AddAsync(meeting);
 
@@ -616,7 +630,7 @@ namespace CRM.Core.Services.Implementations
             }
         }
 
-        public async Task<ResultDto> UpdateMeeting(MeetingDto meetingDto, int MeetingId)
+        public async Task<ResultDto> UpdateMeeting(MeetingDto meetingDto, string MeetingId)
         {
             var meeting = await _unitOfWork.Meetings.FindAsync(c => c.MeetingID == MeetingId);
             if (meeting == null)
@@ -636,10 +650,10 @@ namespace CRM.Core.Services.Implementations
                     Errors = ["Customer not Found"]
                 };
             }
-            meeting.connectionState = meetingDto.connectionState;
+            meeting.connectionState = meetingDto.online;
             meeting.Customer=customer;
-            meeting.FollowUpDate = meetingDto.FollowUpDate;
-            meeting.MeetingSummary = meetingDto.MeetingSummary;
+            meeting.FollowUpDate = meetingDto.followUp;
+            meeting.MeetingSummary = meetingDto.summary;
             try
             {
                 _unitOfWork.complete();
@@ -681,11 +695,15 @@ namespace CRM.Core.Services.Implementations
                 {
                     var meetingDto = new MeetingDto
                     {
-                        MeetingDate = meeting.MeetingDate,
-                        MeetingSummary = meeting.MeetingSummary,
+                        id = meeting.MeetingID,
+                        type=ActionType.meeting,
+                        online=meeting.connectionState,
+                        summary = meeting.MeetingSummary,
+                        date = meeting.MeetingDate,
+                        followUp = meeting.FollowUpDate,
                         // Check if Customer property is not null before accessing CustomerId
-                        CustomerId = meeting.Customer != null ? meeting.Customer.CustomerId : 0, // Or default value as per your requirement
-                        FollowUpDate = meeting.FollowUpDate,
+                       // CustomerId = meeting.Customer != null ? meeting.Customer.CustomerId : 0, // Or default value as per your requirement
+
                     };
                     Meetings.Add(meetingDto);
                 }
@@ -709,7 +727,7 @@ namespace CRM.Core.Services.Implementations
 
         }
 
-        public async Task<ReturnMeetingsDto> GetMeetingByID(int MeetingId)
+        public async Task<ReturnMeetingsDto> GetMeetingByID(string MeetingId)
         {
             try
             {
@@ -727,11 +745,15 @@ namespace CRM.Core.Services.Implementations
 
                 var meetingDto = new MeetingDto
                 {
-                    MeetingDate = meeting.MeetingDate,
-                    MeetingSummary = meeting.MeetingSummary,
+                    id = meeting.MeetingID,
+                    type = ActionType.meeting,
+                    online=meeting.connectionState,
+                    summary = meeting.MeetingSummary,
+                    date = meeting.MeetingDate,
+                    followUp = meeting.FollowUpDate,
                     // Check if Customer property is not null before accessing CustomerId
-                    CustomerId = meeting.Customer != null ? meeting.Customer.CustomerId : 0, // Or default value as per your requirement
-                    FollowUpDate = meeting.FollowUpDate,
+                    //CustomerId = meeting.Customer != null ? meeting.Customer.CustomerId : 0, // Or default value as per your requirement
+
                 };
 
                 return new ReturnMeetingsDto
@@ -751,11 +773,11 @@ namespace CRM.Core.Services.Implementations
             }
         }
 
-        public async Task<ResultDto> DeleteMeeting(int MeetingId)
+        public async Task<ResultDto> DeleteMeeting(string MeetingId)
         {
             try
             {
-                var meeting = await _unitOfWork.Meetings.GetByIdAsync(MeetingId);
+                var meeting = await _unitOfWork.Meetings.FindAsync(c => c.MeetingID == MeetingId);
                 if (meeting == null)
                 {
                     return new ResultDto
@@ -846,9 +868,9 @@ namespace CRM.Core.Services.Implementations
                     };
                 }
 
-                deal.DealDate = dealsDto.DealDate;
-                deal.description = dealsDto.description;
-                deal.Price = dealsDto.Price;
+                deal.DealDate = dealsDto.date;
+                deal.description = dealsDto.summary;
+                deal.Price = dealsDto.price;
                 deal.Interest = interest;
                 deal.SalesRepresntative = salesRep;
                 deal.Customer = customer;
@@ -885,7 +907,7 @@ namespace CRM.Core.Services.Implementations
         }
 
 
-        public async Task<ResultDto> UpdateDeal(DealsDto dealsDto, int dealId)
+        public async Task<ResultDto> UpdateDeal(DealsDto dealsDto, string dealId)
         {
             var deal = await _unitOfWork.Deals.FindAsync(c => c.DealId == dealId);
             if (deal == null)
@@ -915,9 +937,9 @@ namespace CRM.Core.Services.Implementations
                 };
             }
 
-            deal.Price = dealsDto.Price;
-            deal.DealDate = dealsDto.DealDate;
-            deal.description = dealsDto.description;
+            deal.Price = dealsDto.price;
+            deal.DealDate = dealsDto.date;
+            deal.description = dealsDto.summary;
             deal.Interest=interest;
             deal.Customer=customer;
             
@@ -940,11 +962,15 @@ namespace CRM.Core.Services.Implementations
             };
         }
 
+
+
+
+
         public async Task<ReturnDealsDto> GetAllDeals()
         {
             try
             {
-                var includes = new string[] { "Customer","Interest" };
+                var includes = new string[] { "Customer", "Interest" };
                 var deals = await _unitOfWork.Deals.GetAllAsync(call => true, int.MaxValue, 0, includes);
 
                 if (deals == null || !deals.Any())
@@ -955,28 +981,32 @@ namespace CRM.Core.Services.Implementations
                         Errors = ["Deals not Found"]
                     };
                 }
-                 
+
                 var Deals = new List<DealsDto>();
                 foreach (var deal in deals)
                 {
                     var dealDto = new DealsDto
                     {
-                        DealDate= deal.DealDate,
-                        description=deal.description,
-                        Price= deal.Price,    
-                        // Check if Customer property is not null before accessing CustomerId
-                        CustomerId = deal.Customer != null ? deal.Customer.CustomerId : 0,
-                        InterestId = deal.Interest != null? deal.Interest.InterestID:0,
-                       
+                        id = deal.DealId, 
+                        type = ActionType.deal, 
+                        price = deal.Price,
+                        interest = new InterestDto
+                        {
+                            Id = deal.Interest.InterestID,
+                            Name = deal.Interest.InterestName
+                        },
+                        summary = deal.description, 
+                        date = deal.DealDate,
+                        
+                        
                     };
                     Deals.Add(dealDto);
                 }
 
-
                 return new ReturnDealsDto
                 {
                     IsSuccess = true,
-                    Message = "Calls found",
+                    Message = "Deals found",
                     Deals = Deals
                 };
             }
@@ -985,16 +1015,15 @@ namespace CRM.Core.Services.Implementations
                 return new ReturnDealsDto
                 {
                     IsSuccess = false,
-                    Errors =[ ex.Message]
+                    Errors = [ex.Message]
                 };
             }
         }
-
-        public async Task<ReturnDealsDto> GetDealById(int DealId)
+        public async Task<ReturnDealsDto> GetDealById(string DealId)
         {
             try
             {
-                var includes = new string[] { "Customer","Interest" };
+                var includes = new string[] { "Customer", "Interest" };
                 var deal = await _unitOfWork.Deals.FindAsync(c => c.DealId == DealId, includes);
 
                 if (deal == null)
@@ -1002,19 +1031,24 @@ namespace CRM.Core.Services.Implementations
                     return new ReturnDealsDto
                     {
                         IsSuccess = false,
-                       Errors =[ "Deal not found"]
+                        Errors = ["Deal not found"]
                     };
                 }
 
                 var dealDto = new DealsDto
                 {
-                   description=deal.description,
-                   Price= deal.Price,
-                   DealDate=deal.DealDate,
-                   InterestId=deal.Interest !=null? deal.Interest.InterestID:0,
-                    // Check if Customer property is not null before accessing CustomerId
-                    CustomerId = deal.Customer != null ? deal.Customer.CustomerId : 0, // Or default value as per your requirement
+                    id = deal.DealId,
+                    type = ActionType.deal,
+                    price = deal.Price,
+                    interest = new InterestDto
+                    {
+                        Id = deal.Interest.InterestID,
+                        Name = deal.Interest.InterestName
+                    },
+                    summary = deal.description,
+                    date = deal.DealDate,
                     
+
                 };
 
                 return new ReturnDealsDto
@@ -1029,16 +1063,16 @@ namespace CRM.Core.Services.Implementations
                 return new ReturnDealsDto
                 {
                     IsSuccess = false,
-                    Errors =[ ex.Message]
+                    Errors = [ex.Message]
                 };
             }
         }
 
-        public async Task<ResultDto> DeleteDeal(int dealId)
+        public async Task<ResultDto> DeleteDeal(string dealId)
         {
             try
             {
-                var deal = await _unitOfWork.Deals.GetByIdAsync(dealId);
+                var deal = await _unitOfWork.Deals.FindAsync(c => c.DealId == dealId);
                 if (deal == null)
                 {
                     return new ResultDto

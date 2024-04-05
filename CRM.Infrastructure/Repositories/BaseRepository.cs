@@ -1,5 +1,6 @@
 ﻿using CRM.Core.Consts;
 using CRM.Core.Interfaces;
+using CRM.Core.Models;
 using CRM.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -150,6 +151,8 @@ namespace CRM.Infrastructure.Repositories
         {
             return await _context.Set<T>().CountAsync(predicate);
         }
+
+        
 
 
     }

@@ -11,35 +11,35 @@ namespace CRM.Core.Services.Interfaces
     {
         #region MangeCalls
         Task<ResultDto> AddCall(CallDto callDto, string SalesRepresntativeEmail);
-        Task<ResultDto> UpdateCallInfo(CallDto callDto, int CallId);
+        Task<ResultDto> UpdateCallInfo(CallDto callDto, string CallId);
         Task<ReturnCallsDto> GetAllCalls();
-        Task<ReturnCallsDto> GetCallById(int callId);
-        Task<ResultDto> DeleteCallById(int callId);
+        Task<ReturnCallsDto> GetCallById(string callId);
+        Task<ResultDto> DeleteCallById(string callId);
         #endregion
 
         #region ManageMessages
         Task<ResultDto> AddMessage(MessageDto MessageDto, string SalesRepresntativeEmail);
-        Task<ResultDto> UpdateMessageInfo(MessageDto messageDto, int MessageId);
+        Task<ResultDto> UpdateMessageInfo(MessageDto messageDto, string MessageId);
         Task<ReturnMessagesDto> GetAllMessages();
-        Task<ReturnMessagesDto> GetMessageById(int MessageId);
-        Task<ResultDto> DeleteMessageById(int MessageId);
+        Task<ReturnMessagesDto> GetMessageById(string MessageId);
+        Task<ResultDto> DeleteMessageById(string MessageId);
 
         #endregion
 
         #region ManageMeetings
         Task<ResultDto> AddMeeting(MeetingDto meetingDto, string SaleRepEmail);
-        Task<ResultDto> UpdateMeeting(MeetingDto meetingDto, int MeetingId);
+        Task<ResultDto> UpdateMeeting(MeetingDto meetingDto, string MeetingId);
         Task<ReturnMeetingsDto> GetAllMeetings();
-        Task<ReturnMeetingsDto> GetMeetingByID(int MeetingId);
-        Task<ResultDto> DeleteMeeting(int MeetingId);
+        Task<ReturnMeetingsDto> GetMeetingByID(string MeetingId);
+        Task<ResultDto> DeleteMeeting(string MeetingId);
         #endregion
 
         #region ManageDeals
         Task<ResultDto> AddDeal(DealsDto dealsDto, string SaleRepEmail);
-        Task<ResultDto> UpdateDeal(DealsDto dealsDto, int DealId);
+        Task<ResultDto> UpdateDeal(DealsDto dealsDto, string DealId);
         Task<ReturnDealsDto> GetAllDeals();
-        Task<ReturnDealsDto> GetDealById(int DealId);
-        Task<ResultDto> DeleteDeal(int DealId);
+        Task<ReturnDealsDto> GetDealById(string DealId);
+        Task<ResultDto> DeleteDeal(string DealId);
 
         #endregion
 

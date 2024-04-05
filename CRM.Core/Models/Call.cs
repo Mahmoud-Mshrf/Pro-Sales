@@ -1,5 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using CRM.Core.Dtos;
 
 namespace CRM.Core.Models
 {
@@ -14,23 +16,31 @@ namespace CRM.Core.Models
         Failed,        //The call attempt was unsuccessful due to technical reasons or other issues.
         Voicemail,   //The call was forwarded to the recipient's voicemail system.
         OnHold      //The call is temporarily paused or placed on hold.
-
     }
+
     public class Call
     {
-        [Key] 
-        public int CallID { get; set; }
+        [Key]
+        public string CallID { get; set; }
         public DateTime CallDate { get; set; }
         public DateTime FollowUpDate { get; set; }
         public CallStatus CallStatus { get; set; }
 
-        [MaxLength(500)] 
+
+        [MaxLength(500)]
         public string CallSummery { get; set; }
 
-        [ForeignKey("CustomerId")] 
+        [ForeignKey("CustomerId")]
         public Customer Customer { get; set; }
 
         [ForeignKey("SalesRepresntativeId")]
         public ApplicationUser SalesRepresntative { get; set; }
+
+
+        public Call()
+        {
+            CallID = Guid.NewGuid().ToString();
+
+        }
     }
 }

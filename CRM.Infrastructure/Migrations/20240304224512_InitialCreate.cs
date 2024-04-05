@@ -12,18 +12,18 @@ namespace CRM.Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "AspNetRoles",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    NormalizedName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AspNetRoles", x => x.Id);
-                });
+               name: "AspNetRoles",
+               columns: table => new
+               {
+                   Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                   Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                   NormalizedName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                   ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true)
+               },
+               constraints: table =>
+               {
+                   table.PrimaryKey("PK_AspNetRoles", x => x.Id);
+               });
 
             migrationBuilder.CreateTable(
                 name: "AspNetUsers",
@@ -290,8 +290,7 @@ namespace CRM.Infrastructure.Migrations
                 name: "Calls",
                 columns: table => new
                 {
-                    CallID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CallID = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     CallDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     FollowUpDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CallStatus = table.Column<int>(type: "int", nullable: false),
@@ -342,8 +341,7 @@ namespace CRM.Infrastructure.Migrations
                 name: "Deals",
                 columns: table => new
                 {
-                    DealId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    DealId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     DealDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Price = table.Column<double>(type: "float", nullable: false),
@@ -375,12 +373,11 @@ namespace CRM.Infrastructure.Migrations
                 name: "Meetings",
                 columns: table => new
                 {
-                    MeetingID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    MeetingID = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     MeetingDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     MeetingSummary = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
                     FollowUpDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    connectionState = table.Column<int>(type: "int", nullable: false),
+                    connectionState = table.Column<bool>(type: "bit", nullable: false),
                     CustomerId = table.Column<int>(type: "int", nullable: true),
                     SalesRepresntativeId = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
@@ -403,8 +400,7 @@ namespace CRM.Infrastructure.Migrations
                 name: "Messages",
                 columns: table => new
                 {
-                    MessageID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    MessageID = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     MessageDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     MessageContent = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
                     FollowUpDate = table.Column<DateTime>(type: "datetime2", nullable: false),
