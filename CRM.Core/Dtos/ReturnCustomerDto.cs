@@ -16,6 +16,9 @@ namespace CRM.Core.Dtos
         [JsonIgnore]
         public bool IsSuccess { get; set; }
         public UserDto SalesRepresentative { get; set; }
+        public UserDto AddedBy { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public ActionDto LastAction { get; set; }
         public int Id { get; set; }
         public DateTime AdditionDate { get; set; }
 

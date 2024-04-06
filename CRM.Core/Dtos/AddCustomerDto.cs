@@ -34,9 +34,9 @@ namespace CRM.Core.Dtos
             [Required]
             public string SalesRepresntativeId { get; set; }
             [Required]
-            public string sourceName { get; set; }
+            public string Source { get; set; }
             [Required]
             //public IList<UserInterestDto> UserInterests { get; set; }
-            public string[] Interests { get; set; }
+            public IEnumerable<AddInterestDto> Interests { get; set; }
         }
 }

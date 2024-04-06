@@ -2,8 +2,10 @@
 using CRM.Core.Models;
 using CRM.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Org.BouncyCastle.Ocsp;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,12 +15,14 @@ namespace CRM.Core.Services.Implementations
     public class ModeratorService : IModeratorService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IFilterService _filterService;
 
-        public ModeratorService(IUnitOfWork unitOfWork)
+        public ModeratorService(IUnitOfWork unitOfWork, IFilterService filterService)
         {
             _unitOfWork = unitOfWork;
+            _filterService = filterService;
         }
-         // Will be used after adding Manager module
+        // Will be used after adding Manager module
         public async Task<ReturnUsersDto> GetAllSalesRepresentatives()
         {
             var salesReps = await _unitOfWork.UserManager.GetUsersInRoleAsync("Sales Representative");
@@ -36,10 +40,13 @@ namespace CRM.Core.Services.Implementations
                 var customersCount = await _unitOfWork.Customers.CountAsync(c => c.SalesRepresntative.Id == rep.Id);
                 var user = new UserDto
                 {
-                    Name = rep.FirstName + " " + rep.LastName,
+                    FirstName= rep.FirstName,
+                    LastName=rep.LastName,
                     Email = rep.Email,
-                    UserId = rep.Id,
-                    customers=customersCount
+                    UserName=rep.UserName,
+                    Roles=await _unitOfWork.UserManager.GetRolesAsync(rep),
+                    Id = rep.Id,
+                    customers = customersCount
                 };
                 Representatives.Add(user);
             }
@@ -51,7 +58,7 @@ namespace CRM.Core.Services.Implementations
         }
         public async Task<ResultDto> DeleteCustomer(int customerId)
         {
-            var customer =await _unitOfWork.Customers.GetByIdAsync(customerId);
+            var customer = await _unitOfWork.Customers.GetByIdAsync(customerId);
             if (customer == null)
                 return new ResultDto { IsSuccess = false, Errors = ["User not found"] };
 
@@ -75,7 +82,7 @@ namespace CRM.Core.Services.Implementations
         public async Task<ReturnCustomerDto> GetCustomer(int customerId)
         {
             var customerDto = new ReturnCustomerDto();
-            var customer = await _unitOfWork.Customers.FindAsync(c => c.CustomerId == customerId ,["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
+            var customer = await _unitOfWork.Customers.FindAsync(c => c.CustomerId == customerId, ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
             if (customer == null)
             {
                 customerDto.IsSuccess = false;
@@ -95,37 +102,60 @@ namespace CRM.Core.Services.Implementations
             customerDto.Source = customer.Source.SourceName;
             customerDto.AdditionDate = customer.AdditionDate;
             var interests = await _unitOfWork.Interests.GetAllAsync();
-            if(interests == null)
+            if (interests == null)
             {
                 customerDto.IsSuccess = false;
                 customerDto.Errors = ["No interests found"];
                 return customerDto;
             }
             customerDto.Interests = new List<UserInterestDto>();
-            foreach(var interest in interests)
+            //foreach(var interest in interests)
+            //{
+            //    if(customer.Interests.Any(i=>i.InterestID==interest.InterestID))
+            //    {
+            //        customerDto.Interests.Add(new UserInterestDto { /*Id = interest.InterestID,*/ Name = interest.InterestName, IsSelected = true });
+            //    }
+            //    else
+            //    {
+            //        customerDto.Interests.Add(new UserInterestDto { /*Id = interest.InterestID,*/ Name = interest.InterestName, IsSelected = false });
+            //    }
+            //}
+            //foreach (var interest in customer.Interests)
+            //{
+            //    customerDto.Interests.Add(new UserInterestDto { Id = interest.InterestID, Name = interest.InterestName });
+            //}
+            customerDto.Interests = customer.Interests.Select(i => new UserInterestDto { Id = i.InterestID, Name = i.InterestName }).ToList();
+            var lastAction = await GetLastAction(customer.CustomerId);
+            if (lastAction.Summary != null)
             {
-                if(customer.Interests.Any(i=>i.InterestID==interest.InterestID))
-                {
-                    customerDto.Interests.Add(new UserInterestDto { /*Id = interest.InterestID,*/ Name = interest.InterestName, IsSelected = true });
-                }
-                else
-                {
-                    customerDto.Interests.Add(new UserInterestDto { /*Id = interest.InterestID,*/ Name = interest.InterestName, IsSelected = false });
-                }
+                customerDto.LastAction = lastAction;
             }
             var userdto = new UserDto
             {
-                UserId = customer.SalesRepresntative.Id,
-                Name = $"{customer.SalesRepresntative.FirstName} {customer.SalesRepresntative.LastName}",
+                Id = customer.SalesRepresntative.Id,
+                FirstName=customer.SalesRepresntative.FirstName,
+                LastName=customer.SalesRepresntative.LastName,
+                UserName = customer.SalesRepresntative.UserName,
+                Roles = await _unitOfWork.UserManager.GetRolesAsync(customer.SalesRepresntative),
                 Email = customer.SalesRepresntative.Email,
                 customers = await _unitOfWork.Customers.CountAsync(c => c.SalesRepresntative.Id == customer.SalesRepresntative.Id)
             };
             customerDto.SalesRepresentative = userdto;
+            var userdto2 = new UserDto
+            {
+                Id = customer.MarketingModerator.Id,
+                FirstName = customer.MarketingModerator.FirstName,
+                LastName = customer.MarketingModerator.LastName,
+                UserName = customer.MarketingModerator.UserName,
+                Roles = await _unitOfWork.UserManager.GetRolesAsync(customer.MarketingModerator),
+                Email = customer.MarketingModerator.Email
+            };
+            customerDto.AddedBy = userdto2;
             //customerDto.UserInterests = customer.Interests.Select(i => new UserInterestDto { /*Id = i.InterestID,*/ Name = i.InterestName }).ToList();
             return customerDto;
         }
 
-        public async Task<ReturnAllCustomersDto> GetAllCustomers()
+        public async Task<ReturnAllCustomersDto> GetAllCustomers(int page, int size)
         {
             var customers = await _unitOfWork.Customers.GetAllAsync(["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
             if (customers == null)
@@ -142,7 +172,7 @@ namespace CRM.Core.Services.Implementations
                 var customerDto = new ReturnCustomerDto
                 {
                     //CustomerId = customer.CustomerId,
-                    Id=customer.CustomerId,
+                    Id = customer.CustomerId,
                     FirstName = customer.FirstName,
                     LastName = customer.LastName,
                     Email = customer.Email,
@@ -152,26 +182,107 @@ namespace CRM.Core.Services.Implementations
                     Gender = customer.Gender,
                     //SalesRepresntativeId = customer.SalesRepresntative.Id,
                     Source = customer.Source.SourceName,
-                    Interests = customer.Interests.Select(i => new UserInterestDto { /*Id = i.InterestID,*/ Name = i.InterestName , IsSelected=true}).ToList(),
-                    AdditionDate= customer.AdditionDate
+                    //Interests = customer.Interests.Select(i => new UserInterestDto { /*Id = i.InterestID,*/ Name = i.InterestName, IsSelected = true }).ToList(),
+                    AdditionDate = customer.AdditionDate
                 };
+                //foreach (var interest in customer.Interests)
+                //{
+                //    customerDto.Interests.Add(new UserInterestDto { Id = interest.InterestID, Name = interest.InterestName });
+                //}
+                customerDto.Interests = customer.Interests.Select(i => new UserInterestDto { Id = i.InterestID, Name = i.InterestName }).ToList();
+                var lastAction = await GetLastAction(customer.CustomerId);
+                if (lastAction.Summary != null)
+                {
+                    customerDto.LastAction = lastAction;
+                }
                 var userdto = new UserDto
                 {
-                    UserId = customer.SalesRepresntative.Id,
-                    Name = $"{customer.SalesRepresntative.FirstName} {customer.SalesRepresntative.LastName}",
+                    Id = customer.SalesRepresntative.Id,
+                    FirstName = customer.SalesRepresntative.FirstName,
+                    LastName = customer.SalesRepresntative.LastName,
+                    UserName = customer.SalesRepresntative.UserName,
+                    Roles = await _unitOfWork.UserManager.GetRolesAsync(customer.SalesRepresntative),
                     Email = customer.SalesRepresntative.Email,
                     customers = await _unitOfWork.Customers.CountAsync(c => c.SalesRepresntative.Id == customer.SalesRepresntative.Id)
                 };
                 customerDto.SalesRepresentative = userdto;
+                var userdto2 = new UserDto
+                {
+                    Id = customer.MarketingModerator.Id,
+                    FirstName = customer.MarketingModerator.FirstName,
+                    LastName = customer.MarketingModerator.LastName,
+                    UserName = customer.MarketingModerator.UserName,
+                    Roles = await _unitOfWork.UserManager.GetRolesAsync(customer.MarketingModerator),
+                    Email = customer.MarketingModerator.Email
+                };
+                customerDto.AddedBy = userdto2;
                 customersDto.Add(customerDto);
             }
+            var Customers = customersDto.OrderByDescending(DateTime => DateTime.AdditionDate).ToList();
+            var CustomerPage = _filterService.Paginate(Customers, page, size);
             return new ReturnAllCustomersDto
             {
                 IsSuccess = true,
-                Customers = customersDto.OrderByDescending(DateTime => DateTime.AdditionDate).ToList()
+                Pages = CustomerPage
+                //Customers = customersDto.OrderByDescending(DateTime => DateTime.AdditionDate).ToList()
             };
 
         }
+        //public async Task<ReturnAllCustomersDto> GetAllCustomers()
+        //{
+        //    var customers = await _unitOfWork.Customers.GetAllAsync(["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
+        //    if (customers == null)
+        //    {
+        //        return new ReturnAllCustomersDto
+        //        {
+        //            IsSuccess = false,
+        //            Errors = ["No customers found"]
+        //        };
+        //    }
+        //    var customersDto = new List<ReturnCustomerDto>();
+        //    foreach (var customer in customers)
+        //    {
+        //        var customerDto = new ReturnCustomerDto
+        //        {
+
+        //            Id = customer.CustomerId,
+        //            FirstName = customer.FirstName,
+        //            LastName = customer.LastName,
+        //            Email = customer.Email,
+        //            Phone = customer.Phone,
+        //            City = customer.City,
+        //            Age = customer.Age,
+        //            Gender = customer.Gender,
+        //            SalesRepresntativeId = customer.SalesRepresntative.Id,
+        //            Source = customer.Source.SourceName,
+        //            Interests = customer.Interests.Select(i => new UserInterestDto { /*Id = i.InterestID,*/ Name = i.InterestName, IsSelected = true }).ToList(),
+        //            AdditionDate = customer.AdditionDate
+        //        };
+        //        var userdto = new UserDto
+        //        {
+        //            Id = customer.SalesRepresntative.Id,
+        //            Name = $"{customer.SalesRepresntative.FirstName} {customer.SalesRepresntative.LastName}",
+        //            Email = customer.SalesRepresntative.Email,
+        //            customers = await _unitOfWork.Customers.CountAsync(c => c.SalesRepresntative.Id == customer.SalesRepresntative.Id)
+        //        };
+        //        customerDto.SalesRepresentative = userdto;
+        //        var userdto2 = new UserDto
+        //        {
+        //            Id = customer.MarketingModerator.Id,
+        //            Name = $"{customer.MarketingModerator.FirstName} {customer.MarketingModerator.LastName}",
+        //            Email = customer.MarketingModerator.Email
+        //        };
+        //        customerDto.AddedBy = userdto2;
+        //        customersDto.Add(customerDto);
+        //    }
+        //    //var Customers = customersDto.OrderByDescending(DateTime => DateTime.AdditionDate).ToList();
+        //    return new ReturnAllCustomersDto
+        //    {
+        //        IsSuccess = true,
+        //        Customers = customersDto.OrderByDescending(DateTime => DateTime.AdditionDate).ToList()
+        //    };
+
+        //}
 
         //public async Task<ResultDto> AddCustomer(AddCustomerDto customerDto,string marketingModeratorEmail)
         //{
@@ -272,7 +383,7 @@ namespace CRM.Core.Services.Implementations
                 };
             }
             //var source = await _unitOfWork.Sources.FindAsync(x=>x.SourceName==customerDto.sourceName);
-            var source = await _unitOfWork.Sources.FindAsync(x => x.SourceName.ToLower() == customerDto.sourceName.ToLower());
+            var source = await _unitOfWork.Sources.FindAsync(x => x.SourceName.ToLower() == customerDto.Source.ToLower());
 
             if (source == null)
             {
@@ -284,13 +395,13 @@ namespace CRM.Core.Services.Implementations
             }
             foreach (var interestt in customerDto.Interests)
             {
-                var interest = await _unitOfWork.Interests.FindAsync(x => x.InterestName.ToLower() == interestt.ToLower());
+                var interest = await _unitOfWork.Interests.FindAsync(x => x.InterestID == interestt.Id);
                 if (interest == null)
                 {
                     return new ReturnCustomerDto
                     {
                         IsSuccess = false,
-                        Errors = [$"{interest} Interest not found"]
+                        Errors = [$"{interest}  Interest not found"]
                     };
                 }
                 customer.Interests.Add(interest);
@@ -321,45 +432,64 @@ namespace CRM.Core.Services.Implementations
                     Errors = [e.Message]
                 };
             }
-            var ReturnCustomerDto= new ReturnCustomerDto
+            var ReturnCustomerDto = new ReturnCustomerDto
             {
-                AdditionDate=customer.AdditionDate,
-                Age=customer.Age,
-                Gender=customer.Gender,
-                City=customer.City,
+                AdditionDate = customer.AdditionDate,
+                Age = customer.Age,
+                Gender = customer.Gender,
+                City = customer.City,
                 //CustomerId=customer.CustomerId,
-                Email=customer.Email,
-                Phone=customer.Phone,
-                FirstName=customer.FirstName,
-                LastName=customer.LastName,
-                Source=customer.Source.SourceName,
-                IsSuccess=true,
-                Id=customer.CustomerId,
-                
+                Email = customer.Email,
+                Phone = customer.Phone,
+                FirstName = customer.FirstName,
+                LastName = customer.LastName,
+                Source = customer.Source.SourceName,
+                IsSuccess = true,
+                Id = customer.CustomerId,
+
             };
             var userdto = new UserDto
             {
-                UserId = customer.SalesRepresntative.Id,
-                Name = $"{customer.SalesRepresntative.FirstName} {customer.SalesRepresntative.LastName}",
+                Id = customer.SalesRepresntative.Id,
+                FirstName = customer.SalesRepresntative.FirstName,
+                LastName = customer.SalesRepresntative.LastName,
+                UserName = customer.SalesRepresntative.UserName,
+                Roles = await _unitOfWork.UserManager.GetRolesAsync(customer.SalesRepresntative),
                 Email = customer.SalesRepresntative.Email,
                 customers = await _unitOfWork.Customers.CountAsync(c => c.SalesRepresntative.Id == customer.SalesRepresntative.Id)
             };
             ReturnCustomerDto.SalesRepresentative = userdto;
-            ReturnCustomerDto.Interests = new List<UserInterestDto>();
-            foreach (var interest in customer.Interests)
+            var userdto2 = new UserDto
             {
-                if (customer.Interests.Any(i => i.InterestID == interest.InterestID))
-                {
-                    ReturnCustomerDto.Interests.Add(new UserInterestDto { /*Id = interest.InterestID,*/ Name = interest.InterestName, IsSelected = true });
-                }
-                else
-                {
-                    ReturnCustomerDto.Interests.Add(new UserInterestDto { /*Id = interest.InterestID,*/ Name = interest.InterestName, IsSelected = false });
-                }
-            }
+                Id = customer.MarketingModerator.Id,
+                FirstName = customer.MarketingModerator.FirstName,
+                LastName = customer.MarketingModerator.LastName,
+                UserName = customer.MarketingModerator.UserName,
+                Roles = await _unitOfWork.UserManager.GetRolesAsync(customer.MarketingModerator),
+                Email = customer.MarketingModerator.Email
+            };
+            ReturnCustomerDto.AddedBy = userdto2;
+            ReturnCustomerDto.Interests = new List<UserInterestDto>();
+            //foreach (var interest in customer.Interests)
+            //{
+            //    if (customer.Interests.Any(i => i.InterestID == interest.InterestID))
+            //    {
+            //        ReturnCustomerDto.Interests.Add(new UserInterestDto { /*Id = interest.InterestID,*/ Name = interest.InterestName, IsSelected = true });
+            //    }
+            //    else
+            //    {
+            //        ReturnCustomerDto.Interests.Add(new UserInterestDto { /*Id = interest.InterestID,*/ Name = interest.InterestName, IsSelected = false });
+            //    }
+            //}
+            //foreach(var interest in customer.Interests)
+            //{
+            //    ReturnCustomerDto.Interests.Add(new UserInterestDto { Id = interest.InterestID, Name = interest.InterestName });
+            //}
+            ReturnCustomerDto.Interests = customer.Interests.Select(i => new UserInterestDto { Id = i.InterestID, Name = i.InterestName }).ToList();
+
             return ReturnCustomerDto;
         }
-        public async Task<ResultDto> UpdateCustomer(CustomerDto customerDto,int customerId)
+        public async Task<ResultDto> UpdateCustomer(AddCustomerDto customerDto, int customerId)
         {
             var customer = await _unitOfWork.Customers.FindAsync(c => c.CustomerId == customerId, ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
             if (customer == null)
@@ -390,10 +520,11 @@ namespace CRM.Core.Services.Implementations
                 };
             }
             //var interest = await _unitOfWork.Interests.GetAllAsync(customerDto.);
-            foreach(var interestt in customerDto.Interests)
+            var BussinesInterests = await _unitOfWork.Interests.GetAllAsync();
+            foreach (var interestt in customerDto.Interests)
             {
                 //var interest = await _unitOfWork.Interests.FindAsync(x => x.InterestName == interestt.Name);
-                var interest = await _unitOfWork.Interests.FindAsync(x => x.InterestName.ToLower() == interestt.Name.ToLower());
+                var interest = await _unitOfWork.Interests.FindAsync(x => x.InterestID == interestt.Id);
                 if (interest == null)
                 {
                     return new ResultDto
@@ -402,22 +533,37 @@ namespace CRM.Core.Services.Implementations
                         Errors = ["Interest not found"]
                     };
                 }
-                if (customer.Interests.Any(i => i.InterestID == interest.InterestID) && interestt.IsSelected)
+                if (customer.Interests.Any(i => i.InterestID == interest.InterestID))
                 {
                     continue;
                 }
-                if (!customer.Interests.Any(i => i.InterestID == interest.InterestID) && !interestt.IsSelected)
-                {
-                    continue;
-                }
-                if ((!customer.Interests.Any(i => i.InterestID == interest.InterestID)) && interestt.IsSelected)
-                {
+                if (!customer.Interests.Any(i => i.InterestID == interest.InterestID))
                     customer.Interests.Add(interest);
-                }
-                if (customer.Interests.Any(i => i.InterestID == interest.InterestID) && !interestt.IsSelected)
+                //if (customer.Interests.Any(i => i.InterestID == interest.InterestID) && interestt.IsSelected)
+                //{
+                //    continue;
+                //}
+                //if (!customer.Interests.Any(i => i.InterestID == interest.InterestID) && !interestt.IsSelected)
+                //{
+                //    continue;
+                //}
+                //if ((!customer.Interests.Any(i => i.InterestID == interest.InterestID)) && interestt.IsSelected)
+                //{
+                //    customer.Interests.Add(interest);
+                //}
+                //if (customer.Interests.Any(i => i.InterestID == interest.InterestID) && !interestt.IsSelected)
+                //{
+                //    customer.Interests.Remove(interest);
+                //}
+            }
+            foreach (var bisInterest in BussinesInterests)
+            {
+                if (customer.Interests.Any(i => i.InterestID == bisInterest.InterestID) && customerDto.Interests.Any(i => i.Id == bisInterest.InterestID)) { continue; }
+                if (customer.Interests.Any(i => i.InterestID == bisInterest.InterestID) && !customerDto.Interests.Any(i => i.Id == bisInterest.InterestID))
                 {
-                    customer.Interests.Remove(interest);
+                    customer.Interests.Remove(bisInterest);
                 }
+
             }
             customer.FirstName = customerDto.FirstName;
             customer.LastName = customerDto.LastName;
@@ -508,14 +654,78 @@ namespace CRM.Core.Services.Implementations
         //    }
         //    return customerResult.ToList();
         //}
-        public async Task<IEnumerable<ReturnCustomerDto>> Search(string query)
+
+        //public async Task<IEnumerable<ReturnCustomerDto>> Search(string query)
+        //{
+        //    //var customers = await _unitOfWork.Customers.GetAllAsync(c => c.FirstName.ToLower().Contains(query.ToLower()), ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
+        //    //if (!customers.Any())
+        //    //{
+        //    //    customers = await _unitOfWork.Customers.GetAllAsync(c => c.LastName.ToLower().Contains(query.ToLower()), ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
+        //    //}
+        //    var customers = await _unitOfWork.Customers.GetAllAsync(c => (c.FirstName.ToLower() + " " + c.LastName.ToLower()).Contains(query.ToLower()),["Interests","Source","MarketingModerator","SalesRepresntative"]);
+        //    if (!customers.Any())
+        //    {
+        //        customers = await _unitOfWork.Customers.GetAllAsync(c => c.FirstName.ToLower().Contains(query.ToLower()), ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
+        //    }
+        //    if (!customers.Any())
+        //    {
+        //        customers = await _unitOfWork.Customers.GetAllAsync(c => c.LastName.ToLower().Contains(query.ToLower()), ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
+        //    }
+        //    if (!customers.Any())
+        //    {
+        //        customers = await _unitOfWork.Customers.GetAllAsync(c => c.Email.ToLower().Contains(query.ToLower()), ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
+        //    }
+        //    if (!customers.Any())
+        //    {
+        //        customers = await _unitOfWork.Customers.GetAllAsync(c => c.Phone.ToLower().Contains(query.ToLower()), ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
+        //    }
+
+        //    var customerResult = new List<ReturnCustomerDto>();
+        //    foreach (var customer in customers)
+        //    {
+        //        var dto = new ReturnCustomerDto
+        //        {
+
+        //            FirstName = customer.FirstName,
+        //            LastName = customer.LastName,
+        //            Age = customer.Age,
+        //            City = customer.City,
+        //            Email = customer.Email,
+        //            Gender = customer.Gender,
+        //            Phone = customer.Phone,
+        //            Source = customer.Source.SourceName,
+        //            //SalesRepresntativeId = customer.SalesRepresntative.Id,
+        //            Interests = customer.Interests.Select(i => new UserInterestDto { /*Id = i.InterestID,*/ Name = i.InterestName, IsSelected = true }).ToList(),
+        //            AdditionDate = customer.AdditionDate
+        //        };
+        //        var userdto = new UserDto
+        //        {
+        //            Id = customer.SalesRepresntative.Id,
+        //            Name = $"{customer.SalesRepresntative.FirstName} {customer.SalesRepresntative.LastName}",
+        //            Email = customer.SalesRepresntative.Email,
+        //            customers = await _unitOfWork.Customers.CountAsync(c => c.SalesRepresntative.Id == customer.SalesRepresntative.Id)
+        //        };
+        //        dto.SalesRepresentative = userdto;
+        //        var userdto2 = new UserDto
+        //        {
+        //            Id = customer.MarketingModerator.Id,
+        //            Name = $"{customer.MarketingModerator.FirstName} {customer.MarketingModerator.LastName}",
+        //            Email = customer.MarketingModerator.Email
+        //        };
+        //        dto.AddedBy = userdto2;
+        //        customerResult.Add(dto);
+        //    }
+        //    return customerResult.ToList();
+        //}
+
+        public async Task<ReturnAllCustomersDto> Search(string query, int page, int size)
         {
             //var customers = await _unitOfWork.Customers.GetAllAsync(c => c.FirstName.ToLower().Contains(query.ToLower()), ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
             //if (!customers.Any())
             //{
             //    customers = await _unitOfWork.Customers.GetAllAsync(c => c.LastName.ToLower().Contains(query.ToLower()), ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
             //}
-            var customers = await _unitOfWork.Customers.GetAllAsync(c => (c.FirstName.ToLower() + " " + c.LastName.ToLower()).Contains(query.ToLower()),["Interests","Source","MarketingModerator","SalesRepresntative"]);
+            var customers = await _unitOfWork.Customers.GetAllAsync(c => (c.FirstName.ToLower() + " " + c.LastName.ToLower()).Contains(query.ToLower()), ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
             if (!customers.Any())
             {
                 customers = await _unitOfWork.Customers.GetAllAsync(c => c.FirstName.ToLower().Contains(query.ToLower()), ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
@@ -538,7 +748,7 @@ namespace CRM.Core.Services.Implementations
             {
                 var dto = new ReturnCustomerDto
                 {
-
+                    Id = customer.CustomerId,
                     FirstName = customer.FirstName,
                     LastName = customer.LastName,
                     Age = customer.Age,
@@ -548,21 +758,53 @@ namespace CRM.Core.Services.Implementations
                     Phone = customer.Phone,
                     Source = customer.Source.SourceName,
                     //SalesRepresntativeId = customer.SalesRepresntative.Id,
-                    Interests = customer.Interests.Select(i => new UserInterestDto { /*Id = i.InterestID,*/ Name = i.InterestName, IsSelected = true }).ToList(),
+                    //Interests = customer.Interests.Select(i => new UserInterestDto { /*Id = i.InterestID,*/ Name = i.InterestName, IsSelected = true }).ToList(),
                     AdditionDate = customer.AdditionDate
                 };
+                var lastAction = await GetLastAction(customer.CustomerId);
+                if (lastAction.Summary != null)
+                {
+                    dto.LastAction = lastAction;
+                }
+                //foreach (var interest in customer.Interests)
+                //{
+                //    dto.Interests.Add(new UserInterestDto { Id = interest.InterestID, Name = interest.InterestName });
+                //}
+                dto.Interests = customer.Interests.Select(i => new UserInterestDto { Id = i.InterestID, Name = i.InterestName }).ToList();
+
                 var userdto = new UserDto
                 {
-                    UserId = customer.SalesRepresntative.Id,
-                    Name = $"{customer.SalesRepresntative.FirstName} {customer.SalesRepresntative.LastName}",
+                    Id = customer.SalesRepresntative.Id,
+                    FirstName = customer.SalesRepresntative.FirstName,
+                    LastName = customer.SalesRepresntative.LastName,
+                    UserName = customer.SalesRepresntative.UserName,
+                    Roles = await _unitOfWork.UserManager.GetRolesAsync(customer.SalesRepresntative),
                     Email = customer.SalesRepresntative.Email,
                     customers = await _unitOfWork.Customers.CountAsync(c => c.SalesRepresntative.Id == customer.SalesRepresntative.Id)
                 };
                 dto.SalesRepresentative = userdto;
+                var userdto2 = new UserDto
+                {
+                    Id = customer.MarketingModerator.Id,
+                    FirstName = customer.MarketingModerator.FirstName,
+                    LastName = customer.MarketingModerator.LastName,
+                    UserName = customer.MarketingModerator.UserName,
+                    Roles = await _unitOfWork.UserManager.GetRolesAsync(customer.MarketingModerator),
+                    Email = customer.MarketingModerator.Email
+                };
+                dto.AddedBy = userdto2;
                 customerResult.Add(dto);
             }
-            return customerResult.ToList();
+            var Customers = customerResult.OrderByDescending(DateTime => DateTime.AdditionDate).ToList();
+            var CustomerPage = _filterService.Paginate(Customers, page, size);
+            return new ReturnAllCustomersDto
+            {
+                IsSuccess = true,
+                Pages = CustomerPage
+                //Customers = customersDto.OrderByDescending(DateTime => DateTime.AdditionDate).ToList()
+            };
         }
+
         public async Task<UserDto> GetSalesById(string id)
         {
             var user = await _unitOfWork.UserManager.FindByIdAsync(id);
@@ -573,12 +815,194 @@ namespace CRM.Core.Services.Implementations
             }
             var userDto = new UserDto
             {
-                Name = user.FirstName + " " + user.LastName,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
                 Email = user.Email,
-                UserId = user.Id,
+                Id = user.Id,
                 customers = customersNumber
             };
             return userDto;
+        }
+        public async Task<ReturnAllCustomersDto> GetLastWeekCustomers(int page, int size)
+        {
+            var customers = await _unitOfWork.Customers.GetAllAsync(c => c.AdditionDate >= DateTime.Now.AddDays(-7), ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
+            if (customers == null)
+            {
+                return new ReturnAllCustomersDto
+                {
+                    IsSuccess = false,
+                    Errors = ["No customers found"]
+                };
+            }
+            var customersDto = new List<ReturnCustomerDto>();
+            foreach (var customer in customers)
+            {
+                var customerDto = new ReturnCustomerDto
+                {
+                    //CustomerId = customer.CustomerId,
+                    Id = customer.CustomerId,
+                    FirstName = customer.FirstName,
+                    LastName = customer.LastName,
+                    Email = customer.Email,
+                    Phone = customer.Phone,
+                    City = customer.City,
+                    Age = customer.Age,
+                    Gender = customer.Gender,
+                    //SalesRepresntativeId = customer.SalesRepresntative.Id,
+                    Source = customer.Source.SourceName,
+                    //Interests = customer.Interests.Select(i => new UserInterestDto { /*Id = i.InterestID,*/ Name = i.InterestName, IsSelected = true }).ToList(),
+                    AdditionDate = customer.AdditionDate
+                };
+                var lastAction = await GetLastAction(customer.CustomerId);
+                if (lastAction.Summary != null)
+                {
+                    customerDto.LastAction = lastAction;
+                }
+                //foreach (var interest in customer.Interests)
+                //{
+                //    customerDto.Interests.Add(new UserInterestDto { Id = interest.InterestID, Name = interest.InterestName });
+                //}
+                customerDto.Interests = customer.Interests.Select(i => new UserInterestDto { Id = i.InterestID, Name = i.InterestName }).ToList();
+                var userdto = new UserDto
+                {
+                    Id = customer.SalesRepresntative.Id,
+                    FirstName = customer.SalesRepresntative.FirstName,
+                    LastName = customer.SalesRepresntative.LastName,
+                    UserName = customer.SalesRepresntative.UserName,
+                    Roles = await _unitOfWork.UserManager.GetRolesAsync(customer.SalesRepresntative),
+                    Email = customer.SalesRepresntative.Email,
+                    customers = await _unitOfWork.Customers.CountAsync(c => c.SalesRepresntative.Id == customer.SalesRepresntative.Id)
+                };
+                customerDto.SalesRepresentative = userdto;
+                var userdto2 = new UserDto
+                {
+                    Id = customer.MarketingModerator.Id,
+                    FirstName = customer.MarketingModerator.FirstName,
+                    LastName = customer.MarketingModerator.LastName,
+                    UserName=customer.MarketingModerator.UserName,
+                    Roles=await _unitOfWork.UserManager.GetRolesAsync(customer.MarketingModerator),
+                    Email = customer.MarketingModerator.Email
+                };
+                customerDto.AddedBy = userdto2;
+                customersDto.Add(customerDto);
+            }
+            var Customers = customersDto.OrderByDescending(DateTime => DateTime.AdditionDate).ToList();
+            var CustomerPage = _filterService.Paginate(Customers, page, size);
+            return new ReturnAllCustomersDto
+            {
+                IsSuccess = true,
+                Pages = CustomerPage
+                //Customers = customersDto.OrderByDescending(DateTime => DateTime.AdditionDate).ToList()
+            };
+
+        }
+        //public async Task<ActionDto> GetLastAction(int Id)
+        //{
+        //    var customer = await _unitOfWork.Customers.FindAsync(c => c.CustomerId == Id, ["Messages","Calls","Meetings","Deals"]);
+        //    var messages = await _unitOfWork.Messages.GetAllAsync();
+        //    var lastMessage = messages.Where(m => m.Customer==customer).OrderByDescending(m => m.MessageDate).FirstOrDefault();
+        //    var deals = await _unitOfWork.Deals.GetAllAsync();
+        //    var lastDeal = deals.Where(d => d.Customer==customer).OrderByDescending(d=>d.DealDate).FirstOrDefault();
+        //    var calls = await _unitOfWork.Calls.GetAllAsync();
+        //    var lastCall = calls.Where(c => c.Customer == customer).OrderByDescending(c => c.CallDate).FirstOrDefault();
+        //    var meetings = await _unitOfWork.Meetings.GetAllAsync();
+        //    var lastMeeting = meetings.Where(m => m.Customer == customer).OrderByDescending(m => m.MeetingDate).FirstOrDefault();
+        //    // comparise between the dates for the previous last actions and return the most recently action 
+        //    var lastActions = new List<(DateTime Date, string Type, object Data)>
+        //    {
+        //        (lastMessage?.MessageDate ?? DateTime.MinValue, "Message", lastMessage),
+        //        (lastDeal?.DealDate ?? DateTime.MinValue, "Deal", lastDeal),
+        //        (lastCall?.CallDate ?? DateTime.MinValue, "Call", lastCall),
+        //        (lastMeeting?.MeetingDate ?? DateTime.MinValue, "Meeting", lastMeeting)
+        //    };
+
+        //    var mostRecentAction = lastActions.OrderByDescending(a => a.Date).FirstOrDefault();
+
+        //    if (mostRecentAction != default)
+        //    {
+        //        var lastAction = new ActionDto
+        //        {
+        //            Date = mostRecentAction.Date,
+        //            Type = mostRecentAction.Type,
+        //            customerId=customer.CustomerId
+        //        };
+        //        if (lastAction.Type == "Message")
+        //            lastAction.Summary = lastMessage.MessageContent;
+        //        if (lastAction.Type == "Deal")
+        //            lastAction.Summary = lastDeal.description;
+        //        if (lastAction.Type == "Call")
+        //            lastAction.Summary = lastCall.CallSummery;
+        //        if (lastAction.Type == "Meeting")
+        //            lastAction.Summary = lastMeeting.MeetingSummary;
+        //        return lastAction;
+        //    }
+        //    else
+        //    {
+        //        return null; // or handle the case where no action is found
+        //    }
+        //}
+
+        public async Task<ActionDto> GetLastAction(int Id)
+        {
+            var customer = await _unitOfWork.Customers.FindAsync(c => c.CustomerId == Id, ["Messages","Calls","Meetings","Deals"]);
+            var messages = await _unitOfWork.Messages.GetAllAsync();
+            var lastMessage = messages.Where(m => m.Customer==customer).OrderByDescending(m => m.MessageDate).FirstOrDefault();
+            var deals = await _unitOfWork.Deals.GetAllAsync();
+            var lastDeal = deals.Where(d => d.Customer==customer).OrderByDescending(d=>d.DealDate).FirstOrDefault();
+            var calls = await _unitOfWork.Calls.GetAllAsync();
+            var lastCall = calls.Where(c => c.Customer == customer).OrderByDescending(c => c.CallDate).FirstOrDefault();
+            var meetings = await _unitOfWork.Meetings.GetAllAsync();
+            var lastMeeting = meetings.Where(m => m.Customer == customer).OrderByDescending(m => m.MeetingDate).FirstOrDefault();
+        
+            if (lastMessage == null && lastDeal == null && lastCall == null && lastMeeting == null)
+            {
+                return new ActionDto();
+            }
+        
+            // comparise between the dates for the previous last actions and return the most recently action 
+            var lastActions = new List<(DateTime Date, string Type, object Data)>
+            {
+                (lastMessage?.MessageDate ?? DateTime.MinValue, "Message", lastMessage),
+                (lastDeal?.DealDate ?? DateTime.MinValue, "Deal", lastDeal),
+                (lastCall?.CallDate ?? DateTime.MinValue, "Call", lastCall),
+                (lastMeeting?.MeetingDate ?? DateTime.MinValue, "Meeting", lastMeeting)
+            };
+            
+            var mostRecentAction = lastActions.OrderByDescending(a => a.Date).FirstOrDefault();
+            
+            if (mostRecentAction != default)
+            {
+                var lastAction = new ActionDto
+                {
+                    Date = mostRecentAction.Date,
+                    Type = mostRecentAction.Type,
+                };
+                if (lastAction.Type == "Message")
+                {
+                    lastAction.Summary = lastMessage.MessageContent;
+                    lastAction.Id = lastMessage.MessageID;
+                }
+                if (lastAction.Type == "Deal")
+                {
+                    lastAction.Summary = lastDeal.description;
+                    lastAction.Id = lastDeal.DealId;
+                }
+                if (lastAction.Type == "Call")
+                {
+                    lastAction.Summary = lastCall.CallSummery;
+                    lastAction.Id = lastCall.CallID;
+                }
+                if (lastAction.Type == "Meeting")
+                {
+                    lastAction.Summary = lastMeeting.MeetingSummary;
+                    lastAction.Id = lastMeeting.MeetingID;
+                }
+                return lastAction;
+            }
+            else
+            {
+                return null; // or handle the case where no action is found
+            }
         }
 
     }

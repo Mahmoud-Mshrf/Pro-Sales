@@ -219,7 +219,10 @@ namespace CRM.Core.Services.Implementations
             if (result2.Succeeded)
             {
                 // invalidate the user token if the account was deleted
-                await _authService.RevokeToken(user.RefreshTokens.FirstOrDefault(r => r.IsActive).Token);
+                if (user.RefreshTokens.Any(r => r.IsActive))
+                {
+                    await _authService.RevokeToken(user.RefreshTokens.FirstOrDefault(r => r.IsActive).Token);
+                }
                 return new ResultDto
                 {
                     IsSuccess = true,

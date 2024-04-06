@@ -15,6 +15,7 @@ namespace CRM.Extentions
             services.AddScoped<ISalesRepresntative, SalesService>();
             services.AddScoped<ISharedService, SharedService>();
             services.AddScoped<IManagerService, ManagerService>();
+            services.AddScoped<IFilterService, FilterService>();
 
             return services;
         }

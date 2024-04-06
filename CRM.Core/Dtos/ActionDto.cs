@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 
 namespace CRM.Core.Dtos
 {
-    public class UserInterestDto
+    public class ActionDto
     {
-        public string Name { get; set; }
         public int Id { get; set; }
-        //public bool IsSelected { get; set; }
+        public string Type { get; set; }
+        public string Summary { get; set; }
+        public DateTime Date { get; set; }
     }
 }
