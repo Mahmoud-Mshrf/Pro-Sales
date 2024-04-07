@@ -41,7 +41,8 @@ namespace CRM.Core.Services.Interfaces
         Task<ReturnDealsDto> GetDealById(string DealId);
         Task<ResultDto> DeleteDeal(string DealId);
 
-        #endregion
 
+        #endregion
+        Task<IEnumerable<ActionDto>> GetAllActionsForCustomer(int customerId);
     }
 }

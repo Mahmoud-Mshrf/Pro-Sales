@@ -1,4 +1,5 @@
-﻿using CRM.Core.Consts;
+﻿using CRM.Core;
+using CRM.Core.Consts;
 using CRM.Core.Interfaces;
 using CRM.Core.Models;
 using CRM.Infrastructure.Data;
@@ -151,8 +152,30 @@ namespace CRM.Infrastructure.Repositories
         {
             return await _context.Set<T>().CountAsync(predicate);
         }
+        public async Task<IEnumerable<T>> GetAllByCustomerIdAsync(int customerId)
+        {
+            
+            var allEntities = await _context.Set<T>().ToListAsync();
 
-        
+            
+            var entitiesForCustomer = allEntities.Where(entity => GetCustomerId(entity) == customerId);
+
+            return entitiesForCustomer;
+        }
+
+        private int GetCustomerId(T entity)
+        {
+            return (int)entity.GetType().GetProperty("CustomerId").GetValue(entity);
+        }
+
+      
+      
+
+
+
+
+
+
 
 
     }
