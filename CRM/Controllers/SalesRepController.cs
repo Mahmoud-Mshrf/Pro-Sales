@@ -286,16 +286,7 @@ namespace CRM.Controllers
         }
         #endregion
 
-        [HttpGet("actions/customer/{customerId}")]
-        public async Task<ActionResult<IEnumerable<ActionDto>>> GetAllActionsForCustomer(int customerId)
-        {
-            var actions = await _salesRepresntative.GetAllActionsForCustomer(customerId);
-            if (actions == null)
-            {
-                return NotFound();
-            }
-            return Ok(actions);
-        }
+       
 
 
     }

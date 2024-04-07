@@ -580,6 +580,56 @@ namespace CRM.Core.Services.Implementations
             };
             return userDto;
         }
+        public async Task<IEnumerable<ActionDto>> GetAllActionsForCustomer(int customerId)
+        {
+            var calls = await _unitOfWork.Calls.GetAllAsync(call => call.Customer.CustomerId == customerId);
+            var messages = await _unitOfWork.Messages.GetAllAsync(message => message.Customer.CustomerId == customerId);
+            var meetings = await _unitOfWork.Meetings.GetAllAsync(meeting => meeting.Customer.CustomerId == customerId);
+            var deals = await _unitOfWork.Deals.GetAllAsync(deal => deal.Customer.CustomerId == customerId, includes: new[] { "Interest" });
+            var interests = await _unitOfWork.Interests.GetAllAsync();
+
+
+            var actions = calls.Select(call => new ActionDto
+            {
+                Id = call.CallID,
+                Type = "call",
+                Status = (int)call.CallStatus,
+                Summary = call.CallSummery,
+                Date = call.CallDate,
+                FollowUp = call.FollowUpDate
+            }).ToList();
+
+            actions.AddRange(messages.Select(message => new ActionDto
+            {
+                Id = message.MessageID,
+                Type = "message",
+                Summary = message.MessageContent,
+                Date = message.MessageDate,
+                FollowUp = message.FollowUpDate
+            }));
+
+            actions.AddRange(meetings.Select(meeting => new ActionDto
+            {
+                Id = meeting.MeetingID,
+                Type = "meeting",
+                Online = meeting.connectionState,
+                Summary = meeting.MeetingSummary,
+                Date = meeting.MeetingDate,
+                FollowUp = meeting.FollowUpDate
+            }));
+            actions.AddRange(deals.Select(deal => new ActionDto
+            {
+                Id = deal.DealId,
+                Type = "deal",
+                Price = deal.Price,
+                Interest = interests.FirstOrDefault(i => i.InterestID == deal.Interest.InterestID)?.ToInterestDto(), // Map Interest entity to InterestDto
+                Summary = deal.description,
+                Date = deal.DealDate
+            }));
+
+
+            return actions;
+        }
 
     }
 }

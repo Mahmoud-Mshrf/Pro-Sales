@@ -43,6 +43,6 @@ namespace CRM.Core.Services.Interfaces
 
 
         #endregion
-        Task<IEnumerable<ActionDto>> GetAllActionsForCustomer(int customerId);
+       
     }
 }
