@@ -1,4 +1,5 @@
 ﻿using CRM.Core.Dtos;
+using CRM.Core.Services.Implementations;
 using CRM.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -37,7 +38,7 @@ namespace CRM.Controllers
         }
 
         [HttpPut("[action]")]
-        public async Task<IActionResult> UpdateCall([FromBody] CallDto callDto, int CallId)
+        public async Task<IActionResult> UpdateCall([FromBody] CallDto callDto, string CallId)
         {
             if (!ModelState.IsValid)
             {
@@ -63,7 +64,7 @@ namespace CRM.Controllers
         }
 
         [HttpGet("[action]/{callId}")]
-        public async Task<IActionResult> GetCallById(int callId)
+        public async Task<IActionResult> GetCallById(string callId)
         {
             var result = await _salesRepresntative.GetCallById(callId);
             if (!result.IsSuccess)
@@ -73,7 +74,7 @@ namespace CRM.Controllers
             return Ok(result);
         }
         [HttpDelete("[action]/{callId}")]
-        public async Task<IActionResult> DeleteCallById(int callId)
+        public async Task<IActionResult> DeleteCallById(string callId)
         {
             var result = await _salesRepresntative.DeleteCallById(callId);
             if (!result.IsSuccess)
@@ -102,7 +103,7 @@ namespace CRM.Controllers
         }
 
         [HttpPut("[action]")]
-        public async Task<IActionResult> UpdateMessage([FromBody] MessageDto messageDto, int MessageId)
+        public async Task<IActionResult> UpdateMessage([FromBody] MessageDto messageDto, string MessageId)
         {
             if (!ModelState.IsValid)
             {
@@ -127,7 +128,7 @@ namespace CRM.Controllers
         }
 
         [HttpGet("[action]/{messageId}")]
-        public async Task<IActionResult> GetMessageById(int MessageId)
+        public async Task<IActionResult> GetMessageById(string MessageId)
         {
             var result = await _salesRepresntative.GetMessageById(MessageId);
             if (!result.IsSuccess)
@@ -138,7 +139,7 @@ namespace CRM.Controllers
         }
 
         [HttpDelete("[action]/{MessageId}")]
-        public async Task<IActionResult> DeleteMessageById(int messageId)
+        public async Task<IActionResult> DeleteMessageById(string messageId)
         {
             var result = await _salesRepresntative.DeleteMessageById(messageId);
             if (!result.IsSuccess)
@@ -174,7 +175,7 @@ namespace CRM.Controllers
 
 
         [HttpPut("[action]")]
-        public async Task<IActionResult> UpdateMeeting([FromBody] MeetingDto meetingDto, int MeetingId)
+        public async Task<IActionResult> UpdateMeeting([FromBody] MeetingDto meetingDto, string MeetingId)
         {
             if (!ModelState.IsValid)
             {
@@ -199,7 +200,7 @@ namespace CRM.Controllers
         }
 
         [HttpGet("[action]/{meetingId}")]
-        public async Task<IActionResult> GetMeetingById(int MeetingId)
+        public async Task<IActionResult> GetMeetingById(string MeetingId)
         {
             var result = await _salesRepresntative.GetMeetingByID(MeetingId);
             if (!result.IsSuccess)
@@ -210,7 +211,7 @@ namespace CRM.Controllers
         }
 
         [HttpDelete("[action]/{MeetingId}")]
-        public async Task<IActionResult> DeleteMeetingById(int meetingId)
+        public async Task<IActionResult> DeleteMeetingById(string meetingId)
         {
             var result = await _salesRepresntative.DeleteMeeting(meetingId);
             if (!result.IsSuccess)
@@ -240,14 +241,14 @@ namespace CRM.Controllers
             return Ok(result);
         }
         [HttpPut("[action]")]
-        public async Task<IActionResult> UpdateDeal([FromBody] DealsDto dealDto, int DealId)
+        public async Task<IActionResult> UpdateDeal([FromBody] DealsDto dealDto, string DealId)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
             var SalesRepresntativeEmail = User.FindFirstValue(ClaimTypes.Email);
-            var result = await _salesRepresntative.UpdateDeal(dealDto, DealId);
+            var result = await _salesRepresntative.UpdateDeal(dealDto,  DealId);
             if (!result.IsSuccess)
             {
                 return BadRequest(result);
@@ -264,7 +265,7 @@ namespace CRM.Controllers
         }
 
         [HttpGet("[action]/{dealId}")]
-        public async Task<IActionResult> GetDealById(int dealId)
+        public async Task<IActionResult> GetDealById(string dealId)
         {
             var result = await _salesRepresntative.GetDealById(dealId);
             if (!result.IsSuccess)
@@ -274,7 +275,7 @@ namespace CRM.Controllers
             return Ok(result);
         }
         [HttpDelete("[action]/{dealId}")]
-        public async Task<IActionResult> DeleteDealById(int dealId)
+        public async Task<IActionResult> DeleteDealById(string dealId)
         {
             var result = await _salesRepresntative.DeleteDeal(dealId);
             if (!result.IsSuccess)
@@ -285,7 +286,7 @@ namespace CRM.Controllers
         }
         #endregion
 
-
+       
 
 
     }
