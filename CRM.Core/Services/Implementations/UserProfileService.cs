@@ -166,7 +166,7 @@ namespace CRM.Core.Services.Implementations
             string message = "Hi " + user.UserName + " Your new email confirmation code is: " + randomNum;
             try
             {
-                var emailResult = await _mailingService.SendEmailAsync(user.Email, "Email Confirmation Code ", message, null);
+                var emailResult = await _mailingService.SendEmailAsync(Newemail, "Email Confirmation Code ", message, null);
                 if (emailResult)
                 {
                     var Vcode = new VerificationCode
