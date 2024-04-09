@@ -15,6 +15,7 @@ namespace CRM.Core.Dtos
         [JsonIgnore]
         public bool IsSuccess { get; set; }
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public IEnumerable<ReturnCustomerDto> Customers { get; set; }
+        //public IEnumerable<ReturnCustomerDto> Customers { get; set; }
+        public PagesDto<ReturnCustomerDto> Pages { get; set; }
     }
 }

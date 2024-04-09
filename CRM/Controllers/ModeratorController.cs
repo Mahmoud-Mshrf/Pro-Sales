@@ -162,7 +162,7 @@ namespace CRM.Controllers
             var result = await _moderatorService.GetLastAction(id);
             return Ok(result);
         }
-        [HttpGet("actions/customer/{customerId}")]
+        [HttpGet("get-customer-actions/{customerId}")]
         public async Task<ActionResult<IEnumerable<ActionDto>>> GetAllActionsForCustomer(int customerId)
         {
             var actions = await _moderatorService.GetAllActionsForCustomer(customerId);
