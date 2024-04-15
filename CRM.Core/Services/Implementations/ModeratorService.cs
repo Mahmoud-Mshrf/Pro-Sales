@@ -567,6 +567,7 @@ namespace CRM.Core.Services.Implementations
             }
             customer.FirstName = customerDto.FirstName;
             customer.LastName = customerDto.LastName;
+            customer.Gender = customerDto.Gender;
             customer.Email = customerDto.Email;
             customer.Phone = customerDto.Phone;
             customer.City = customerDto.City;
