@@ -99,7 +99,7 @@ namespace CRM.Core.Services.Implementations
             customerDto.Age = customer.Age;
             customerDto.Gender = customer.Gender;
             //customerDto.SalesRepresntativeId = customer.SalesRepresntative.Id;
-            customerDto.Source = customer.Source.SourceName;
+            customerDto.SourceId = customer.Source.SourceId;
             customerDto.AdditionDate = customer.AdditionDate;
             var interests = await _unitOfWork.Interests.GetAllAsync();
             if (interests == null)
@@ -181,7 +181,7 @@ namespace CRM.Core.Services.Implementations
                     Age = customer.Age,
                     Gender = customer.Gender,
                     //SalesRepresntativeId = customer.SalesRepresntative.Id,
-                    Source = customer.Source.SourceName,
+                    SourceId = customer.Source.SourceId,
                     //Interests = customer.Interests.Select(i => new UserInterestDto { /*Id = i.InterestID,*/ Name = i.InterestName, IsSelected = true }).ToList(),
                     AdditionDate = customer.AdditionDate
                 };
@@ -443,7 +443,7 @@ namespace CRM.Core.Services.Implementations
                 Phone = customer.Phone,
                 FirstName = customer.FirstName,
                 LastName = customer.LastName,
-                Source = customer.Source.SourceName,
+                SourceId = customer.Source.SourceId,
                 IsSuccess = true,
                 Id = customer.CustomerId,
 
@@ -565,6 +565,7 @@ namespace CRM.Core.Services.Implementations
                 }
 
             }
+
             customer.FirstName = customerDto.FirstName;
             customer.LastName = customerDto.LastName;
             customer.Gender = customerDto.Gender;
@@ -757,7 +758,7 @@ namespace CRM.Core.Services.Implementations
                     Email = customer.Email,
                     Gender = customer.Gender,
                     Phone = customer.Phone,
-                    Source = customer.Source.SourceName,
+                    SourceId = customer.Source.SourceId,
                     //SalesRepresntativeId = customer.SalesRepresntative.Id,
                     //Interests = customer.Interests.Select(i => new UserInterestDto { /*Id = i.InterestID,*/ Name = i.InterestName, IsSelected = true }).ToList(),
                     AdditionDate = customer.AdditionDate
@@ -850,7 +851,7 @@ namespace CRM.Core.Services.Implementations
                     Age = customer.Age,
                     Gender = customer.Gender,
                     //SalesRepresntativeId = customer.SalesRepresntative.Id,
-                    Source = customer.Source.SourceName,
+                    SourceId = customer.Source.SourceId,
                     //Interests = customer.Interests.Select(i => new UserInterestDto { /*Id = i.InterestID,*/ Name = i.InterestName, IsSelected = true }).ToList(),
                     AdditionDate = customer.AdditionDate
                 };

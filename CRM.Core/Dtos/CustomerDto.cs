@@ -37,7 +37,7 @@ namespace CRM.Core.Dtos
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string SalesRepresntativeId { get; set; }
         [Required]
-        public string Source { get; set; }
+        public int SourceId { get; set; }
         [Required]
         public IList<UserInterestDto> Interests { get; set; }
     }
