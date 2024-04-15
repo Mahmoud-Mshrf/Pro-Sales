@@ -52,6 +52,7 @@ namespace CRM.Core.Models
 
             [ForeignKey("SourceId")]
             public Source Source { get; set; }
+            public bool IsDeleted { get; set; }
 
             public ICollection<Interest> Interests { get; set; } = new List<Interest>();
 

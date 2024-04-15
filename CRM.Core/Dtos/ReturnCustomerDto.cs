@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CRM.Core.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,6 +21,7 @@ namespace CRM.Core.Dtos
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public ActionDto LastAction { get; set; }
         public int Id { get; set; }
+        public SourceDto Source { get; set; }
         public DateTime AdditionDate { get; set; }
 
         public ReturnCustomerDto()
