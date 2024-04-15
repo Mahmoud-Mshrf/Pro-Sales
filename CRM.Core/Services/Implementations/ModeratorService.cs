@@ -393,7 +393,7 @@ namespace CRM.Core.Services.Implementations
                 };
             }
             //var source = await _unitOfWork.Sources.FindAsync(x=>x.SourceName==customerDto.sourceName);
-            var source = await _unitOfWork.Sources.FindAsync(x => x.SourceName.ToLower() == customerDto.Source.ToLower());
+            var source = await _unitOfWork.Sources.FindAsync(x => x.SourceId == customerDto.SourceId);
 
             if (source == null)
             {
@@ -504,12 +504,12 @@ namespace CRM.Core.Services.Implementations
 
             return ReturnCustomerDto;
         }
-        public async Task<ResultDto> UpdateCustomer(AddCustomerDto customerDto, int customerId)
+        public async Task<ReturnCustomerDto> UpdateCustomer(AddCustomerDto customerDto, int customerId)
         {
             var customer = await _unitOfWork.Customers.FindAsync(c => c.CustomerId == customerId, ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
             if (customer == null)
             {
-                return new ResultDto
+                return new ReturnCustomerDto
                 {
                     IsSuccess = false,
                     Errors = ["Customer not found"]
@@ -518,17 +518,17 @@ namespace CRM.Core.Services.Implementations
             var salesRep = await _unitOfWork.UserManager.FindByIdAsync(customerDto.SalesRepresntativeId);
             if (salesRep == null)
             {
-                return new ResultDto
+                return new ReturnCustomerDto
                 {
                     IsSuccess = false,
                     Errors = ["Sales Representative not found"]
                 };
             }
             //var source = await _unitOfWork.Sources.FindAsync(x => x.SourceName == customerDto.sourceName);
-            var source = await _unitOfWork.Sources.FindAsync(x => x.SourceName.ToLower() == customerDto.Source.ToLower());
+            var source = await _unitOfWork.Sources.FindAsync(x => x.SourceId == customerDto.SourceId);
             if (source == null)
             {
-                return new ResultDto
+                return new ReturnCustomerDto
                 {
                     IsSuccess = false,
                     Errors = ["Source not found"]
@@ -542,11 +542,12 @@ namespace CRM.Core.Services.Implementations
                 var interest = await _unitOfWork.Interests.FindAsync(x => x.InterestID == interestt.Id);
                 if (interest == null)
                 {
-                    return new ResultDto
+                    return new ReturnCustomerDto
                     {
                         IsSuccess = false,
                         Errors = ["Interest not found"]
                     };
+
                 }
                 if (customer.Interests.Any(i => i.InterestID == interest.InterestID))
                 {
@@ -596,17 +597,74 @@ namespace CRM.Core.Services.Implementations
             }
             catch (Exception e)
             {
-                return new ResultDto
+                return new ReturnCustomerDto
                 {
                     IsSuccess = false,
                     Errors = [e.Message]
                 };
+
             }
-            return new ResultDto
+            var ReturnCustomerDto = new ReturnCustomerDto
             {
+                AdditionDate = customer.AdditionDate,
+                Age = customer.Age,
+                Gender = customer.Gender,
+                City = customer.City,
+                //CustomerId=customer.CustomerId,
+                Email = customer.Email,
+                Phone = customer.Phone,
+                FirstName = customer.FirstName,
+                LastName = customer.LastName,
+                //SourceId = customer.Source.SourceId,
                 IsSuccess = true,
-                Message = "Customer updated successfully"
+                Id = customer.CustomerId,
+
             };
+            ReturnCustomerDto.Source = new SourceDto
+            {
+                Id = customer.Source.SourceId,
+                Name = customer.Source.SourceName
+            };
+            var userdto = new UserDto
+            {
+                Id = customer.SalesRepresntative.Id,
+                FirstName = customer.SalesRepresntative.FirstName,
+                LastName = customer.SalesRepresntative.LastName,
+                UserName = customer.SalesRepresntative.UserName,
+                Roles = await _unitOfWork.UserManager.GetRolesAsync(customer.SalesRepresntative),
+                Email = customer.SalesRepresntative.Email,
+                customers = await _unitOfWork.Customers.CountAsync(c => c.SalesRepresntative.Id == customer.SalesRepresntative.Id)
+            };
+            ReturnCustomerDto.SalesRepresentative = userdto;
+            var userdto2 = new UserDto
+            {
+                Id = customer.MarketingModerator.Id,
+                FirstName = customer.MarketingModerator.FirstName,
+                LastName = customer.MarketingModerator.LastName,
+                UserName = customer.MarketingModerator.UserName,
+                Roles = await _unitOfWork.UserManager.GetRolesAsync(customer.MarketingModerator),
+                Email = customer.MarketingModerator.Email
+            };
+            ReturnCustomerDto.AddedBy = userdto2;
+            ReturnCustomerDto.Interests = new List<UserInterestDto>();
+            //foreach (var interest in customer.Interests)
+            //{
+            //    if (customer.Interests.Any(i => i.InterestID == interest.InterestID))
+            //    {
+            //        ReturnCustomerDto.Interests.Add(new UserInterestDto { /*Id = interest.InterestID,*/ Name = interest.InterestName, IsSelected = true });
+            //    }
+            //    else
+            //    {
+            //        ReturnCustomerDto.Interests.Add(new UserInterestDto { /*Id = interest.InterestID,*/ Name = interest.InterestName, IsSelected = false });
+            //    }
+            //}
+            //foreach(var interest in customer.Interests)
+            //{
+            //    ReturnCustomerDto.Interests.Add(new UserInterestDto { Id = interest.InterestID, Name = interest.InterestName });
+            //}
+            ReturnCustomerDto.Interests = customer.Interests.Select(i => new UserInterestDto { Id = i.InterestID, Name = i.InterestName }).ToList();
+
+            return ReturnCustomerDto;
         }
         public async Task<ResultDto> AddSource(string name)
         {

@@ -58,7 +58,8 @@ namespace CRM.Controllers
             var result = await _moderatorService.UpdateCustomer(customerDto, CustomerId);
             if (!result.IsSuccess)
             {
-                return BadRequest(result);
+                var errors = new { result.Errors };
+                return BadRequest(errors);
             }
             return Ok(result);
         }
