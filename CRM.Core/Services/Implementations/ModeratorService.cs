@@ -374,7 +374,7 @@ namespace CRM.Core.Services.Implementations
         public async Task<ReturnCustomerDto> AddCustomer(AddCustomerDto customerDto, string marketingModeratorEmail)
         {
             var customer = new Customer();
-            var salesRep = await _unitOfWork.UserManager.FindByIdAsync(customerDto.SalesRepresntativeId);
+            var salesRep = await _unitOfWork.UserManager.FindByIdAsync(customerDto.SalesRepresentativeId);
             if (salesRep == null)
             {
                 return new ReturnCustomerDto
@@ -515,7 +515,7 @@ namespace CRM.Core.Services.Implementations
                     Errors = ["Customer not found"]
                 };
             }
-            var salesRep = await _unitOfWork.UserManager.FindByIdAsync(customerDto.SalesRepresntativeId);
+            var salesRep = await _unitOfWork.UserManager.FindByIdAsync(customerDto.SalesRepresentativeId);
             if (salesRep == null)
             {
                 return new ReturnCustomerDto

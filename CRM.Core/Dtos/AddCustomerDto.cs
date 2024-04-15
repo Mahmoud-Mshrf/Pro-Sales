@@ -32,7 +32,7 @@ namespace CRM.Core.Dtos
             [MaxLength(50)]
             public string City { get; set; }
             [Required]
-            public string SalesRepresntativeId { get; set; }
+            public string SalesRepresentativeId { get; set; }
             [Required]
             public int SourceId { get; set; }
             [Required]
