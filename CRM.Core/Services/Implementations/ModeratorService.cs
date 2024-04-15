@@ -99,7 +99,12 @@ namespace CRM.Core.Services.Implementations
             customerDto.Age = customer.Age;
             customerDto.Gender = customer.Gender;
             //customerDto.SalesRepresntativeId = customer.SalesRepresntative.Id;
-            customerDto.SourceId = customer.Source.SourceId;
+            //customerDto.SourceId = customer.Source.SourceId;
+            customerDto.Source = new SourceDto
+            {
+                Id = customer.Source.SourceId,
+                Name = customer.Source.SourceName
+            };
             customerDto.AdditionDate = customer.AdditionDate;
             var interests = await _unitOfWork.Interests.GetAllAsync();
             if (interests == null)
@@ -181,9 +186,14 @@ namespace CRM.Core.Services.Implementations
                     Age = customer.Age,
                     Gender = customer.Gender,
                     //SalesRepresntativeId = customer.SalesRepresntative.Id,
-                    SourceId = customer.Source.SourceId,
+                    //SourceId = customer.Source.SourceId,
                     //Interests = customer.Interests.Select(i => new UserInterestDto { /*Id = i.InterestID,*/ Name = i.InterestName, IsSelected = true }).ToList(),
                     AdditionDate = customer.AdditionDate
+                };
+                customerDto.Source = new SourceDto
+                {
+                    Id = customer.Source.SourceId,
+                    Name = customer.Source.SourceName
                 };
                 //foreach (var interest in customer.Interests)
                 //{
@@ -443,10 +453,15 @@ namespace CRM.Core.Services.Implementations
                 Phone = customer.Phone,
                 FirstName = customer.FirstName,
                 LastName = customer.LastName,
-                SourceId = customer.Source.SourceId,
+                //SourceId = customer.Source.SourceId,
                 IsSuccess = true,
                 Id = customer.CustomerId,
 
+            };
+            ReturnCustomerDto.Source = new SourceDto
+            {
+                Id = customer.Source.SourceId,
+                Name = customer.Source.SourceName
             };
             var userdto = new UserDto
             {
@@ -758,7 +773,7 @@ namespace CRM.Core.Services.Implementations
                     Email = customer.Email,
                     Gender = customer.Gender,
                     Phone = customer.Phone,
-                    SourceId = customer.Source.SourceId,
+                    //SourceId = customer.Source.SourceId,
                     //SalesRepresntativeId = customer.SalesRepresntative.Id,
                     //Interests = customer.Interests.Select(i => new UserInterestDto { /*Id = i.InterestID,*/ Name = i.InterestName, IsSelected = true }).ToList(),
                     AdditionDate = customer.AdditionDate
@@ -768,6 +783,11 @@ namespace CRM.Core.Services.Implementations
                 {
                     dto.LastAction = lastAction;
                 }
+                dto.Source = new SourceDto
+                {
+                    Id = customer.Source.SourceId,
+                    Name = customer.Source.SourceName
+                };
                 //foreach (var interest in customer.Interests)
                 //{
                 //    dto.Interests.Add(new UserInterestDto { Id = interest.InterestID, Name = interest.InterestName });
@@ -851,9 +871,14 @@ namespace CRM.Core.Services.Implementations
                     Age = customer.Age,
                     Gender = customer.Gender,
                     //SalesRepresntativeId = customer.SalesRepresntative.Id,
-                    SourceId = customer.Source.SourceId,
+                    //SourceId = customer.Source.SourceId,
                     //Interests = customer.Interests.Select(i => new UserInterestDto { /*Id = i.InterestID,*/ Name = i.InterestName, IsSelected = true }).ToList(),
                     AdditionDate = customer.AdditionDate
+                };
+                customerDto.Source = new SourceDto
+                {
+                    Id = customer.Source.SourceId,
+                    Name = customer.Source.SourceName
                 };
                 var lastAction = await GetLastAction(customer.CustomerId);
                 if (lastAction.Summary != null)
