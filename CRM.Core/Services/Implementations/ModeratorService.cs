@@ -17,7 +17,6 @@ namespace CRM.Core.Services.Implementations
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IFilterService _filterService;
-
         public ModeratorService(IUnitOfWork unitOfWork, IFilterService filterService)
         {
             _unitOfWork = unitOfWork;
@@ -160,7 +159,6 @@ namespace CRM.Core.Services.Implementations
             //customerDto.UserInterests = customer.Interests.Select(i => new UserInterestDto { /*Id = i.InterestID,*/ Name = i.InterestName }).ToList();
             return customerDto;
         }
-
         public async Task<ReturnAllCustomersDto> GetAllCustomers(int page, int size)
         {
             var customers = await _unitOfWork.Customers.GetAllAsync(["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
@@ -560,7 +558,6 @@ namespace CRM.Core.Services.Implementations
                 Message = "Source added successfully"
             };
         }
-
         public async Task<ReturnAllCustomersDto> Search(string query, int page, int size)
         {
             //var customers = await _unitOfWork.Customers.GetAllAsync(c => c.FirstName.ToLower().Contains(query.ToLower()), ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
@@ -652,7 +649,6 @@ namespace CRM.Core.Services.Implementations
                 //Customers = customersDto.OrderByDescending(DateTime => DateTime.AdditionDate).ToList()
             };
         }
-
         public async Task<UserDto> GetSalesById(string id)
         {
             var user = await _unitOfWork.UserManager.FindByIdAsync(id);
@@ -749,7 +745,6 @@ namespace CRM.Core.Services.Implementations
             };
 
         }
-
         public async Task<ActionDto> GetLastAction(int Id)
         {
             var customer = await _unitOfWork.Customers.FindAsync(c => c.CustomerId == Id, ["Messages","Calls","Meetings","Deals"]);
