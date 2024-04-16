@@ -42,11 +42,11 @@ namespace CRM.Controllers
         public async Task<IActionResult> GetBusinessInfo()
         {
             var result = await _sharedService.GetBussinesInfo();
-            if (string.IsNullOrEmpty(result.CompanyName))
-            {
-                var errors = new { errors = new string[] { "The business information has not been added yet." } };
-                return BadRequest(errors);
-            }
+            //if (string.IsNullOrEmpty(result.CompanyName))
+            //{
+            //    //var errors = new { errors = new string[] { "The business information has not been added yet." } };
+            //    //return BadRequest(errors);
+            //}
             return Ok(result);
         }
     }
