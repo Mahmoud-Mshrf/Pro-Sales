@@ -149,7 +149,8 @@ namespace CRM.Core.Services.Implementations
                 LastName = user.LastName,
                 Username = user.UserName,
                 Email = user.Email,
-                Roles = _unitOfWork.UserManager.GetRolesAsync(user).Result
+                Roles = _unitOfWork.UserManager.GetRolesAsync(user).Result,
+                EmailConfirmed = user.EmailConfirmed
             }).ToList();
 
             return userViewModels;

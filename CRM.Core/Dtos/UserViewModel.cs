@@ -20,5 +20,6 @@ namespace CRM.Core.Dtos
         public string Email { get; set; }
         [Required]
         public string Username { get; set; }
+        public bool EmailConfirmed { get; set; }
     }
 }
