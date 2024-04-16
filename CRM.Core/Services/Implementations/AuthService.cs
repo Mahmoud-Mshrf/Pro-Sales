@@ -111,7 +111,7 @@ namespace CRM.Core.Services.Implementations
             return new RefreshToken
             {
                 Token = Convert.ToBase64String(randomNumber),
-                ExpiresOn = DateTime.UtcNow.AddDays(15),
+                ExpiresOn = DateTime.UtcNow.AddDays(7),
                 CreatedOn = DateTime.UtcNow
             };
         }
