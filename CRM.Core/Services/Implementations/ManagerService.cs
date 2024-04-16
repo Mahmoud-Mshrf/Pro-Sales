@@ -19,7 +19,7 @@ namespace CRM.Core.Services.Implementations
         {
             _unitOfWork = unitOfWork;
         }
-        public async Task<ResultDto> AddInterest(string name)
+        public async Task<InterestDto> AddInterest(string name)
         {
             var interest = new Interest
             {
@@ -28,18 +28,14 @@ namespace CRM.Core.Services.Implementations
             var interests = await _unitOfWork.Interests.GetAllAsync();
             if (interests.Any(interests => interests.InterestName.ToLower() == name.ToLower()))
             {
-                return new ResultDto
-                {
-                    IsSuccess = false,
-                    Errors = ["Interest already exists"]
-                };
+                return new InterestDto();
             }
             var result = await _unitOfWork.Interests.AddAsync(interest);
             _unitOfWork.complete();
-            return new ResultDto
+            return new InterestDto
             {
-                IsSuccess = true,
-                Message = "Interest added successfully"
+                Id= result.InterestID,
+                Name= result.InterestName
             };
         }
         public async Task<InterestDto> updateInterest(InterestDto dto)

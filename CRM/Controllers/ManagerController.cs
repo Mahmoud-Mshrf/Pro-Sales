@@ -22,9 +22,10 @@ namespace CRM.Controllers
         public async Task<IActionResult> AddInterest([FromBody] NameDto dto)
         {
             var result = await _managerService.AddInterest(dto.Name);
-            if (!result.IsSuccess)
+            if (string.IsNullOrEmpty(result.Name))
             {
-                return BadRequest(result);
+                var errors =new { errors = new string[] { $"Interest not found" } };
+                return BadRequest(errors);
             }
             return Ok(result);
         }
@@ -34,7 +35,7 @@ namespace CRM.Controllers
             var result = await _managerService.updateInterest(dto);
             if (string.IsNullOrEmpty(result.Name))
             {
-                var errors = new { errors = new string[] { "The interest does not exist." } };
+                var errors = new { errors = new string[] { "Interest not found" } };
                 return BadRequest(errors);
             }
             return Ok(result);
@@ -45,7 +46,7 @@ namespace CRM.Controllers
             var result = await _managerService.getInterest(id);
             if (string.IsNullOrEmpty(result.Name))
             {
-                var errors = new { errors = new string[] { "The interest does not exist." } };
+                var errors = new { errors = new string[] { "Interest not found" } };
                 return BadRequest(errors);
             }
             return Ok(result);
