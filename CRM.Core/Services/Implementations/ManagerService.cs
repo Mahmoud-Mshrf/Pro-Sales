@@ -15,15 +15,12 @@ namespace CRM.Core.Services.Implementations
     public class ManagerService:IManagerService
     {
         private readonly IUnitOfWork _unitOfWork;
-
         public ManagerService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }
-
         public async Task<ResultDto> AddInterest(string name)
         {
-
             var interest = new Interest
             {
                 InterestName = name
@@ -230,7 +227,6 @@ namespace CRM.Core.Services.Implementations
             };
             return UserRolesDto;
         }
-
         public async Task DeletUserWithoutRoles(string id)
         {
             var user = await _unitOfWork.UserManager.FindByIdAsync(id);

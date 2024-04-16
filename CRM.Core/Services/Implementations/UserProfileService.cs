@@ -31,7 +31,6 @@ namespace CRM.Core.Services.Implementations
             _authService = authService;
             _mailingService = mailingService;
         }
-
         public async Task<ResultDto> UpdateNameAsync(string email, UpdateNameDto dto)
         {
             var user = await _unitOfWork.UserManager.FindByEmailAsync(email);

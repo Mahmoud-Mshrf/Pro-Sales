@@ -11,12 +11,10 @@ namespace CRM.Core.Services.Implementations
     public class SharedService : ISharedService
     {
         private readonly IUnitOfWork _unitOfWork;
-
         public SharedService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }
-
         // will be used after adding Manager module
         public async Task<ReturnInterstsDto> GetAllInterests()
         {
@@ -45,10 +43,6 @@ namespace CRM.Core.Services.Implementations
                 Interests = Interests
             };
         }
-        
-
-
-
         // will be used after adding Manager module
         public async Task<ReturnSourcesDto> GetAllSources()
         {
@@ -77,7 +71,6 @@ namespace CRM.Core.Services.Implementations
                 Sources = Sources
             };
         }
-
         public async Task<BusinessDto> GetBussinesInfo()
         {
             var businesses = await _unitOfWork.Businesses.GetAllAsync();

@@ -32,7 +32,6 @@ namespace CRM.Core.Services.Implementations
             _mailingService = mailingService;
             _unitOfWork = unitOfWork;
         }
-
         // This method is used to generate a new Access Token for the user (will be called by Login Endpoint)
         public async Task<AuthModel> GetTokenAsync(TokenRequestDto dto)
         {
@@ -75,7 +74,6 @@ namespace CRM.Core.Services.Implementations
             }
             return authModel;
         }
-
         public async Task<JwtSecurityToken> CreateToken(ApplicationUser user)
         {
             var userClaims = await _unitOfWork.UserManager.GetClaimsAsync(user);
@@ -105,7 +103,6 @@ namespace CRM.Core.Services.Implementations
             );
             return token;
         }
-
         private RefreshToken GenerateRefreshToken()
         {
             var randomNumber = new byte[32];
@@ -118,44 +115,6 @@ namespace CRM.Core.Services.Implementations
                 CreatedOn = DateTime.UtcNow
             };
         }
-
-
-        //public async Task<AuthModel> RefreshTokenAsync(string token)// this method is used to revoke the current refresh token and return a new refresh token 
-        //{
-        //    var authModel = new AuthModel();
-
-        //    var user = await _unitOfWork.UserManager.Users.SingleOrDefaultAsync(u => u.RefreshTokens.Any(t => t.Token == token));
-        //    if (user is null)
-        //    {
-        //        authModel.Errors = ["Invalid Token"];
-        //        return authModel;
-        //    }
-        //    var refreshToken = user.RefreshTokens.Single(x => x.Token == token);
-        //    if (!refreshToken.IsActive)
-        //    {
-        //        authModel.Errors = ["Inactive Token"];
-        //        return authModel;
-        //    }
-        //    refreshToken.RevokedOn = DateTime.UtcNow;
-
-        //    var newRefreshToken = GenerateRefreshToken();
-        //    user.RefreshTokens.Add(newRefreshToken);
-        //    await _unitOfWork.UserManager.UpdateAsync(user);
-
-        //    var JwtToken = await CreateToken(user);
-        //    authModel.AccessToken = new JwtSecurityTokenHandler().WriteToken(JwtToken);
-        //    authModel.IsAuthenticated = true;
-        //    authModel.FirstName = user.FirstName;
-        //    authModel.LastName = user.LastName;
-        //    authModel.RefreshToken = newRefreshToken.Token;
-        //    authModel.RefreshTokenExpiration = newRefreshToken.ExpiresOn;
-        //    authModel.Email = user.Email;
-        //    authModel.UserName = user.UserName;
-        //    authModel.Roles = JwtToken.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => x.Value).ToList();
-        //    return authModel;
-
-        //}
-
         public async Task<AuthModel> RefreshTokenAsync(string token)// this method is used to revoke the current refresh token and return a new refresh token 
         {
             var authModel = new AuthModel();
@@ -193,7 +152,6 @@ namespace CRM.Core.Services.Implementations
             return authModel;
 
         }
-
         public async Task<bool> RevokeToken(string token)
         {
             var user = await _unitOfWork.UserManager.Users.SingleOrDefaultAsync(u => u.RefreshTokens.Any(t => t.Token == token));
@@ -208,7 +166,6 @@ namespace CRM.Core.Services.Implementations
             return true;
 
         }
-
         public async Task<ResultDto> RegisterAsync(RegisterDto dto)
         {
             if (await _unitOfWork.UserManager.FindByNameAsync(dto.Username) is not null)
@@ -292,7 +249,6 @@ namespace CRM.Core.Services.Implementations
                 await _unitOfWork.UserManager.DeleteAsync(user);
             }
         }
-
         public async Task<AuthModel> ConfirmEmailAsync(VerifyCodeDto codeDto)
         {
             var authModel = new AuthModel();
@@ -339,7 +295,6 @@ namespace CRM.Core.Services.Implementations
             authModel.Errors = ["Invalid Code"];
             return authModel;
         }
-
         public async Task<AuthModel> ConfirmNewEmailAsync(VerifyCodeDto codeDto)
         {
             var authModel = new AuthModel();
@@ -390,7 +345,6 @@ namespace CRM.Core.Services.Implementations
             return authModel;
 
         }
-
         public async Task<ResultDto> ForgotPasswordAsync(string email)
         {
             var user = await _unitOfWork.UserManager.FindByEmailAsync(email);
@@ -428,7 +382,6 @@ namespace CRM.Core.Services.Implementations
                 Errors = ["Invalid Email"]
             };
         }
-
         public async Task<ResultDto> ResetPasswordAsync(ResetPasswordDto model)
         {
 
@@ -459,7 +412,6 @@ namespace CRM.Core.Services.Implementations
 
 
         }
-
         public async Task<ResetTokenDto> VerifyCodeAsync(VerifyCodeDto codeDto)
         {
             var user = await _unitOfWork.UserManager.FindByEmailAsync(codeDto.Email);
