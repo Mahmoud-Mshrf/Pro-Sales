@@ -11,7 +11,6 @@ namespace CRM.Core.Services.Implementations
     public class MailingService : IMailingService
     {
         private readonly MailSettings _mailSettings;
-
         public MailingService(IOptions<MailSettings> mailSettings)
         {
             _mailSettings = mailSettings.Value;
