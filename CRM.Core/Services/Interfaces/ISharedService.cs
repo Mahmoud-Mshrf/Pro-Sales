@@ -12,5 +12,6 @@ namespace CRM.Core.Services.Interfaces
         Task<ReturnInterstsDto> GetAllInterests();
         Task<ReturnSourcesDto> GetAllSources();
         Task<BusinessDto> GetBussinesInfo();
+        Task<ReturnActionDto> GetActionsForCustomer(int customerId);
     }
 }

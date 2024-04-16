@@ -85,6 +85,7 @@ namespace CRM
                 });
             });
             builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+            builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             //builder.Services.AddCors();
             builder.Services.AddCors(options =>
             {

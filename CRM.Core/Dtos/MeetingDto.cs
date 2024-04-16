@@ -10,7 +10,7 @@ using System.Text.Json.Serialization;
 
 namespace CRM.Core.Dtos
 {
-    public class MeetingDto
+    public class MeetingDto : AddMeetingDto
     {
 
 
@@ -18,18 +18,7 @@ namespace CRM.Core.Dtos
         public string id { get; set; }
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public ActionType type { get; set; }
-        [Required]
-        public bool online { get; set; }
-        [MaxLength(1000), Required]
-        public string summary { get; set; }
-        [Required]     
-        public DateTime date { get; set; }
-        [Required]
-        public DateTime followUp { get; set; }
-        [Required]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-        public int CustomerId { get; set; }
 
-        
+
     }
 }

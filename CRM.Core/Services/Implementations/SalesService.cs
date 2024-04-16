@@ -1,6 +1,10 @@
 ﻿using CRM.Core.Dtos;
 using CRM.Core.Models;
 using CRM.Core.Services.Interfaces;
+using System.Security.Claims;
+using System.Diagnostics;
+using Microsoft.AspNetCore.Http;
+using Microsoft.IdentityModel.Tokens;
 using Org.BouncyCastle.Asn1.Ocsp;
 using System;
 using System.Linq.Expressions;
@@ -11,28 +15,34 @@ namespace CRM.Core.Services.Implementations
     public class SalesService : ISalesRepresntative
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ISharedService _sharedService;
 
-        public SalesService(IUnitOfWork unitOfWork)
+
+        public SalesService(IUnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor, ISharedService sharedService)
         {
             _unitOfWork = unitOfWork;
+            _httpContextAccessor = httpContextAccessor;
+            _sharedService = sharedService;
+
         }
 
         #region ManageCalls
-        public async Task<ResultDto> AddCall(CallDto callDto, string salesRepEmail)
+        public async Task<ReturnCallsDto> AddCall(AddCallDto addcallDto, string salesRepEmail)
         {
             try
             {
-                if (callDto == null)
+                if (addcallDto == null)
                 {
-                    throw new ArgumentNullException(nameof(callDto));
+                    throw new ArgumentNullException(nameof(addcallDto));
                 }
 
                 var call = new Call();
 
-                var customer = await _unitOfWork.Customers.GetByIdAsync(callDto.CustomerId);
+                var customer = await _unitOfWork.Customers.GetByIdAsync(addcallDto.CustomerId);
                 if (customer == null)
                 {
-                    return new ResultDto
+                    return new ReturnCallsDto
                     {
                         IsSuccess = false,
                         Errors = ["Customer not found"]
@@ -41,7 +51,7 @@ namespace CRM.Core.Services.Implementations
 
                 if (string.IsNullOrEmpty(salesRepEmail))
                 {
-                    return new ResultDto
+                    return new ReturnCallsDto
                     {
                         IsSuccess = false,
                         Errors = ["Sales Representative email is null or empty"]
@@ -51,44 +61,57 @@ namespace CRM.Core.Services.Implementations
                 var salesRep = await _unitOfWork.UserManager.FindByEmailAsync(salesRepEmail);
                 if (salesRep == null)
                 {
-                    return new ResultDto
+                    return new ReturnCallsDto
                     {
                         IsSuccess = false,
                         Errors = ["Sales Representative not found"]
                     };
                 }
 
-                call.CallStatus = callDto.status;
-                call.CallSummery = callDto.summary;
-                call.CallDate = callDto.date;
-                call.FollowUpDate = callDto.followUp;
+                call.CallStatus = addcallDto.status;
+                call.CallSummery = addcallDto.summary;
+                call.CallDate = addcallDto.date;
+                call.FollowUpDate = addcallDto.followUp;
                 call.SalesRepresntative = salesRep;
-                call.Customer= customer;
+                call.Customer = customer;
 
                 await _unitOfWork.Calls.AddAsync(call);
-
                 try
                 {
                     _unitOfWork.complete();
                 }
                 catch (Exception e)
                 {
-                    return new ResultDto
+                    return new ReturnCallsDto
                     {
                         IsSuccess = false,
                         Message = e.Message
                     };
                 }
 
-                return new ResultDto
+
+                var returnDto = new ReturnCallsDto
                 {
                     IsSuccess = true,
-                    Message = "Call added successfully"
+                    Calls = new[]
+                    {
+                        new CallDto
+                        {
+                            id = call.CallID,
+                            status = call.CallStatus,
+                            summary = call.CallSummery,
+                            date = call.CallDate,
+                            followUp = call.FollowUpDate,
+                            CustomerId = call.Customer.CustomerId
+                        }
+                    }
                 };
+
+                return returnDto;
             }
             catch (Exception ex)
             {
-                return new ResultDto
+                return new ReturnCallsDto
                 {
                     IsSuccess = false,
                     Errors = [ex.Message]
@@ -96,49 +119,106 @@ namespace CRM.Core.Services.Implementations
             }
         }
 
-        public async Task<ResultDto> UpdateCallInfo(CallDto callDto, string callId)
+        //public async Task<ResultDto> UpdateCallInfo(CallDto callDto, string callId)
+        //{
+        //    var call = await _unitOfWork.Calls.FindAsync(c => c.CallID == callId);
+        //    if (call == null)
+        //    {
+        //        return new ResultDto
+        //        {
+        //            IsSuccess = false,
+        //            Errors=["Call not Found"]
+        //        };
+        //    }
+        //    var customer = await _unitOfWork.Customers.GetByIdAsync(callDto.CustomerId);
+        //    if (customer == null)
+        //    {
+        //        return new ResultDto
+        //        {
+        //            IsSuccess = false,
+        //            Errors = ["Customer not Found"]
+        //        };
+        //    }
+        //    call.CallDate = callDto.date;
+        //    call.CallStatus = callDto.status;
+        //    call.CallSummery = callDto.summary;
+        //    call.Customer = customer;
+        //    call.FollowUpDate = callDto.followUp;
+
+        //    try
+        //    {
+        //        _unitOfWork.complete();
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        return new ResultDto
+        //        {
+        //            IsSuccess = false,
+        //           Errors = [e.Message]
+        //        };
+        //    }
+        //    return new ResultDto
+        //    {
+        //        IsSuccess = true,
+        //        Message = "Call updated successfully"
+        //    };
+        //}
+        public async Task<List<CallDto>> UpdateCallInfo(AddCallDto addCallDto, string callId)
         {
             var call = await _unitOfWork.Calls.FindAsync(c => c.CallID == callId);
             if (call == null)
             {
-                return new ResultDto
-                {
-                    IsSuccess = false,
-                    Errors=["Call not Found"]
-                };
+                // If call not found, return null or an empty list depending on your preference
+                return null;
             }
-            var customer = await _unitOfWork.Customers.GetByIdAsync(callDto.CustomerId);
-            if (customer == null)
+
+            // Update CustomerId if provided
+            if (addCallDto.CustomerId != 0)
             {
-                return new ResultDto
+                var customer = await _unitOfWork.Customers.GetByIdAsync(addCallDto.CustomerId);
+                if (customer == null)
                 {
-                    IsSuccess = false,
-                    Errors = ["Customer not Found"]
-                };
+                    // If customer not found, handle accordingly, here I'm returning null
+                    return null;
+                }
+
+                // Update CustomerId and Customer navigation property
+                call.Customer.CustomerId = addCallDto.CustomerId;
+                call.Customer = customer;
             }
-            call.CallDate = callDto.date;
-            call.CallStatus = callDto.status;
-            call.CallSummery = callDto.summary;
-            call.Customer = customer;
-            call.FollowUpDate = callDto.followUp;
+
+            // Update other call properties
+            call.CallStatus = addCallDto.status;
+            call.CallSummery = addCallDto.summary;
+            call.CallDate = addCallDto.date;
+            call.FollowUpDate = addCallDto.followUp;
 
             try
             {
-                _unitOfWork.complete();
+                _unitOfWork.complete(); // Assuming asynchronous completion
             }
             catch (Exception e)
             {
-                return new ResultDto
-                {
-                    IsSuccess = false,
-                   Errors = [e.Message]
-                };
+                // Handle exceptions, here I'm returning null
+                Debug.WriteLine($"Error: {e.Message}");
+                return null;
             }
-            return new ResultDto
-            {
-                IsSuccess = true,
-                Message = "Call updated successfully"
-            };
+
+            // Return updated call information
+            return new List<CallDto>
+    {
+        new CallDto
+        {
+            // Populate your CallDto properties here
+            id = call.CallID,
+            status = call.CallStatus,
+            summary = call.CallSummery,
+            date = call.CallDate,
+            followUp = call.FollowUpDate,
+            CustomerId = call.Customer.CustomerId,
+
+        }
+    };
         }
 
 
@@ -284,11 +364,11 @@ namespace CRM.Core.Services.Implementations
 
         #endregion
         #region ManageMessages
-        public async Task<ResultDto> AddMessage(MessageDto messageDto, string salesRepEmail)
+        public async Task<ResultDto> AddMessage(AddMessageDto messageDto, string salesRepEmail)
         {
             try
             {
-                if ( messageDto== null)
+                if (messageDto == null)
                 {
                     throw new ArgumentNullException(nameof(messageDto));
                 }
@@ -301,7 +381,7 @@ namespace CRM.Core.Services.Implementations
                     return new ResultDto
                     {
                         IsSuccess = false,
-                       Errors = ["Customer not Found"]
+                        Errors = ["Customer not Found"]
                     };
                 }
 
@@ -357,13 +437,14 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Errors = [ex.Message]   
+                    Errors = [ex.Message]
                 };
             }
 
         }
 
-        public async Task<ResultDto> UpdateMessageInfo(MessageDto messageDto, string MessageId)
+
+        public async Task<ResultDto> UpdateMessageInfo(AddMessageDto messageDto, string MessageId)
         {
             var message = await _unitOfWork.Messages.FindAsync(c => c.MessageID == MessageId);
             if (message == null)
@@ -371,7 +452,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                   Errors = ["Message not Found"]
+                    Errors = ["Message not Found"]
                 };
             }
             var customer = await _unitOfWork.Customers.GetByIdAsync(messageDto.CustomerId);
@@ -386,7 +467,7 @@ namespace CRM.Core.Services.Implementations
             }
             message.MessageContent = messageDto.summary;
             message.MessageDate = messageDto.date;
-            message.FollowUpDate= messageDto.followUp;
+            message.FollowUpDate = messageDto.followUp;
             message.Customer.CustomerId = messageDto.CustomerId;
             try
             {
@@ -407,7 +488,8 @@ namespace CRM.Core.Services.Implementations
             };
         }
 
-   
+
+
         public async Task<ReturnMessagesDto> GetAllMessages()
         {
             try
@@ -547,7 +629,7 @@ namespace CRM.Core.Services.Implementations
         #endregion
 
         #region ManageMeetings
-        public async Task<ResultDto> AddMeeting(MeetingDto meetingDto, string SaleRepEmail)
+        public async Task<ResultDto> AddMeeting(AddMeetingDto meetingDto, string SaleRepEmail)
         {
             try
             {
@@ -562,7 +644,7 @@ namespace CRM.Core.Services.Implementations
                     return new ResultDto
                     {
                         IsSuccess = false,
-                        Errors=["Customer not Found"]
+                        Errors = ["Customer not Found"]
                     };
                 }
 
@@ -613,7 +695,7 @@ namespace CRM.Core.Services.Implementations
 
                 return new ResultDto
                 {
-                    IsSuccess=true,
+                    IsSuccess = true,
                     Message = "Meeting is added Successfully"
 
                 };
@@ -629,8 +711,7 @@ namespace CRM.Core.Services.Implementations
                 };
             }
         }
-
-        public async Task<ResultDto> UpdateMeeting(MeetingDto meetingDto, string MeetingId)
+        public async Task<ResultDto> UpdateMeeting(AddMeetingDto meetingDto, string MeetingId)
         {
             var meeting = await _unitOfWork.Meetings.FindAsync(c => c.MeetingID == MeetingId);
             if (meeting == null)
@@ -638,7 +719,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Errors=["Meeting not Found"]
+                    Errors = ["Meeting not Found"]
                 };
             }
             var customer = await _unitOfWork.Customers.GetByIdAsync(meetingDto.CustomerId);
@@ -651,7 +732,7 @@ namespace CRM.Core.Services.Implementations
                 };
             }
             meeting.connectionState = meetingDto.online;
-            meeting.Customer=customer;
+            meeting.Customer = customer;
             meeting.FollowUpDate = meetingDto.followUp;
             meeting.MeetingSummary = meetingDto.summary;
             try
@@ -819,7 +900,7 @@ namespace CRM.Core.Services.Implementations
         #endregion
 
         #region ManageDeals
-        public async Task<ResultDto> AddDeal(DealsDto dealsDto, string salesRepEmail)
+        public async Task<ResultDto> AddDeal(AddDealDto dealsDto, string salesRepEmail)
         {
             try
             {
@@ -836,7 +917,7 @@ namespace CRM.Core.Services.Implementations
                     return new ResultDto
                     {
                         IsSuccess = false,
-                       Errors = ["Customer not Found"]
+                        Errors = ["Customer not Found"]
                     };
                 }
                 var interest = await _unitOfWork.Interests.GetByIdAsync(dealsDto.InterestId);
@@ -845,7 +926,7 @@ namespace CRM.Core.Services.Implementations
                     return new ResultDto
                     {
                         IsSuccess = false,
-                        Errors=[ "Interest not found"]
+                        Errors = ["Interest not found"]
                     };
                 }
 
@@ -886,7 +967,7 @@ namespace CRM.Core.Services.Implementations
                     return new ResultDto
                     {
                         IsSuccess = false,
-                       Errors = [e.Message]
+                        Errors = [e.Message]
                     };
                 }
 
@@ -901,13 +982,14 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Errors =[ ex.Message]
+                    Errors = [ex.Message]
                 };
             }
         }
 
 
-        public async Task<ResultDto> UpdateDeal(DealsDto dealsDto, string dealId)
+
+        public async Task<ResultDto> UpdateDeal(AddDealDto dealsDto, string dealId)
         {
             var deal = await _unitOfWork.Deals.FindAsync(c => c.DealId == dealId);
             if (deal == null)
@@ -915,7 +997,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Errors =[ "Deal not found"]
+                    Errors = ["Deal not found"]
                 };
             }
             var customer = await _unitOfWork.Customers.GetByIdAsync(dealsDto.CustomerId);
@@ -924,7 +1006,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Errors =[ "Customer not found"]
+                    Errors = ["Customer not found"]
                 };
             }
             var interest = await _unitOfWork.Interests.GetByIdAsync(dealsDto.InterestId);
@@ -933,16 +1015,16 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Errors =[ "Interest not found"]
+                    Errors = ["Interest not found"]
                 };
             }
 
             deal.Price = dealsDto.price;
             deal.DealDate = dealsDto.date;
             deal.description = dealsDto.summary;
-            deal.Interest=interest;
-            deal.Customer=customer;
-            
+            deal.Interest = interest;
+            deal.Customer = customer;
+
             try
             {
                 _unitOfWork.complete();
@@ -952,7 +1034,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = false,
-                    Errors =[e.Message]
+                    Errors = [e.Message]
                 };
             }
             return new ResultDto
@@ -961,6 +1043,7 @@ namespace CRM.Core.Services.Implementations
                 Message = "Deal updated successfully"
             };
         }
+
 
 
 
@@ -1112,9 +1195,47 @@ namespace CRM.Core.Services.Implementations
             }
         }
         #endregion
+        public async Task<ReturnActionDto> GetAllActionsForCustomer(int customerId)
+        {
+            var salesRepresentativeEmail = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.Email);
+            var salesRepresentative = await _unitOfWork.UserManager.FindByEmailAsync(salesRepresentativeEmail);
+
+            if (salesRepresentative == null)
+            {
+                return new ReturnActionDto
+                {
+
+                    IsSuccess = false,
+                    Errors = ["Sales representative not found"],
+
+                };
+            }
+
+            var customer = await _unitOfWork.Customers.GetByIdAsync(customerId);
+
+            if (customer == null || customer.SalesRepresntative == null || customer.SalesRepresntative.Id != salesRepresentative.Id)
+            {
+                return new ReturnActionDto
+                {
+
+                    IsSuccess = false,
+                    Errors = ["Customer not found or not assigned to the sales representative"],
+                    Actions = new List<ActionDto>()
+                };
+            }
+
+            var actions = await _sharedService.GetActionsForCustomer(customerId);
+
+            return new ReturnActionDto
+            {
+
+                IsSuccess = true,
+                Message = "Actions retrieved successfully",
+                Actions = actions.Actions.ToList()
+            };
+        }
 
 
-       
     }
 }
 
