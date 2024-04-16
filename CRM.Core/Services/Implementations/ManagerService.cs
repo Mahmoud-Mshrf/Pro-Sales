@@ -15,15 +15,12 @@ namespace CRM.Core.Services.Implementations
     public class ManagerService:IManagerService
     {
         private readonly IUnitOfWork _unitOfWork;
-
         public ManagerService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }
-
-        public async Task<ResultDto> AddInterest(string name)
+        public async Task<InterestDto> AddInterest(string name)
         {
-
             var interest = new Interest
             {
                 InterestName = name
@@ -31,18 +28,14 @@ namespace CRM.Core.Services.Implementations
             var interests = await _unitOfWork.Interests.GetAllAsync();
             if (interests.Any(interests => interests.InterestName.ToLower() == name.ToLower()))
             {
-                return new ResultDto
-                {
-                    IsSuccess = false,
-                    Errors = ["Interest already exists"]
-                };
+                return new InterestDto();
             }
             var result = await _unitOfWork.Interests.AddAsync(interest);
             _unitOfWork.complete();
-            return new ResultDto
+            return new InterestDto
             {
-                IsSuccess = true,
-                Message = "Interest added successfully"
+                Id= result.InterestID,
+                Name= result.InterestName
             };
         }
         public async Task<InterestDto> updateInterest(InterestDto dto)
@@ -152,7 +145,8 @@ namespace CRM.Core.Services.Implementations
                 LastName = user.LastName,
                 Username = user.UserName,
                 Email = user.Email,
-                Roles = _unitOfWork.UserManager.GetRolesAsync(user).Result
+                Roles = _unitOfWork.UserManager.GetRolesAsync(user).Result,
+                EmailConfirmed = user.EmailConfirmed
             }).ToList();
 
             return userViewModels;
@@ -230,7 +224,6 @@ namespace CRM.Core.Services.Implementations
             };
             return UserRolesDto;
         }
-
         public async Task DeletUserWithoutRoles(string id)
         {
             var user = await _unitOfWork.UserManager.FindByIdAsync(id);
