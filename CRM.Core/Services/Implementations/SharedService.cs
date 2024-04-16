@@ -87,20 +87,15 @@ namespace CRM.Core.Services.Implementations
             return businessDto;
         }
 
-        public async Task<ReturnActionDto> GetActionsForCustomer(int customerId)
+        public async Task<IEnumerable<object>> GetActionsForCustomer(int customerId)
         {
             var customer = await _unitOfWork.Customers.GetByIdAsync(customerId);
 
             if (customer == null)
             {
-                return new ReturnActionDto
-                {
-
-                    IsSuccess = false,
-                    Errors = ["Customer not found"],
-
-                };
+                return null;
             }
+
 
             var calls = await _unitOfWork.Calls.GetAllAsync(call => call.Customer.CustomerId == customerId);
             var messages = await _unitOfWork.Messages.GetAllAsync(message => message.Customer.CustomerId == customerId);
@@ -108,56 +103,50 @@ namespace CRM.Core.Services.Implementations
             var deals = await _unitOfWork.Deals.GetAllAsync(deal => deal.Customer.CustomerId == customerId, includes: new[] { "Interest" });
             var interests = await _unitOfWork.Interests.GetAllAsync();
 
-            var actions = new List<ActionDto>();
+            var actions = new List<object>();
 
-            actions.AddRange(calls.Select(call => new ActionDto
+            actions.AddRange(calls.Select(call => new
             {
-                Id = call.CallID,
-                Type = "call",
-                Status = (int)call.CallStatus,
-                Summary = call.CallSummery,
-                Date = call.CallDate,
-                FollowUp = call.FollowUpDate
+                id = call.CallID,
+                type = "call",
+                status = (int)call.CallStatus,
+                summary = call.CallSummery,
+                date = call.CallDate,
+                followUp = call.FollowUpDate
             }));
 
-            actions.AddRange(messages.Select(message => new ActionDto
+            actions.AddRange(messages.Select(message => new
             {
-                Id = message.MessageID,
-                Type = "message",
-                Summary = message.MessageContent,
-                Date = message.MessageDate,
-                FollowUp = message.FollowUpDate
+                id = message.MessageID,
+                type = "message",
+                summary = message.MessageContent,
+                date = message.MessageDate,
+                followUp = message.FollowUpDate
             }));
 
-            actions.AddRange(meetings.Select(meeting => new ActionDto
+            actions.AddRange(meetings.Select(meeting => new
             {
-                Id = meeting.MeetingID,
-                Type = "meeting",
-                Online = meeting.connectionState,
-                Summary = meeting.MeetingSummary,
-                Date = meeting.MeetingDate,
-                FollowUp = meeting.FollowUpDate
+                id = meeting.MeetingID,
+                type = "meeting",
+                online = meeting.connectionState,
+                summary = meeting.MeetingSummary,
+                date = meeting.MeetingDate,
+                followUp = meeting.FollowUpDate
             }));
 
-            actions.AddRange(deals.Select(deal => new ActionDto
+            actions.AddRange(deals.Select(deal => new
             {
-                Id = deal.DealId,
-                Type = "deal",
-                Price = deal.Price,
-                Interest = interests.FirstOrDefault(i => i.InterestID == deal.Interest.InterestID)?.ToInterestDto(),
-                Summary = deal.description,
-                Date = deal.DealDate
+                id = deal.DealId,
+                type = "deal",
+                price = deal.Price,
+                interest = interests.FirstOrDefault(i => i.InterestID == deal.Interest.InterestID)?.ToInterestDto(),
+                summary = deal.description,
+                date = deal.DealDate
             }));
 
-            actions = actions.OrderBy(a => a.Date).ToList();
+            actions = actions.OrderBy(a => ((dynamic)a).date).ToList();
 
-            return new ReturnActionDto
-            {
-
-                IsSuccess = true,
-                Message = "Actions Found",
-                Actions = actions
-            };
+            return actions;
         }
     }
 }

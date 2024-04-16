@@ -1195,44 +1195,41 @@ namespace CRM.Core.Services.Implementations
             }
         }
         #endregion
-        public async Task<ReturnActionDto> GetAllActionsForCustomer(int customerId)
+        public async Task<IEnumerable<object>> GetAllActionsForCustomer(int customerId)
         {
             var salesRepresentativeEmail = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.Email);
             var salesRepresentative = await _unitOfWork.UserManager.FindByEmailAsync(salesRepresentativeEmail);
 
             if (salesRepresentative == null)
             {
-                return new ReturnActionDto
-                {
-
-                    IsSuccess = false,
-                    Errors = ["Sales representative not found"],
-
-                };
+                return new List<object>
+        {
+            new
+            {
+                IsSuccess = false,
+                Errors = new List<string> { "Sales representative not found" }
+            }
+        };
             }
 
             var customer = await _unitOfWork.Customers.GetByIdAsync(customerId);
 
             if (customer == null || customer.SalesRepresntative == null || customer.SalesRepresntative.Id != salesRepresentative.Id)
             {
-                return new ReturnActionDto
-                {
-
-                    IsSuccess = false,
-                    Errors = ["Customer not found or not assigned to the sales representative"],
-                    Actions = new List<ActionDto>()
-                };
+                return new List<object>
+        {
+            new
+            {
+                IsSuccess = false,
+                Errors = new List<string> { "Customer not found or not assigned to the sales representative" },
+                Actions = new List<ActionDto>()
+            }
+        };
             }
 
             var actions = await _sharedService.GetActionsForCustomer(customerId);
 
-            return new ReturnActionDto
-            {
-
-                IsSuccess = true,
-                Message = "Actions retrieved successfully",
-                Actions = actions.Actions.ToList()
-            };
+            return actions;
         }
 
 

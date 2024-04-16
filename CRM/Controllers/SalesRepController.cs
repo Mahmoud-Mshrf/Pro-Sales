@@ -288,16 +288,19 @@ namespace CRM.Controllers
         [HttpGet("{customerId}/actions")]
         public async Task<IActionResult> GetActionsForCustomer(int customerId)
         {
-           
-              
-                var actions = await _salesRepresntative.GetAllActionsForCustomer(customerId);
-            if (!actions.IsSuccess)
+            try
             {
-                return NotFound(actions.Errors);
+                // Retrieve actions for the specific customer
+                var actions = await _salesRepresntative.GetAllActionsForCustomer(customerId);
+                return Ok(actions);
             }
-            return Ok(actions);
-
+            catch (Exception ex)
+            {
+                // Log the exception and return an error response
+                return StatusCode(500, "Internal server error");
+            }
         }
+
 
 
 

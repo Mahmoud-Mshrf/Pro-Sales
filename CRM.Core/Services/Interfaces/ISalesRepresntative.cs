@@ -45,7 +45,7 @@ namespace CRM.Core.Services.Interfaces
 
         #endregion
 
-        Task<ReturnActionDto> GetAllActionsForCustomer(int customerId);
+        Task<IEnumerable<object>> GetAllActionsForCustomer(int customerId);
 
     }
 }
