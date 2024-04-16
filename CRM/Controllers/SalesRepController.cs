@@ -22,7 +22,7 @@ namespace CRM.Controllers
 
         #region Manage Calls
         [HttpPost("[action]")]
-        public async Task<IActionResult> AddCall([FromBody] CallDto callDto)
+        public async Task<IActionResult> AddCall([FromBody] AddCallDto callDto)
         {
             if (!ModelState.IsValid)
             {
@@ -38,7 +38,7 @@ namespace CRM.Controllers
         }
 
         [HttpPut("[action]")]
-        public async Task<IActionResult> UpdateCall([FromBody] CallDto callDto, string CallId)
+        public async Task<IActionResult> UpdateCall([FromBody] AddCallDto callDto, string CallId)
         {
             if (!ModelState.IsValid)
             {
@@ -46,10 +46,10 @@ namespace CRM.Controllers
             }
             var SalesRepresntativeEmail = User.FindFirstValue(ClaimTypes.Email);
             var result = await _salesRepresntative.UpdateCallInfo(callDto, CallId);
-            if (!result.IsSuccess)
-            {
-                return BadRequest(result);
-            }
+            //if (!result.IsSuccess)
+            //{
+            //    return BadRequest(result);
+            //}
             return Ok(result);
         }
         [HttpGet("[action]")]
@@ -87,7 +87,7 @@ namespace CRM.Controllers
 
         #region ManageMessages
         [HttpPost("[action]")]
-        public async Task<IActionResult> AddMessages([FromBody] MessageDto messageDto)
+        public async Task<IActionResult> AddMessages([FromBody] AddMessageDto messageDto)
         {
             if (!ModelState.IsValid)
             {
@@ -103,7 +103,7 @@ namespace CRM.Controllers
         }
 
         [HttpPut("[action]")]
-        public async Task<IActionResult> UpdateMessage([FromBody] MessageDto messageDto, string MessageId)
+        public async Task<IActionResult> UpdateMessage([FromBody] AddMessageDto messageDto, string MessageId)
         {
             if (!ModelState.IsValid)
             {
@@ -158,7 +158,7 @@ namespace CRM.Controllers
 
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> AddMeeting([FromBody] MeetingDto meetingDto)
+        public async Task<IActionResult> AddMeeting([FromBody] AddMeetingDto meetingDto)
         {
             if (!ModelState.IsValid)
             {
@@ -175,7 +175,7 @@ namespace CRM.Controllers
 
 
         [HttpPut("[action]")]
-        public async Task<IActionResult> UpdateMeeting([FromBody] MeetingDto meetingDto, string MeetingId)
+        public async Task<IActionResult> UpdateMeeting([FromBody] AddMeetingDto meetingDto, string MeetingId)
         {
             if (!ModelState.IsValid)
             {
@@ -226,7 +226,7 @@ namespace CRM.Controllers
 
         #region ManageDeals
         [HttpPost("[action]")]
-        public async Task<IActionResult> AddDeal([FromBody] DealsDto dealDto)
+        public async Task<IActionResult> AddDeal([FromBody] AddDealDto dealDto)
         {
             if (!ModelState.IsValid)
             {
@@ -241,7 +241,7 @@ namespace CRM.Controllers
             return Ok(result);
         }
         [HttpPut("[action]")]
-        public async Task<IActionResult> UpdateDeal([FromBody] DealsDto dealDto, string DealId)
+        public async Task<IActionResult> UpdateDeal([FromBody] AddDealDto dealDto, string DealId)
         {
             if (!ModelState.IsValid)
             {
@@ -285,8 +285,20 @@ namespace CRM.Controllers
             return Ok(result);
         }
         #endregion
+        [HttpGet("{customerId}/actions")]
+        public async Task<IActionResult> GetActionsForCustomer(int customerId)
+        {
+           
+              
+                var actions = await _salesRepresntative.GetAllActionsForCustomer(customerId);
+            if (!actions.IsSuccess)
+            {
+                return NotFound(actions.Errors);
+            }
+            return Ok(actions);
 
-       
+        }
+
 
 
     }

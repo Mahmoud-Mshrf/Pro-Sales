@@ -119,7 +119,7 @@ namespace CRM.Infrastructure.Migrations
 
                     b.HasIndex("ManagerId");
 
-                    b.ToTable("Business");
+                    b.ToTable("Business", (string)null);
                 });
 
             modelBuilder.Entity("CRM.Core.Models.Call", b =>
@@ -152,7 +152,7 @@ namespace CRM.Infrastructure.Migrations
 
                     b.HasIndex("SalesRepresntativeId");
 
-                    b.ToTable("Calls");
+                    b.ToTable("Calls", (string)null);
                 });
 
             modelBuilder.Entity("CRM.Core.Models.Customer", b =>
@@ -212,7 +212,7 @@ namespace CRM.Infrastructure.Migrations
 
                     b.HasIndex("SourceId");
 
-                    b.ToTable("Customers");
+                    b.ToTable("Customers", (string)null);
                 });
 
             modelBuilder.Entity("CRM.Core.Models.Deal", b =>
@@ -246,7 +246,7 @@ namespace CRM.Infrastructure.Migrations
 
                     b.HasIndex("SalesRepresntativeId");
 
-                    b.ToTable("Deals");
+                    b.ToTable("Deals", (string)null);
                 });
 
             modelBuilder.Entity("CRM.Core.Models.Interest", b =>
@@ -264,7 +264,7 @@ namespace CRM.Infrastructure.Migrations
 
                     b.HasKey("InterestID");
 
-                    b.ToTable("Interests");
+                    b.ToTable("Interests", (string)null);
                 });
 
             modelBuilder.Entity("CRM.Core.Models.Meeting", b =>
@@ -297,7 +297,7 @@ namespace CRM.Infrastructure.Migrations
 
                     b.HasIndex("SalesRepresntativeId");
 
-                    b.ToTable("Meetings");
+                    b.ToTable("Meetings", (string)null);
                 });
 
             modelBuilder.Entity("CRM.Core.Models.Message", b =>
@@ -328,7 +328,7 @@ namespace CRM.Infrastructure.Migrations
 
                     b.HasIndex("SalesRepresntativeId");
 
-                    b.ToTable("Messages");
+                    b.ToTable("Messages", (string)null);
                 });
 
             modelBuilder.Entity("CRM.Core.Models.Source", b =>
@@ -345,7 +345,7 @@ namespace CRM.Infrastructure.Migrations
 
                     b.HasKey("SourceId");
 
-                    b.ToTable("Sources");
+                    b.ToTable("Sources", (string)null);
                 });
 
             modelBuilder.Entity("CRM.Core.Models.VerificationCode", b =>
@@ -373,7 +373,7 @@ namespace CRM.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("VerificationCodes");
+                    b.ToTable("VerificationCodes", (string)null);
                 });
 
             modelBuilder.Entity("CustomerInterest", b =>
@@ -526,7 +526,7 @@ namespace CRM.Infrastructure.Migrations
 
             modelBuilder.Entity("CRM.Core.Models.ApplicationUser", b =>
                 {
-                    b.OwnsMany("CRM.Core.Helpers.RefreshToken", "RefreshTokens", b1 =>
+                    b.OwnsMany("CRM.Core.Models.ApplicationUser.RefreshTokens#CRM.Core.Helpers.RefreshToken", "RefreshTokens", b1 =>
                         {
                             b1.Property<string>("ApplicationUserId")
                                 .HasColumnType("nvarchar(450)");
@@ -551,7 +551,7 @@ namespace CRM.Infrastructure.Migrations
 
                             b1.HasKey("ApplicationUserId", "Id");
 
-                            b1.ToTable("RefreshToken");
+                            b1.ToTable("RefreshToken", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("ApplicationUserId");

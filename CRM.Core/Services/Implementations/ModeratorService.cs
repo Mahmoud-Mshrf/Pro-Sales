@@ -17,10 +17,12 @@ namespace CRM.Core.Services.Implementations
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IFilterService _filterService;
-        public ModeratorService(IUnitOfWork unitOfWork, IFilterService filterService)
+        private readonly ISharedService _sharedService;
+        public ModeratorService(IUnitOfWork unitOfWork, IFilterService filterService,ISharedService sharedService)
         {
             _unitOfWork = unitOfWork;
             _filterService = filterService;
+            _sharedService = sharedService;
         }
         // Will be used after adding Manager module
         public async Task<ReturnUsersDto> GetAllSalesRepresentatives()
@@ -58,11 +60,12 @@ namespace CRM.Core.Services.Implementations
         }
         public async Task<ResultDto> DeleteCustomer(int customerId)
         {
-            var customer = await _unitOfWork.Customers.GetByIdAsync(customerId);
+            var customer = await _unitOfWork.Customers.FindAsync(c=>c.CustomerId==customerId && !c.IsDeleted);
             if (customer == null)
-                return new ResultDto { IsSuccess = false, Errors = ["User not found"] };
+                return new ResultDto { IsSuccess = false, Errors = ["Customer not found"] };
 
-            _unitOfWork.Customers.Delete(customerId);
+            //_unitOfWork.Customers.Delete(customerId);\
+            customer.IsDeleted = true;
             try
             {
                 _unitOfWork.complete();
@@ -82,7 +85,7 @@ namespace CRM.Core.Services.Implementations
         public async Task<ReturnCustomerDto> GetCustomer(int customerId)
         {
             var customerDto = new ReturnCustomerDto();
-            var customer = await _unitOfWork.Customers.FindAsync(c => c.CustomerId == customerId, ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
+            var customer = await _unitOfWork.Customers.FindAsync(c => c.CustomerId == customerId && !c.IsDeleted, ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
             if (customer == null)
             {
                 customerDto.IsSuccess = false;
@@ -161,7 +164,7 @@ namespace CRM.Core.Services.Implementations
         }
         public async Task<ReturnAllCustomersDto> GetAllCustomers(int page, int size)
         {
-            var customers = await _unitOfWork.Customers.GetAllAsync(["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
+            var customers = await _unitOfWork.Customers.GetAllAsync(c=>!c.IsDeleted,["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
             if (customers == null)
             {
                 return new ReturnAllCustomersDto
@@ -372,7 +375,7 @@ namespace CRM.Core.Services.Implementations
         }
         public async Task<ReturnCustomerDto> UpdateCustomer(AddCustomerDto customerDto, int customerId)
         {
-            var customer = await _unitOfWork.Customers.FindAsync(c => c.CustomerId == customerId, ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
+            var customer = await _unitOfWork.Customers.FindAsync(c => c.CustomerId == customerId && !c.IsDeleted, ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
             if (customer == null)
             {
                 return new ReturnCustomerDto
@@ -565,22 +568,22 @@ namespace CRM.Core.Services.Implementations
             //{
             //    customers = await _unitOfWork.Customers.GetAllAsync(c => c.LastName.ToLower().Contains(query.ToLower()), ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
             //}
-            var customers = await _unitOfWork.Customers.GetAllAsync(c => (c.FirstName.ToLower() + " " + c.LastName.ToLower()).Contains(query.ToLower()), ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
+            var customers = await _unitOfWork.Customers.GetAllAsync(c => (c.FirstName.ToLower() + " " + c.LastName.ToLower()).Contains(query.ToLower()) && !c.IsDeleted, ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
             if (!customers.Any())
             {
-                customers = await _unitOfWork.Customers.GetAllAsync(c => c.FirstName.ToLower().Contains(query.ToLower()), ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
+                customers = await _unitOfWork.Customers.GetAllAsync(c => c.FirstName.ToLower().Contains(query.ToLower()) && !c.IsDeleted, ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
             }
             if (!customers.Any())
             {
-                customers = await _unitOfWork.Customers.GetAllAsync(c => c.LastName.ToLower().Contains(query.ToLower()), ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
+                customers = await _unitOfWork.Customers.GetAllAsync(c => c.LastName.ToLower().Contains(query.ToLower()) && !c.IsDeleted, ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
             }
             if (!customers.Any())
             {
-                customers = await _unitOfWork.Customers.GetAllAsync(c => c.Email.ToLower().Contains(query.ToLower()), ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
+                customers = await _unitOfWork.Customers.GetAllAsync(c => c.Email.ToLower().Contains(query.ToLower()) && !c.IsDeleted, ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
             }
             if (!customers.Any())
             {
-                customers = await _unitOfWork.Customers.GetAllAsync(c => c.Phone.ToLower().Contains(query.ToLower()), ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
+                customers = await _unitOfWork.Customers.GetAllAsync(c => c.Phone.ToLower().Contains(query.ToLower()) && !c.IsDeleted, ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
             }
 
             var customerResult = new List<ReturnCustomerDto>();
@@ -669,7 +672,7 @@ namespace CRM.Core.Services.Implementations
         }
         public async Task<ReturnAllCustomersDto> GetLastWeekCustomers(int page, int size)
         {
-            var customers = await _unitOfWork.Customers.GetAllAsync(c => c.AdditionDate >= DateTime.Now.AddDays(-7), ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
+            var customers = await _unitOfWork.Customers.GetAllAsync(c => c.AdditionDate >= DateTime.Now.AddDays(-7) && !c.IsDeleted, ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
             if (customers == null)
             {
                 return new ReturnAllCustomersDto
@@ -807,54 +810,9 @@ namespace CRM.Core.Services.Implementations
                 return null; // or handle the case where no action is found
             }
         }
-        public async Task<IEnumerable<ActionDto>> GetAllActionsForCustomer(int customerId)
+        public async Task<ReturnActionDto> GetAllActionsForCustomer(int customerId)
         {
-            var calls = await _unitOfWork.Calls.GetAllAsync(call => call.Customer.CustomerId == customerId);
-            var messages = await _unitOfWork.Messages.GetAllAsync(message => message.Customer.CustomerId == customerId);
-            var meetings = await _unitOfWork.Meetings.GetAllAsync(meeting => meeting.Customer.CustomerId == customerId);
-            var deals = await _unitOfWork.Deals.GetAllAsync(deal => deal.Customer.CustomerId == customerId, includes: new[] { "Interest" });
-            var interests = await _unitOfWork.Interests.GetAllAsync();
-
-
-            var actions = calls.Select(call => new ActionDto
-            {
-                Id = call.CallID,
-                Type = "call",
-                Status = (int)call.CallStatus,
-                Summary = call.CallSummery,
-                Date = call.CallDate,
-                FollowUp = call.FollowUpDate
-            }).ToList();
-
-            actions.AddRange(messages.Select(message => new ActionDto
-            {
-                Id = message.MessageID,
-                Type = "message",
-                Summary = message.MessageContent,
-                Date = message.MessageDate,
-                FollowUp = message.FollowUpDate
-            }));
-
-            actions.AddRange(meetings.Select(meeting => new ActionDto
-            {
-                Id = meeting.MeetingID,
-                Type = "meeting",
-                Online = meeting.connectionState,
-                Summary = meeting.MeetingSummary,
-                Date = meeting.MeetingDate,
-                FollowUp = meeting.FollowUpDate
-            }));
-            actions.AddRange(deals.Select(deal => new ActionDto
-            {
-                Id = deal.DealId,
-                Type = "deal",
-                Price = deal.Price,
-                Interest = interests.FirstOrDefault(i => i.InterestID == deal.Interest.InterestID)?.ToInterestDto(), // Map Interest entity to InterestDto
-                Summary = deal.description,
-                Date = deal.DealDate
-            }));
-
-
+            var actions = await _sharedService.GetActionsForCustomer(customerId);
             return actions;
         }
         public async Task DeleteUnusedSource(int id)
