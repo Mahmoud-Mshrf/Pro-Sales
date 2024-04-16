@@ -13,24 +13,12 @@ using System.Text.Json.Serialization;
 
 namespace CRM.Core.Dtos
 {
-    public class CallDto
+    public class CallDto : AddCallDto
     {
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public string id { get; set; }
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public ActionType type { get; set; }
-
-        [EnumDataType(typeof(CallStatus))]
-        public CallStatus status { get; set; }
-        [MaxLength(500)]
-        public string summary { get; set; }
-        public DateTime date { get; set; }
-        public DateTime followUp { get; set; }
-
-        [Required]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-        public int CustomerId { get; set; }
-
 
     }
 }

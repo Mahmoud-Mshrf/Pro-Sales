@@ -1,5 +1,4 @@
-﻿using CRM.Core.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -9,14 +8,19 @@ using System.Threading.Tasks;
 
 namespace CRM.Core.Dtos
 {
-    public class MessageDto : AddMessageDto
-
-
+    public class AddDealDto
     {
+        [Required]
+        public double price { get; set; }
+        [Required]
+        public String summary { get; set; }
+        [Required]
+        public DateTime date { get; set; }
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-        public string id { get; set; }
+        public int CustomerId { get; set; }
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-        public ActionType type { get; set; }
+        public int InterestId { get; set; }
+
 
 
 
