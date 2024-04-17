@@ -41,25 +41,6 @@ namespace CRM.Controllers
             }
             return Ok(result);
         }
-
-
-
-        //[HttpPost("confirm-email")]
-        //public async Task<IActionResult> ConfirmEmail(VerifyCodeDto codeDto)
-        //{
-        //    var result = await _authService.ConfirmEmailAsync(codeDto);
-        //    if (!result.IsAuthenticated)
-        //    {
-        //        var errors = new { errors = result.Errors };
-        //        return BadRequest(errors);
-        //    }
-        //    if (!string.IsNullOrEmpty(result.RefreshToken))
-        //    {
-        //        setRefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
-        //    }
-        //    return Ok(result);
-        //}
-
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] TokenRequestDto dto)
         {
@@ -79,7 +60,6 @@ namespace CRM.Controllers
             }
             return Ok(result);
         }
-
         private void setRefreshTokenInCookie(string refreshToken, DateTime refreshTokenExpiration)
         {
             var cookieOptions = new CookieOptions
@@ -92,7 +72,6 @@ namespace CRM.Controllers
             };
             Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
         }
-
         [HttpGet("refresh-token")]
         public async Task<IActionResult> RefreshToken()
         {
@@ -107,7 +86,6 @@ namespace CRM.Controllers
             setRefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
             return Ok(result);
         }
-
         [HttpPost("revoke-token")]
         public async Task<IActionResult> RevokeToken()
         {
@@ -128,8 +106,6 @@ namespace CRM.Controllers
             }
             return NoContent();
         }
-
-
         [HttpPost("forgot-password")]
         [AllowAnonymous]
         public async Task<IActionResult> ForgotPassword([FromBody] EmailDto dto)
@@ -197,15 +173,7 @@ namespace CRM.Controllers
                 var errors = new { errors = new string[] { "Invalid Purpose" } };
                 return BadRequest(errors);
             }
-            //var result = await _authService.VerifyCodeAsync(codeDto);
-            //if (result.IsSuccess)
-            //{
-            //    return Ok(result);
-
-            //}
-            //return NotFound(result);
         }
-
         [HttpPost("reset-password")]
         [AllowAnonymous]
         public async Task<IActionResult> ResetPassword(ResetPasswordDto model)
@@ -220,7 +188,6 @@ namespace CRM.Controllers
                 return Ok(result);
             }
             return BadRequest(result);
-
         }
         [AllowAnonymous]
         [EnableCors("AllowAnyOrigin")] // Apply a different CORS policy for this endpoint
