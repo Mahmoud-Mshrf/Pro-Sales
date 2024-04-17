@@ -143,10 +143,11 @@ namespace CRM.Controllers
             var actions = await _moderatorService.GetAllActionsForCustomer(customerId);
             if (actions == null)
             {
-                return NotFound();
+                var errors = new { errors = new List<string> { "Customer not found" } };
+
+                return BadRequest(errors);
             }
             return Ok(actions);
         }
-
     }
 }

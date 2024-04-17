@@ -1,4 +1,5 @@
 ﻿using CRM.Core.Dtos;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,7 +46,8 @@ namespace CRM.Core.Services.Interfaces
 
         #endregion
 
-        Task<ReturnActionDto> GetAllActionsForCustomer(int customerId);
+        
+        Task<ActionResult<IEnumerable<object>>> GetAllActionsForCustomer(int customerId);
 
     }
 }

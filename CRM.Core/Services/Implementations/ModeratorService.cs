@@ -810,7 +810,7 @@ namespace CRM.Core.Services.Implementations
                 return null; // or handle the case where no action is found
             }
         }
-        public async Task<ReturnActionDto> GetAllActionsForCustomer(int customerId)
+        public async Task<IEnumerable<object>> GetAllActionsForCustomer(int customerId)
         {
             var actions = await _sharedService.GetActionsForCustomer(customerId);
             return actions;
