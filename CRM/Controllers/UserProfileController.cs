@@ -73,19 +73,5 @@ namespace CRM.Controllers
             }
             return NoContent();
         }
-
-        //[AllowAnonymous]
-        //[HttpPost("confirm-new-email")]
-        //public async Task<IActionResult> ConfirmNewEmail(VerifyCodeDto codeDto)
-        //{
-        //    var result = await _authService.ConfirmNewEmailAsync(codeDto);
-        //    if (!result.IsAuthenticated)
-        //    {
-        //        var errors = new { errors = result.Errors };
-        //        return BadRequest(errors);
-        //    }
-        //    return Ok(result);
-        //}
-
     }
 }
