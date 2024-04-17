@@ -18,8 +18,6 @@ namespace CRM.Controllers
         {
             _moderatorService = moderatorService;
         }
-
-        // Will be used after adding Manager module
         [HttpGet("get-all-sales")]
         public async Task<IActionResult> GetAllSalesRepresentatives()
         {
@@ -30,7 +28,6 @@ namespace CRM.Controllers
             }
             return Ok(result.Users);
         }
-
         [HttpPost("add-customer")]
         public async Task<IActionResult> AddCustomer([FromBody] AddCustomerDto customerDto)
         {
@@ -73,17 +70,6 @@ namespace CRM.Controllers
             }
             return Ok(result.Pages);
         }
-
-        //[HttpGet("get-all-customers")]
-        //public async Task<IActionResult> GetAllCustomers()
-        //{
-        //    var result = await _moderatorService.GetAllCustomers();
-        //    if (!result.IsSuccess)
-        //    {
-        //        return BadRequest(result);
-        //    }
-        //    return Ok(result);
-        //}
         [HttpGet("get-customer/{customerId}")]
         public async Task<IActionResult> GetCustomer(int customerId)
         {
@@ -116,18 +102,6 @@ namespace CRM.Controllers
             }
             return Ok(result);
         }
-        //[HttpGet("search")]
-        //public async Task<IActionResult> Search([FromQuery] string query)
-        //{
-        //    var result = await _moderatorService.Search(query);
-        //    return Ok(result);
-        //}
-        //[HttpGet("search")]
-        //public async Task<IActionResult> Search([FromQuery] string query,int page ,int size)
-        //{
-        //    var result = await _moderatorService.Search(query,page,size);
-        //    return Ok(result);
-        //}
         [HttpGet("get-customers")]
         public async Task<IActionResult> GetCustomers(int page , int size, [FromQuery] string query = null)
         {
