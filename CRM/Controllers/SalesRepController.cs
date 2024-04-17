@@ -1,8 +1,10 @@
-﻿using CRM.Core.Dtos;
+﻿using CRM.Core;
+using CRM.Core.Dtos;
 using CRM.Core.Services.Implementations;
 using CRM.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 using System.Security.Claims;
 
 namespace CRM.Controllers
@@ -15,9 +17,11 @@ namespace CRM.Controllers
 
 
         private readonly ISalesRepresntative _salesRepresntative;
-        public SalesRepController(ISalesRepresntative salesRepresntative)
+        private readonly IUnitOfWork _unitOfWork;
+        public SalesRepController(ISalesRepresntative salesRepresntative, IUnitOfWork unitOfWork)
         {
             _salesRepresntative = salesRepresntative;
+            _unitOfWork = unitOfWork;
         }
 
         #region Manage Calls
@@ -285,21 +289,42 @@ namespace CRM.Controllers
             return Ok(result);
         }
         #endregion
-        [HttpGet("{customerId}/actions")]
-        public async Task<IActionResult> GetActionsForCustomer(int customerId)
+     
+        [HttpGet("ActionsForCustomersAssignedToSales/{customerId}")]
+        public async Task<IActionResult> GetCustomerActions(int customerId)
         {
             try
             {
-                // Retrieve actions for the specific customer
-                var actions = await _salesRepresntative.GetAllActionsForCustomer(customerId);
-                return Ok(actions);
+                var actionResult = await _salesRepresntative.GetAllActionsForCustomer(customerId);
+
+                if (actionResult.Result is BadRequestObjectResult badRequestResult)
+                {
+                    return BadRequest(badRequestResult.Value);
+                }
+
+                if (actionResult.Result is OkObjectResult okResult)
+                {
+                    return Ok(okResult.Value);
+                }
+
+                
+                return StatusCode(500, "An unexpected error occurred");
             }
             catch (Exception ex)
             {
-                // Log the exception and return an error response
+                
                 return StatusCode(500, "Internal server error");
             }
         }
+
+
+
+
+
+
+
+
+
 
 
 

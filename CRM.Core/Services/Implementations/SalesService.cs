@@ -9,6 +9,7 @@ using Org.BouncyCastle.Asn1.Ocsp;
 using System;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CRM.Core.Services.Implementations
 {
@@ -1195,42 +1196,39 @@ namespace CRM.Core.Services.Implementations
             }
         }
         #endregion
-        public async Task<IEnumerable<object>> GetAllActionsForCustomer(int customerId)
+
+     
+        public async Task<ActionResult<IEnumerable<object>>> GetAllActionsForCustomer(int customerId)
         {
             var salesRepresentativeEmail = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.Email);
             var salesRepresentative = await _unitOfWork.UserManager.FindByEmailAsync(salesRepresentativeEmail);
 
             if (salesRepresentative == null)
             {
-                return new List<object>
-        {
-            new
-            {
-                IsSuccess = false,
-                Errors = new List<string> { "Sales representative not found" }
-            }
-        };
+                return new BadRequestObjectResult(new { errors = new List<string> { "Sales representative not found" } });
             }
 
             var customer = await _unitOfWork.Customers.GetByIdAsync(customerId);
 
-            if (customer == null || customer.SalesRepresntative == null || customer.SalesRepresntative.Id != salesRepresentative.Id)
+            if (customer == null)
             {
-                return new List<object>
-        {
-            new
-            {
-                IsSuccess = false,
-                Errors = new List<string> { "Customer not found or not assigned to the sales representative" },
-                Actions = new List<ActionDto>()
+                return new BadRequestObjectResult(new { errors = new List<string> { "Customer not found" } });
             }
-        };
+
+            if (customer.SalesRepresntative == null || customer.SalesRepresntative.Id != salesRepresentative.Id)
+            {
+                return new BadRequestObjectResult( new { errors = new List<string> { "This customer is not assigned to you" } });
             }
 
             var actions = await _sharedService.GetActionsForCustomer(customerId);
 
-            return actions;
+            return new OkObjectResult(actions);
         }
+
+
+
+
+
 
 
     }
