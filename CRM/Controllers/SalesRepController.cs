@@ -74,23 +74,41 @@ namespace CRM.Controllers
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllCalls()
         {
-            var result = await _salesRepresntative.GetAllCalls();
-            if (!result.IsSuccess)
+            try
             {
-                return BadRequest(result.Errors);
+                var calls = await _salesRepresntative.GetAllCalls();
+                if (calls == null || !calls.Any())
+                {
+                    return NotFound(new { errors = new[] { " No Calls found" } });
+                }
+
+                return Ok(calls);
             }
-            return Ok(result.Calls);
+            catch (Exception ex)
+            {
+               
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
         }
 
         [HttpGet("[action]/{callId}")]
         public async Task<IActionResult> GetCallById(string callId)
         {
-            var result = await _salesRepresntative.GetCallById(callId);
-            if (!result.IsSuccess)
+            try
             {
-                return NotFound(result.Errors);
+                var call = await _salesRepresntative.GetCallById(callId);
+                if (call == null || !call.Any())
+                {
+                    return NotFound(new { errors = new[] { "Call not found" } });
+                }
+
+                return Ok(call);
             }
-            return Ok(result);
+            catch (Exception ex)
+            {
+               
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
         }
         [HttpDelete("[action]/{callId}")]
         public async Task<IActionResult> DeleteCallById(string callId)
@@ -152,21 +170,39 @@ namespace CRM.Controllers
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllMessages()
         {
-            var result = await _salesRepresntative.GetAllMessages();
-            if (!result.IsSuccess)
-                return BadRequest(result.Errors);
-            return Ok(result.Messages);
-        }
-
-        [HttpGet("[action]/{messageId}")]
-        public async Task<IActionResult> GetMessageById(string MessageId)
-        {
-            var result = await _salesRepresntative.GetMessageById(MessageId);
-            if (!result.IsSuccess)
+            try
             {
-                return NotFound(result.Errors);
+                var messages = await _salesRepresntative.GetAllMessages();
+                if (messages == null || !messages.Any())
+                {
+                    return NotFound(new { errors = new[] { " No Messages found" } });
+                }
+
+                return Ok(messages);
             }
-            return Ok(result.Messages);
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+        [HttpGet("[action]/{messageId}")]
+        public async Task<IActionResult> GetMessageById(string messageId)
+        {
+            try
+            {
+                var message = await _salesRepresntative.GetMessageById(messageId);
+                if ( message== null || !message.Any())
+                {
+                    return NotFound(new { errors = new[] { "Message not found" } });
+                }
+
+                return Ok(message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
         }
 
         [HttpDelete("[action]/{MessageId}")]
@@ -237,22 +273,42 @@ namespace CRM.Controllers
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllMeetings()
         {
-            var result = await _salesRepresntative.GetAllMeetings();
-            if (!result.IsSuccess)
-                return BadRequest(result.Errors);
-            return Ok(result.Meetings);
+            try
+            {
+                var meetings = await _salesRepresntative.GetAllMeetings();
+                if (meetings == null || !meetings.Any())
+                {
+                    return NotFound(new { errors = new[] { " No Meetings found" } });
+                }
+
+                return Ok(meetings);
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
         }
 
         [HttpGet("[action]/{meetingId}")]
-        public async Task<IActionResult> GetMeetingById(string MeetingId)
+        public async Task<IActionResult> GetMeetingById(string meetingId)
         {
-            var result = await _salesRepresntative.GetMeetingByID(MeetingId);
-            if (!result.IsSuccess)
+            try
             {
-                return NotFound(result.Errors);
+                var meeting = await _salesRepresntative.GetMeetingByID(meetingId);
+                if (meeting == null || !meeting.Any())
+                {
+                    return NotFound(new { errors = new[] { "Meeting not found" } });
+                }
+
+                return Ok(meeting);
             }
-            return Ok(result);
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
         }
+
 
         [HttpDelete("[action]/{MeetingId}")]
         public async Task<IActionResult> DeleteMeetingById(string meetingId)
@@ -315,21 +371,41 @@ namespace CRM.Controllers
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllDeals()
         {
-            var result = await _salesRepresntative.GetAllDeals();
-            if (!result.IsSuccess)
-                return BadRequest(result.Errors);
-            return Ok(result.Deals);
+            try
+            {
+                var deals = await _salesRepresntative.GetAllDeals();
+                if (deals == null || !deals.Any())
+                {
+                    return NotFound(new { errors = new[] { " No Deals found" } });
+                }
+
+                return Ok(deals);
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
         }
 
         [HttpGet("[action]/{dealId}")]
         public async Task<IActionResult> GetDealById(string dealId)
         {
-            var result = await _salesRepresntative.GetDealById(dealId);
-            if (!result.IsSuccess)
+            try
             {
-                return NotFound(result.Errors);
+                var deal = await _salesRepresntative.GetDealById(dealId);
+                if (deal == null || !deal.Any())
+                {
+                    return NotFound(new { errors = new[] { "Deal not found" } });
+                }
+
+                return Ok(deal);
             }
-            return Ok(result);
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
         }
         [HttpDelete("[action]/{dealId}")]
         public async Task<IActionResult> DeleteDealById(string dealId)

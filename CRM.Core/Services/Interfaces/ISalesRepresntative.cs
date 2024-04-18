@@ -15,16 +15,16 @@ namespace CRM.Core.Services.Interfaces
         Task<ActionResult<IEnumerable<object>>> AddCall(AddCallDto addcallDto, string salesRepEmail);
         // Task<ReturnCallsDto> UpdateCallInfo(AddCallDto callDto, string CallId);
         Task<List<CallDto>> UpdateCallInfo(AddCallDto addCallDto, string callId);
-        Task<ReturnCallsDto> GetAllCalls();
-        Task<ReturnCallsDto> GetCallById(string callId);
+        Task<IEnumerable<CallDto>> GetAllCalls();
+        Task<IEnumerable<CallDto>> GetCallById(string callId);
         Task<ResultDto> DeleteCallById(string callId);
         #endregion
 
         #region ManageMessages
         Task<ActionResult<IEnumerable<object>>> AddMessage(AddMessageDto messageDto, string salesRepEmail);
         Task<ResultDto> UpdateMessageInfo(AddMessageDto messageDto, string MessageId);
-        Task<ReturnMessagesDto> GetAllMessages();
-        Task<ReturnMessagesDto> GetMessageById(string MessageId);
+        Task<IEnumerable<MessageDto>> GetAllMessages();
+        Task<IEnumerable<MessageDto>> GetMessageById(string messageID);
         Task<ResultDto> DeleteMessageById(string MessageId);
 
         #endregion
@@ -32,8 +32,8 @@ namespace CRM.Core.Services.Interfaces
         #region ManageMeetings
         Task<ActionResult<IEnumerable<object>>> AddMeeting(AddMeetingDto meetingDto, string SaleRepEmail);
         Task<ResultDto> UpdateMeeting(AddMeetingDto meetingDto, string MeetingId);
-        Task<ReturnMeetingsDto> GetAllMeetings();
-        Task<ReturnMeetingsDto> GetMeetingByID(string MeetingId);
+        Task<IEnumerable<MeetingDto>> GetAllMeetings();
+        Task<IEnumerable<MeetingDto>> GetMeetingByID(string MeetingId);
         Task<ResultDto> DeleteMeeting(string MeetingId);
         #endregion
 
@@ -41,8 +41,8 @@ namespace CRM.Core.Services.Interfaces
         Task<ActionResult<IEnumerable<object>>> AddDeal(AddDealDto addcallDto, string salesRepEmail);
 
         Task<ResultDto> UpdateDeal(AddDealDto dealsDto, string DealId);
-        Task<ReturnDealsDto> GetAllDeals();
-        Task<ReturnDealsDto> GetDealById(string DealId);
+        Task<IEnumerable<DealsDto>> GetAllDeals();
+        Task<IEnumerable<DealsDto>> GetDealById(string DealId);
         Task<ResultDto> DeleteDeal(string DealId);
 
 

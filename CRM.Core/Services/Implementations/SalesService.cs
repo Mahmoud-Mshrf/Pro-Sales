@@ -11,6 +11,7 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace CRM.Core.Services.Implementations
 {
@@ -207,103 +208,129 @@ namespace CRM.Core.Services.Implementations
         }
 
 
-        public async Task<ReturnCallsDto> GetAllCalls()
+        //public async Task<ReturnCallsDto> GetAllCalls()
+        //{
+        //    try
+        //    {
+        //        var includes = new string[] { "Customer" }; 
+        //        var calls = await _unitOfWork.Calls.GetAllAsync(call => true, int.MaxValue, 0, includes);
+
+        //        if (calls == null || !calls.Any())
+        //        {
+        //            return new ReturnCallsDto
+        //            {
+        //                IsSuccess = false,
+        //                Errors = ["Calls not Found"]
+
+        //            };
+        //        }
+
+        //        var Calls = new List<CallDto>();
+        //        foreach (var call in calls)
+        //        {
+        //            var callDto = new CallDto
+        //            {
+        //                id= call.CallID,
+        //                type = ActionType.call,
+        //                status = call.CallStatus,
+        //                summary = call.CallSummery,
+        //                date = call.CallDate,
+        //                followUp = call.FollowUpDate,
+        //             // CustomerId = call.Customer != null ? call.Customer.CustomerId : 0
+
+        //            };
+        //            Calls.Add(callDto);
+        //        }
+
+
+        //        return new ReturnCallsDto
+        //        {
+        //            IsSuccess = true,
+        //            Message = "Calls found",
+        //            Calls = Calls
+        //        };
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return new ReturnCallsDto
+        //        {
+        //            IsSuccess = false,
+        //            Errors=[ex.Message]
+        //        };
+        //    }
+        //}
+        public async Task<IEnumerable<CallDto>> GetAllCalls()
         {
             try
             {
-                var includes = new string[] { "Customer" }; 
+                var includes = new string[] { "Customer" };
                 var calls = await _unitOfWork.Calls.GetAllAsync(call => true, int.MaxValue, 0, includes);
 
                 if (calls == null || !calls.Any())
                 {
-                    return new ReturnCallsDto
-                    {
-                        IsSuccess = false,
-                        Errors = ["Calls not Found"]
-                        
-                    };
+                    return null; 
                 }
-               
+
                 var Calls = new List<CallDto>();
                 foreach (var call in calls)
                 {
                     var callDto = new CallDto
                     {
-                        id= call.CallID,
+                        id = call.CallID,
                         type = ActionType.call,
                         status = call.CallStatus,
                         summary = call.CallSummery,
                         date = call.CallDate,
                         followUp = call.FollowUpDate,
-                     // CustomerId = call.Customer != null ? call.Customer.CustomerId : 0
+                        CustomerId = call.Customer != null ? call.Customer.CustomerId : 0,
+
 
                     };
                     Calls.Add(callDto);
                 }
 
-
-                return new ReturnCallsDto
-                {
-                    IsSuccess = true,
-                    Message = "Calls found",
-                    Calls = Calls
-                };
+                return Calls;
             }
-            catch (Exception ex)
+            catch 
             {
-                return new ReturnCallsDto
-                {
-                    IsSuccess = false,
-                    Errors=[ex.Message]
-                };
+                
+                return Enumerable.Empty<CallDto>(); 
             }
         }
-        public async Task<ReturnCallsDto> GetCallById(string callId)
+
+        public async Task<IEnumerable<CallDto>> GetCallById(string callId)
         {
             try
             {
-                var includes = new string[] { "Customer" }; 
+                var includes = new string[] { "Customer" };
                 var call = await _unitOfWork.Calls.FindAsync(c => c.CallID == callId, includes);
 
                 if (call == null)
                 {
-                    return new ReturnCallsDto
-                    {
-                        IsSuccess = false,
-                      Errors = ["Call not Found"]
-                    };
+                    return null ; 
                 }
 
                 var callDto = new CallDto
                 {
-                    id= call.CallID,
-                    type=ActionType.call,
+                    id = call.CallID,
+                    type = ActionType.call,
                     status = call.CallStatus,
                     summary = call.CallSummery,
                     date = call.CallDate,
                     followUp = call.FollowUpDate,
-                    //CustomerId = call.Customer != null ? call.Customer.CustomerId : 0,
-
-
+                    CustomerId = call.Customer != null ? call.Customer.CustomerId : 0,
                 };
 
-                return new ReturnCallsDto
-                {
-                    IsSuccess = true,
-                    Message = "Call found",
-                    Calls = new List<CallDto> { callDto }
-                };
+                return new List<CallDto> { callDto };
             }
-            catch (Exception ex)
+            catch 
             {
-                return new ReturnCallsDto
-                {
-                    IsSuccess = false,
-                   Errors = [ex.Message]    
-                };
+                
+                return Enumerable.Empty<CallDto>(); 
             }
         }
-         public async Task<ResultDto> DeleteCallById(string callId)
+
+        public async Task<ResultDto> DeleteCallById(string callId)
         {
             try
             {
@@ -334,7 +361,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto
                 {
                     IsSuccess = true,
-                    Message = "Call deleted successfully"
+                    Message =  "Call deleted successfully" 
                 };
             }
             catch (Exception ex)
@@ -464,7 +491,7 @@ namespace CRM.Core.Services.Implementations
 
 
 
-        public async Task<ReturnMessagesDto> GetAllMessages()
+        public async Task<IEnumerable<MessageDto>> GetAllMessages()
         {
             try
             {
@@ -473,60 +500,39 @@ namespace CRM.Core.Services.Implementations
 
                 if (messages == null || !messages.Any())
                 {
-                    return new ReturnMessagesDto
-                    {
-                        IsSuccess = false,
-                        Errors = ["Message not Found"]
-                    };
+                    return null ;
                 }
 
-                var Messages = new List<MessageDto>();
-                foreach (var message in messages)
+                var Messages = messages.Select(message => new MessageDto
                 {
-                    var messageDto = new MessageDto
-                    {
-                        id = message.MessageID,
-                        type = ActionType.message,
-                        summary = message.MessageContent,
-                        date = message.MessageDate,
-                        followUp = message.FollowUpDate,
-                      //  CustomerId = message.Customer != null ? message.Customer.CustomerId : 0,
-                    };
-                    Messages.Add(messageDto);
-                }
+                    id = message.MessageID,
+                    type = ActionType.message,
+                    summary = message.MessageContent,
+                    date = message.MessageDate,
+                    followUp = message.FollowUpDate,
+                    CustomerId = message.Customer != null ? message.Customer.CustomerId : 0
+                });
 
-
-                return new ReturnMessagesDto
-                {
-                    IsSuccess = true,
-                    Message = "Message found",
-                    Messages = Messages
-                };
+                return Messages;
             }
-            catch (Exception ex)
+            catch 
             {
-                return new ReturnMessagesDto
-                {
-                    IsSuccess = false,
-                   Errors = [ex.Message]
-                };
+               
+                throw; 
             }
         }
 
-        public async Task<ReturnMessagesDto> GetMessageById(string messageID)
+
+        public async Task<IEnumerable<MessageDto>> GetMessageById(string messageID)
         {
             try
             {
-                var includes = new string[] { "Customer" }; 
+                var includes = new string[] { "Customer" };
                 var message = await _unitOfWork.Messages.FindAsync(c => c.MessageID == messageID, includes);
 
                 if (message == null)
                 {
-                    return new ReturnMessagesDto
-                    {
-                        IsSuccess = false,
-                       Errors = ["Message not Found"]
-                    };
+                    return null;
                 }
 
                 var messageDto = new MessageDto
@@ -536,25 +542,18 @@ namespace CRM.Core.Services.Implementations
                     summary = message.MessageContent,
                     date = message.MessageDate,
                     followUp = message.FollowUpDate,
-                  //  CustomerId = message.Customer != null ? message.Customer.CustomerId : 0,
+                    CustomerId = message.Customer != null ? message.Customer.CustomerId : 0
                 };
 
-                return new ReturnMessagesDto
-                {
-                    IsSuccess = true,
-                    Message = "Message found",
-                    Messages = new List<MessageDto> { messageDto}
-                };
+                return new List<MessageDto> { messageDto };
             }
-            catch (Exception ex)
+            catch 
             {
-                return new ReturnMessagesDto
-                {
-                    IsSuccess = false,
-                    Errors = [ex.Message]   
-                };
+                
+                throw; 
             }
         }
+
 
         public async Task<ResultDto> DeleteMessageById(string MessageId)
         {
@@ -716,7 +715,7 @@ namespace CRM.Core.Services.Implementations
             };
         }
 
-        public async Task<ReturnMeetingsDto> GetAllMeetings()
+        public async Task<IEnumerable<MeetingDto>> GetAllMeetings()
         {
             try
             {
@@ -725,52 +724,31 @@ namespace CRM.Core.Services.Implementations
 
                 if (meetings == null || !meetings.Any())
                 {
-                    return new ReturnMeetingsDto
-                    {
-                        IsSuccess = false,
-                        Errors = ["Meetings not Found"]
-                        
-                    };
+                    return Enumerable.Empty<MeetingDto>();
                 }
 
-                var Meetings = new List<MeetingDto>();
-                foreach (var meeting in meetings)
+                var Meetings = meetings.Select(meeting => new MeetingDto
                 {
-                    var meetingDto = new MeetingDto
-                    {
-                        id = meeting.MeetingID,
-                        type=ActionType.meeting,
-                        online=meeting.connectionState,
-                        summary = meeting.MeetingSummary,
-                        date = meeting.MeetingDate,
-                        followUp = meeting.FollowUpDate,
-                        // Check if Customer property is not null before accessing CustomerId
-                       // CustomerId = meeting.Customer != null ? meeting.Customer.CustomerId : 0, // Or default value as per your requirement
+                    id = meeting.MeetingID,
+                    type = ActionType.meeting,
+                    online = meeting.connectionState,
+                    summary = meeting.MeetingSummary,
+                    date = meeting.MeetingDate,
+                    followUp = meeting.FollowUpDate,
+                    CustomerId = meeting.Customer != null ? meeting.Customer.CustomerId : 0 
+                });
 
-                    };
-                    Meetings.Add(meetingDto);
-                }
-
-
-                return new ReturnMeetingsDto
-                {
-                    IsSuccess = true,
-                    Message = "Meeting found",
-                    Meetings = Meetings
-                };
+                return Meetings;
             }
-            catch (Exception ex)
+            catch 
             {
-                return new ReturnMeetingsDto
-                {
-                    IsSuccess = false,
-                    Errors=[ex.Message]
-                };
+                
+                throw; 
             }
-
         }
 
-        public async Task<ReturnMeetingsDto> GetMeetingByID(string MeetingId)
+
+        public async Task<IEnumerable<MeetingDto>> GetMeetingByID(string MeetingId)
         {
             try
             {
@@ -779,40 +757,27 @@ namespace CRM.Core.Services.Implementations
 
                 if (meeting == null)
                 {
-                    return new ReturnMeetingsDto
-                    {
-                        IsSuccess = false,
-                        Errors = ["Meeting not Found"]
-                    };
+                    return Enumerable.Empty<MeetingDto>();
                 }
 
                 var meetingDto = new MeetingDto
                 {
                     id = meeting.MeetingID,
                     type = ActionType.meeting,
-                    online=meeting.connectionState,
+                    online = meeting.connectionState,
                     summary = meeting.MeetingSummary,
                     date = meeting.MeetingDate,
                     followUp = meeting.FollowUpDate,
-                    // Check if Customer property is not null before accessing CustomerId
-                    //CustomerId = meeting.Customer != null ? meeting.Customer.CustomerId : 0, // Or default value as per your requirement
-
+                    
+                    CustomerId = meeting.Customer != null ? meeting.Customer.CustomerId : 0 
                 };
 
-                return new ReturnMeetingsDto
-                {
-                    IsSuccess = true,
-                    Message = "Meeting found",
-                    Meetings = new List<MeetingDto> { meetingDto }
-                };
+                return new List<MeetingDto> { meetingDto };
             }
             catch (Exception ex)
             {
-                return new ReturnMeetingsDto
-                {
-                    IsSuccess = false,
-                   Errors = [ex.Message]
-                };
+               
+                throw; 
             }
         }
 
@@ -995,7 +960,7 @@ namespace CRM.Core.Services.Implementations
 
 
 
-        public async Task<ReturnDealsDto> GetAllDeals()
+        public async Task<IEnumerable<DealsDto>> GetAllDeals()
         {
             try
             {
@@ -1004,51 +969,33 @@ namespace CRM.Core.Services.Implementations
 
                 if (deals == null || !deals.Any())
                 {
-                    return new ReturnDealsDto
-                    {
-                        IsSuccess = false,
-                        Errors = ["Deals not Found"]
-                    };
+                    return Enumerable.Empty<DealsDto>();
                 }
 
-                var Deals = new List<DealsDto>();
-                foreach (var deal in deals)
+                var Deals = deals.Select(deal => new DealsDto
                 {
-                    var dealDto = new DealsDto
+                    id = deal.DealId,
+                    type = ActionType.deal,
+                    price = deal.Price,
+                    interest = new InterestDto
                     {
-                        id = deal.DealId, 
-                        type = ActionType.deal, 
-                        price = deal.Price,
-                        interest = new InterestDto
-                        {
-                            Id = deal.Interest.InterestID,
-                            Name = deal.Interest.InterestName
-                        },
-                        summary = deal.description, 
-                        date = deal.DealDate,
-                        
-                        
-                    };
-                    Deals.Add(dealDto);
-                }
+                        Id = deal.Interest.InterestID,
+                        Name = deal.Interest.InterestName
+                    },
+                    summary = deal.description,
+                    date = deal.DealDate
+                });
 
-                return new ReturnDealsDto
-                {
-                    IsSuccess = true,
-                    Message = "Deals found",
-                    Deals = Deals
-                };
+                return Deals;
             }
-            catch (Exception ex)
+            catch
             {
-                return new ReturnDealsDto
-                {
-                    IsSuccess = false,
-                    Errors = [ex.Message]
-                };
+                
+                throw; 
             }
         }
-        public async Task<ReturnDealsDto> GetDealById(string DealId)
+
+        public async Task<IEnumerable<DealsDto>> GetDealById(string DealId)
         {
             try
             {
@@ -1057,11 +1004,7 @@ namespace CRM.Core.Services.Implementations
 
                 if (deal == null)
                 {
-                    return new ReturnDealsDto
-                    {
-                        IsSuccess = false,
-                        Errors = ["Deal not found"]
-                    };
+                    return Enumerable.Empty<DealsDto>();
                 }
 
                 var dealDto = new DealsDto
@@ -1075,25 +1018,15 @@ namespace CRM.Core.Services.Implementations
                         Name = deal.Interest.InterestName
                     },
                     summary = deal.description,
-                    date = deal.DealDate,
-                    
-
+                    date = deal.DealDate
                 };
 
-                return new ReturnDealsDto
-                {
-                    IsSuccess = true,
-                    Message = "Deal found",
-                    Deals = new List<DealsDto> { dealDto }
-                };
+                return new List<DealsDto> { dealDto };
             }
             catch (Exception ex)
             {
-                return new ReturnDealsDto
-                {
-                    IsSuccess = false,
-                    Errors = [ex.Message]
-                };
+                
+                throw; 
             }
         }
 
