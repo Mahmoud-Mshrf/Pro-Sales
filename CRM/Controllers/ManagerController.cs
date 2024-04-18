@@ -101,28 +101,25 @@ namespace CRM.Controllers
             }
             return Ok(result);
         }
-        [HttpPost("add-business-info")]
+        //[HttpPost("add-business-info")]
+        [HttpPut("update-business-info")]
         public async Task<IActionResult> AddBusinessInfo([FromBody] BusinessDto dto)
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
             var result = await _managerService.AddBusinessInfo(email, dto);
-            if (!result.IsSuccess)
-            {
-                return BadRequest(result);
-            }
             return Ok(result);
         }
-        [HttpPut("update-business-info")]
-        public async Task<IActionResult> UpdateBusinessInfo([FromBody] BusinessDto dto)
-        {
-            var email = User.FindFirstValue(ClaimTypes.Email);
-            var result = await _managerService.UpdateBusinessInfo(email, dto);
-            if (!result.IsSuccess)
-            {
-                return BadRequest(result);
-            }
-            return Ok(result);
-        }
+        //[HttpPut("update-business-info")]
+        //public async Task<IActionResult> UpdateBusinessInfo([FromBody] BusinessDto dto)
+        //{
+        //    var email = User.FindFirstValue(ClaimTypes.Email);
+        //    var result = await _managerService.UpdateBusinessInfo(email, dto);
+        //    if (!result.IsSuccess)
+        //    {
+        //        return BadRequest(result);
+        //    }
+        //    return Ok(result);
+        //}
 
     }
 }

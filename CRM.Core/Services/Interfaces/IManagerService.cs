@@ -21,7 +21,7 @@ namespace CRM.Core.Services.Interfaces
         Task<ReturnUserRolesDto> ViewUserRoles(string userId);
         Task<ReturnUserRolesDto> ManageUserRoles(UserRolesDTO dto);
         //Task<BusinessDto> GetBussinesInfo();
-        Task<ResultDto> UpdateBusinessInfo(string email,BusinessDto dto);
-        Task<ResultDto> AddBusinessInfo(string email, BusinessDto dto);
+        //Task<ResultDto> UpdateBusinessInfo(string email,BusinessDto dto);
+        Task<BusinessDto> AddBusinessInfo(string email, BusinessDto dto);
     }
 }
