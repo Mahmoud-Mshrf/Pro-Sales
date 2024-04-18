@@ -71,27 +71,27 @@ namespace CRM.Core.Services.Implementations
                 IsDisabled = interest.IsDisabled
             };
         }
-        public async Task<ReturnInterestDto> DisableInterest(int id)
-        {
-            var interest = await _unitOfWork.Interests.GetByIdAsync(id);
-            if (interest == null)
-            {
-                return new ReturnInterestDto
-                {
-                    IsSuccess = false
-                };
-            }
-            //_unitOfWork.Interests.Delete(interest);
-            interest.IsDisabled = true;
-            _unitOfWork.complete();
-            return new ReturnInterestDto
-            {
-                IsSuccess=true,
-                Id = interest.InterestID,
-                Name = interest.InterestName,
-                IsDisabled = interest.IsDisabled
-            };
-        }
+        //public async Task<ReturnInterestDto> DisableInterest(int id)
+        //{
+        //    var interest = await _unitOfWork.Interests.GetByIdAsync(id);
+        //    if (interest == null)
+        //    {
+        //        return new ReturnInterestDto
+        //        {
+        //            IsSuccess = false
+        //        };
+        //    }
+        //    //_unitOfWork.Interests.Delete(interest);
+        //    interest.IsDisabled = true;
+        //    _unitOfWork.complete();
+        //    return new ReturnInterestDto
+        //    {
+        //        IsSuccess=true,
+        //        Id = interest.InterestID,
+        //        Name = interest.InterestName,
+        //        IsDisabled = interest.IsDisabled
+        //    };
+        //}
         public async Task<SourceDto> updateSource(SourceDto dto)
         {
             var source = await _unitOfWork.Sources.GetByIdAsync(dto.Id);

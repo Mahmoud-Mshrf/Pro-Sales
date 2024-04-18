@@ -51,16 +51,17 @@ namespace CRM.Controllers
             }
             return Ok(result);
         }
-        [HttpDelete("disable-interest/{id}")]
-        public async Task<IActionResult> DisableInterest(int id)
-        {
-            var result = await _managerService.DisableInterest(id);
-            if (!result.IsSuccess)
-            {
-                return BadRequest(result);
-            }
-            return Ok(result);
-        }
+        //[HttpPatch("disable-interest/{id}")]
+        //public async Task<IActionResult> DisableInterest(int id)
+        //{
+        //    var result = await _managerService.DisableInterest(id);
+        //    if (!result.IsSuccess)
+        //    {
+        //        var errors = new string[] {"Interest not found"};
+        //        return BadRequest();
+        //    }
+        //    return Ok(result);
+        //}
         [HttpGet("get-all-roles")]
         public IActionResult GetAllRoles()
         {
