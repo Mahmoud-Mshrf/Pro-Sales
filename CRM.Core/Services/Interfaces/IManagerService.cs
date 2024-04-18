@@ -12,7 +12,7 @@ namespace CRM.Core.Services.Interfaces
         Task<InterestDto> AddInterest(string name);
         Task<InterestDto> updateInterest(InterestDto dto);
         Task<InterestDto> getInterest(int id);
-        Task<ResultDto> DisableInterest(int id);
+        Task<ReturnInterestDto> DisableInterest(int id);
         Task<SourceDto> updateSource(SourceDto dto);
         Task<SourceDto> getSource(int id);
         Task<ResultDto> DeleteSource(int id);

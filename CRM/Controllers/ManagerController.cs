@@ -52,7 +52,7 @@ namespace CRM.Controllers
             return Ok(result);
         }
         [HttpDelete("disable-interest/{id}")]
-        public async Task<IActionResult> DeleteInterest(int id)
+        public async Task<IActionResult> DisableInterest(int id)
         {
             var result = await _managerService.DisableInterest(id);
             if (!result.IsSuccess)
