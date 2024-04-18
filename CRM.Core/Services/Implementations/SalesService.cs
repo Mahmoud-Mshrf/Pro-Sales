@@ -10,6 +10,7 @@ using System;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CRM.Core.Services.Implementations
 {
@@ -29,96 +30,7 @@ namespace CRM.Core.Services.Implementations
         }
 
         #region ManageCalls
-        public async Task<ReturnCallsDto> AddCall(AddCallDto addcallDto, string salesRepEmail)
-        {
-            try
-            {
-                if (addcallDto == null)
-                {
-                    throw new ArgumentNullException(nameof(addcallDto));
-                }
-
-                var call = new Call();
-
-                var customer = await _unitOfWork.Customers.GetByIdAsync(addcallDto.CustomerId);
-                if (customer == null)
-                {
-                    return new ReturnCallsDto
-                    {
-                        IsSuccess = false,
-                        Errors = ["Customer not found"]
-                    };
-                }
-
-                if (string.IsNullOrEmpty(salesRepEmail))
-                {
-                    return new ReturnCallsDto
-                    {
-                        IsSuccess = false,
-                        Errors = ["Sales Representative email is null or empty"]
-                    };
-                }
-
-                var salesRep = await _unitOfWork.UserManager.FindByEmailAsync(salesRepEmail);
-                if (salesRep == null)
-                {
-                    return new ReturnCallsDto
-                    {
-                        IsSuccess = false,
-                        Errors = ["Sales Representative not found"]
-                    };
-                }
-
-                call.CallStatus = addcallDto.status;
-                call.CallSummery = addcallDto.summary;
-                call.CallDate = addcallDto.date;
-                call.FollowUpDate = addcallDto.followUp;
-                call.SalesRepresntative = salesRep;
-                call.Customer = customer;
-
-                await _unitOfWork.Calls.AddAsync(call);
-                try
-                {
-                    _unitOfWork.complete();
-                }
-                catch (Exception e)
-                {
-                    return new ReturnCallsDto
-                    {
-                        IsSuccess = false,
-                        Message = e.Message
-                    };
-                }
-
-
-                var returnDto = new ReturnCallsDto
-                {
-                    IsSuccess = true,
-                    Calls = new[]
-                    {
-                        new CallDto
-                        {
-                            id = call.CallID,
-                            status = call.CallStatus,
-                            summary = call.CallSummery,
-                            date = call.CallDate,
-                            followUp = call.FollowUpDate,
-                            CustomerId = call.Customer.CustomerId
-                        }
-                    }
-                };
-
-                return returnDto;
-            }
-            catch (Exception ex)
-            {
-                return new ReturnCallsDto
-                {
-                    IsSuccess = false,
-                    Errors = [ex.Message]
-                };
-            }
-        }
+        
 
         //public async Task<ResultDto> UpdateCallInfo(CallDto callDto, string callId)
         //{
@@ -164,6 +76,78 @@ namespace CRM.Core.Services.Implementations
         //        Message = "Call updated successfully"
         //    };
         //}
+        public async Task<ActionResult<IEnumerable<object>>> AddCall(AddCallDto addcallDto, string salesRepEmail)
+        {
+            try
+            {
+                if (addcallDto == null)
+                {
+                    throw new ArgumentNullException(nameof(addcallDto));
+                }
+
+                var calls = new List<object>();
+
+                var customer = await _unitOfWork.Customers.GetByIdAsync(addcallDto.CustomerId);
+                if (customer == null)
+                {
+                    return new BadRequestObjectResult(new { errors = new List<string> { "Customer not found" } });
+                }
+
+                if (string.IsNullOrEmpty(salesRepEmail))
+                {
+                    return new BadRequestObjectResult(new { errors = new List<string> { "Sales Representative email is null or empty" } });
+                }
+
+                var salesRep = await _unitOfWork.UserManager.FindByEmailAsync(salesRepEmail);
+                if (salesRep == null)
+                {
+                    return new BadRequestObjectResult(new { errors = new List<string> { "Sales Representative not found" } });
+                }
+
+                var call = new Call
+                {
+                    CallStatus = addcallDto.status,
+                    CallSummery = addcallDto.summary,
+                    CallDate = addcallDto.date,
+                    FollowUpDate = addcallDto.followUp,
+                    SalesRepresntative = salesRep,
+                    Customer = customer
+                };
+
+                await _unitOfWork.Calls.AddAsync(call);
+                try
+                {
+                    _unitOfWork.complete();
+                }
+                catch (Exception e)
+                {
+                    return new BadRequestObjectResult(new { errors = new List<string> { e.Message } });
+                }
+
+                calls.Add(new CallDto
+                {
+                    id = call.CallID,
+                    status = call.CallStatus,
+                    summary = call.CallSummery,
+                    date = call.CallDate,
+                    followUp = call.FollowUpDate,
+                    CustomerId = call.Customer.CustomerId
+                });
+
+                return new OkObjectResult(calls);
+            }
+            catch (Exception ex)
+            {
+                return new BadRequestObjectResult(new { errors = new List<string> { ex.Message } });
+            }
+        }
+
+
+
+
+
+
+
         public async Task<List<CallDto>> UpdateCallInfo(AddCallDto addCallDto, string callId)
         {
             var call = await _unitOfWork.Calls.FindAsync(c => c.CallID == callId);
@@ -365,7 +349,7 @@ namespace CRM.Core.Services.Implementations
 
         #endregion
         #region ManageMessages
-        public async Task<ResultDto> AddMessage(AddMessageDto messageDto, string salesRepEmail)
+        public async Task<ActionResult<IEnumerable<object>>> AddMessage(AddMessageDto messageDto, string salesRepEmail)
         {
             try
             {
@@ -374,76 +358,63 @@ namespace CRM.Core.Services.Implementations
                     throw new ArgumentNullException(nameof(messageDto));
                 }
 
-                var message = new Message();
+                
 
                 var customer = await _unitOfWork.Customers.GetByIdAsync(messageDto.CustomerId);
                 if (customer == null)
                 {
-                    return new ResultDto
-                    {
-                        IsSuccess = false,
-                        Errors = ["Customer not Found"]
-                    };
+                    return new BadRequestObjectResult(new { errors = new List<string> { "Customer not found" } });
                 }
 
                 if (string.IsNullOrEmpty(salesRepEmail))
                 {
-                    return new ResultDto
-                    {
-                        IsSuccess = false,
-                        Errors = ["Sales Representative email is null or empty"]
-
-                    };
+                    return new BadRequestObjectResult(new { errors = new List<string> { "Sales Representative email is null or empty" } });
                 }
 
                 var salesRep = await _unitOfWork.UserManager.FindByEmailAsync(salesRepEmail);
                 if (salesRep == null)
                 {
-                    return new ResultDto
-                    {
-                        IsSuccess = false,
-                        Errors = ["Sales Representative not found"]
-                    };
+                    return new BadRequestObjectResult(new { errors = new List<string> { "Sales Representative not found" } });
                 }
 
-                message.MessageDate = messageDto.date;
-                message.FollowUpDate = messageDto.followUp;
-                message.MessageContent = messageDto.summary;
-                message.SalesRepresntative = salesRep;
-                message.Customer = customer;
+
+                var message = new Message
+                {
+                   
+                    MessageContent = messageDto.summary,
+                    MessageDate = messageDto.date,
+                    FollowUpDate = messageDto.followUp,
+                    SalesRepresntative = salesRep,
+                    Customer = customer
+                };
 
                 await _unitOfWork.Messages.AddAsync(message);
-
                 try
                 {
                     _unitOfWork.complete();
                 }
                 catch (Exception e)
                 {
-                    return new ResultDto
-                    {
-                        IsSuccess = false,
-                        Errors = [e.Message]
-                    };
+                    return new BadRequestObjectResult(new { errors = new List<string> { e.Message } });
                 }
+                var messages = new List<object>();
 
-                return new ResultDto
+                messages.Add(new MessageDto
                 {
-                    IsSuccess = true,
-                    Message = "Message is added successfully"
-                };
+                    id = message.MessageID,
+                    summary = message.MessageContent,
+                    date = message.MessageDate,
+                    followUp = message.FollowUpDate,
+                    CustomerId = message.Customer.CustomerId
+                });
+
+                return new OkObjectResult(messages);
             }
             catch (Exception ex)
             {
-                return new ResultDto
-                {
-                    IsSuccess = false,
-                    Errors = [ex.Message]
-                };
+                return new BadRequestObjectResult(new { errors = new List<string> { ex.Message } });
             }
-
         }
-
 
         public async Task<ResultDto> UpdateMessageInfo(AddMessageDto messageDto, string MessageId)
         {
@@ -466,10 +437,12 @@ namespace CRM.Core.Services.Implementations
 
                 };
             }
-            message.MessageContent = messageDto.summary;
-            message.MessageDate = messageDto.date;
-            message.FollowUpDate = messageDto.followUp;
-            message.Customer.CustomerId = messageDto.CustomerId;
+
+            //var message  = new Message { 
+            //message.MessageContent = messageDto.summary;
+            //message.MessageDate = messageDto.date;
+            //message.FollowUpDate = messageDto.followUp;
+            //message.Customer.CustomerId = messageDto.CustomerId;
             try
             {
                 _unitOfWork.complete();
@@ -630,7 +603,7 @@ namespace CRM.Core.Services.Implementations
         #endregion
 
         #region ManageMeetings
-        public async Task<ResultDto> AddMeeting(AddMeetingDto meetingDto, string SaleRepEmail)
+        public async Task<ActionResult<IEnumerable<object>>> AddMeeting(AddMeetingDto meetingDto, string SaleRepEmail)
         {
             try
             {
@@ -638,46 +611,40 @@ namespace CRM.Core.Services.Implementations
                 {
                     throw new ArgumentNullException(nameof(MeetingDto));
                 }
-                var meeting = new Meeting();
+                
                 var customer = await _unitOfWork.Customers.GetByIdAsync(meetingDto.CustomerId);
                 if (customer == null)
                 {
-                    return new ResultDto
-                    {
-                        IsSuccess = false,
-                        Errors = ["Customer not Found"]
-                    };
+                    return new BadRequestObjectResult(new { errors = new List<string> { "Customer not found" } });
+
                 }
 
                 if (string.IsNullOrEmpty(SaleRepEmail))
                 {
-                    return new ResultDto
-                    {
-                        IsSuccess = false,
-                        Errors = ["Sales Representative email is null or empty"]
-
-                    };
+                    return new BadRequestObjectResult(new { errors = new List<string> { "Sales Representative email is null or empty" } });
                 }
 
                 var salesRep = await _unitOfWork.UserManager.FindByEmailAsync(SaleRepEmail);
 
                 if (salesRep == null)
                 {
-                    return new ResultDto
-                    {
-                        IsSuccess = false,
-                        Errors = ["Sales Representative not found"]
-                    };
+                    return new BadRequestObjectResult(new { errors = new List<string> { "Sales Representative not found" } });
+
                 }
 
-                meeting.connectionState = meetingDto.online;
-                meeting.SalesRepresntative = salesRep;
-                meeting.Customer = customer;
-                meeting.FollowUpDate = meetingDto.followUp;
-                meeting.MeetingDate = meetingDto.date;
-                meeting.MeetingSummary = meetingDto.summary;
+
+                var meeting = new Meeting
+                {
+                    connectionState = meetingDto.online,
+                    SalesRepresntative = salesRep,
+                    Customer = customer,
+                    FollowUpDate = meetingDto.followUp,
+                    MeetingDate = meetingDto.date,
+                    MeetingSummary = meetingDto.summary
+                };
 
                 await _unitOfWork.Meetings.AddAsync(meeting);
+                var meetings = new List<object>();
 
                 try
                 {
@@ -686,30 +653,24 @@ namespace CRM.Core.Services.Implementations
 
                 catch (Exception e)
                 {
-                    return new ResultDto
-                    {
-                        IsSuccess = false,
-                        Errors = [e.Message]
-                    };
-
+                    return new BadRequestObjectResult(new { errors = new List<string> { e.Message } });
                 }
 
-                return new ResultDto
+                meetings.Add(new MeetingDto
                 {
-                    IsSuccess = true,
-                    Message = "Meeting is added Successfully"
+                    id = meeting.MeetingID,
+                    summary = meeting.MeetingSummary,
+                    date = meeting.MeetingDate,
+                    followUp = meeting.FollowUpDate,
+                    CustomerId = meeting.Customer.CustomerId
+                });
 
-                };
 
+                return new OkObjectResult(meetings);
             }
-
-            catch (Exception e)
+            catch (Exception ex)
             {
-                return new ResultDto
-                {
-                    IsSuccess = false,
-                    Errors = [e.Message]
-                };
+                return new BadRequestObjectResult(new { errors = new List<string> { ex.Message } });
             }
         }
         public async Task<ResultDto> UpdateMeeting(AddMeetingDto meetingDto, string MeetingId)
@@ -901,7 +862,7 @@ namespace CRM.Core.Services.Implementations
         #endregion
 
         #region ManageDeals
-        public async Task<ResultDto> AddDeal(AddDealDto dealsDto, string salesRepEmail)
+        public async Task<ActionResult<IEnumerable<object>>> AddDeal(AddDealDto dealsDto, string salesRepEmail)
         {
             try
             {
@@ -910,53 +871,39 @@ namespace CRM.Core.Services.Implementations
                     throw new ArgumentNullException(nameof(dealsDto));
                 }
 
-                var deal = new Deal();
+                var deals = new List<object>();
 
                 var customer = await _unitOfWork.Customers.GetByIdAsync(dealsDto.CustomerId);
                 if (customer == null)
                 {
-                    return new ResultDto
-                    {
-                        IsSuccess = false,
-                        Errors = ["Customer not Found"]
-                    };
+                    return new BadRequestObjectResult(new { errors = new List<string> { "Customer Not Found" } });
+
                 }
                 var interest = await _unitOfWork.Interests.GetByIdAsync(dealsDto.InterestId);
                 if (interest == null)
                 {
-                    return new ResultDto
-                    {
-                        IsSuccess = false,
-                        Errors = ["Interest not found"]
-                    };
+                    return new BadRequestObjectResult(new { errors = new List<string> { "Interest Not Found" } });
                 }
 
                 if (string.IsNullOrEmpty(salesRepEmail))
                 {
-                    return new ResultDto
-                    {
-                        IsSuccess = false,
-                        Errors = ["Sales Representative email is null or empty"]
-                    };
+                    return new BadRequestObjectResult(new { errors = new List<string> { "Sales Representative email is null or empty" } });
                 }
 
                 var salesRep = await _unitOfWork.UserManager.FindByEmailAsync(salesRepEmail);
                 if (salesRep == null)
                 {
-                    return new ResultDto
-                    {
-                        IsSuccess = false,
-                        Errors = ["Sales Representative not found"]
-                    };
+                    return new BadRequestObjectResult(new { errors = new List<string> { "Sales Representative not found " } });
                 }
-
-                deal.DealDate = dealsDto.date;
-                deal.description = dealsDto.summary;
-                deal.Price = dealsDto.price;
-                deal.Interest = interest;
-                deal.SalesRepresntative = salesRep;
-                deal.Customer = customer;
-
+                var deal = new Deal
+                {
+                    DealDate = dealsDto.date,
+                description = dealsDto.summary,
+                Price = dealsDto.price,
+               Interest = interest,
+                SalesRepresntative = salesRep,
+               Customer = customer,
+               };
                 await _unitOfWork.Deals.AddAsync(deal);
 
                 try
@@ -965,26 +912,24 @@ namespace CRM.Core.Services.Implementations
                 }
                 catch (Exception e)
                 {
-                    return new ResultDto
-                    {
-                        IsSuccess = false,
-                        Errors = [e.Message]
-                    };
+                    return new BadRequestObjectResult(new { errors = new List<string> { e.Message } });
                 }
+              
 
-                return new ResultDto
+                deals.Add(new DealsDto
                 {
-                    IsSuccess = true,
-                    Message = "Deal added successfully"
-                };
+                    id = deal.DealId,
+                    price = deal.Price,
+                    InterestId=deal.Interest.InterestID,
+                    summary = deal.description,
+                    date = deal.DealDate,
+                });
+
+                return new OkObjectResult(deals);
             }
             catch (Exception ex)
             {
-                return new ResultDto
-                {
-                    IsSuccess = false,
-                    Errors = [ex.Message]
-                };
+                return new BadRequestObjectResult(new { errors = new List<string> { ex.Message } });
             }
         }
 

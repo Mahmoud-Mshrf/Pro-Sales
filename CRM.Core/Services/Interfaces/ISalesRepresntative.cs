@@ -11,7 +11,8 @@ namespace CRM.Core.Services.Interfaces
     public interface ISalesRepresntative
     {
         #region MangeCalls
-        Task<ReturnCallsDto> AddCall(AddCallDto addcallDto, string SalesRepresntativeEmail);
+        
+        Task<ActionResult<IEnumerable<object>>> AddCall(AddCallDto addcallDto, string salesRepEmail);
         // Task<ReturnCallsDto> UpdateCallInfo(AddCallDto callDto, string CallId);
         Task<List<CallDto>> UpdateCallInfo(AddCallDto addCallDto, string callId);
         Task<ReturnCallsDto> GetAllCalls();
@@ -20,7 +21,7 @@ namespace CRM.Core.Services.Interfaces
         #endregion
 
         #region ManageMessages
-        Task<ResultDto> AddMessage(AddMessageDto MessageDto, string SalesRepresntativeEmail);
+        Task<ActionResult<IEnumerable<object>>> AddMessage(AddMessageDto messageDto, string salesRepEmail);
         Task<ResultDto> UpdateMessageInfo(AddMessageDto messageDto, string MessageId);
         Task<ReturnMessagesDto> GetAllMessages();
         Task<ReturnMessagesDto> GetMessageById(string MessageId);
@@ -29,7 +30,7 @@ namespace CRM.Core.Services.Interfaces
         #endregion
 
         #region ManageMeetings
-        Task<ResultDto> AddMeeting(AddMeetingDto meetingDto, string SaleRepEmail);
+        Task<ActionResult<IEnumerable<object>>> AddMeeting(AddMeetingDto meetingDto, string SaleRepEmail);
         Task<ResultDto> UpdateMeeting(AddMeetingDto meetingDto, string MeetingId);
         Task<ReturnMeetingsDto> GetAllMeetings();
         Task<ReturnMeetingsDto> GetMeetingByID(string MeetingId);
@@ -37,7 +38,8 @@ namespace CRM.Core.Services.Interfaces
         #endregion
 
         #region ManageDeals
-        Task<ResultDto> AddDeal(AddDealDto dealsDto, string SaleRepEmail);
+        Task<ActionResult<IEnumerable<object>>> AddDeal(AddDealDto addcallDto, string salesRepEmail);
+
         Task<ResultDto> UpdateDeal(AddDealDto dealsDto, string DealId);
         Task<ReturnDealsDto> GetAllDeals();
         Task<ReturnDealsDto> GetDealById(string DealId);
