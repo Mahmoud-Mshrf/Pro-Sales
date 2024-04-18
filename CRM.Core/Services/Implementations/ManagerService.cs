@@ -239,7 +239,7 @@ namespace CRM.Core.Services.Implementations
                 await _unitOfWork.UserManager.DeleteAsync(user);
             }
         }
-        public async Task<BusinessDto> AddBusinessInfo(string email,BusinessDto dto)
+        public async Task<BusinessDto> UpdateBusinessInfo(string email,BusinessDto dto)
         {
             var Manager = await _unitOfWork.UserManager.FindByEmailAsync(email);
             var businesses = await _unitOfWork.Businesses.GetAllAsync();
@@ -284,56 +284,5 @@ namespace CRM.Core.Services.Implementations
             //    };
             //}
         }
-        //public async Task<ResultDto> UpdateBusinessInfo(string email,BusinessDto dto)
-        //{
-        //    var Manager = await _unitOfWork.UserManager.FindByEmailAsync(email);
-        //    var businesses = await _unitOfWork.Businesses.GetAllAsync();
-        //    var existingBusiness = businesses.FirstOrDefault();
-        //    if (existingBusiness == null)
-        //    {
-        //        return new ResultDto
-        //        {
-        //            IsSuccess = false,
-        //            Errors = ["Business information is not exist , go to add it"]
-        //        };
-        //    }
-        //    existingBusiness.CompanyName = dto.CompanyName;
-        //    existingBusiness.Description = dto.Description;
-        //    existingBusiness.Manager = Manager; 
-        //    var result = _unitOfWork.Businesses.Update(existingBusiness);
-        //    try
-        //    {
-        //        _unitOfWork.complete();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return new ResultDto
-        //        {
-        //            IsSuccess = false,
-        //            Errors = [ex.Message]
-        //        };
-        //    }
-
-        //    return new ResultDto
-        //    {
-        //        IsSuccess = true,
-        //        Message = "Business information updated successfully"
-        //    };
-        //}
-        //public async Task<BusinessDto> GetBussinesInfo()
-        //{
-        //    var businesses = await _unitOfWork.Businesses.GetAllAsync();
-        //    var existingBusiness = businesses.FirstOrDefault();
-        //    if (existingBusiness == null)
-        //    {
-        //        return new BusinessDto();
-        //    }
-        //    var businessDto = new BusinessDto
-        //    {
-        //        CompanyName = existingBusiness.CompanyName,
-        //        Description = existingBusiness.Description
-        //    };
-        //    return businessDto;
-        //}
     }
 }
