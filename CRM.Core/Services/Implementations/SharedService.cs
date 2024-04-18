@@ -35,7 +35,8 @@ namespace CRM.Core.Services.Implementations
                 var interestDto = new InterestDto
                 {
                     Id = interest.InterestID,
-                    Name = interest.InterestName
+                    Name = interest.InterestName,
+                    IsDisabled= interest.IsDisabled
                 };
                 Interests.Add(interestDto);
             }
