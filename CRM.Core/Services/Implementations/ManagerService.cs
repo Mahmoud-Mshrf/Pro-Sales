@@ -67,7 +67,7 @@ namespace CRM.Core.Services.Implementations
                 Name = interest.InterestName
             };
         }
-        public async Task<ResultDto> DeleteInterest(int id)
+        public async Task<ResultDto> DisableInterest(int id)
         {
             var interest = await _unitOfWork.Interests.GetByIdAsync(id);
             if (interest == null)
@@ -78,7 +78,8 @@ namespace CRM.Core.Services.Implementations
                     Errors = ["Interest not found"]
                 };
             }
-            _unitOfWork.Interests.Delete(interest);
+            //_unitOfWork.Interests.Delete(interest);
+            interest.IsDisabled = true;
             _unitOfWork.complete();
             return new ResultDto
             {
