@@ -353,7 +353,11 @@ namespace CRM.Core.Services.Implementations
                 IsSuccess = false,
                 Errors = ["Email is incorrect or not found"]
             };
-
+            if(!user.EmailConfirmed) return new ResultDto
+            {
+                IsSuccess = false,
+                Errors = ["Email is not confirmed"]
+            };
 
             Random rnd = new Random();
             var randomNum = (rnd.Next(100000, 999999)).ToString();
