@@ -194,7 +194,7 @@ namespace CRM.Core.Services.Implementations
                 return new ResultDto { Errors =["Something wrong, confirmation email failed to send"] };
             }
         }
-        public async Task<ResultDto> DeleteMyAccount(string email,string password)
+        public async Task<ResultDto> DeleteMyAccount(string email, string password)
         {
             var user = await _unitOfWork.UserManager.FindByEmailAsync(email);
             if (user == null)
@@ -213,6 +213,15 @@ namespace CRM.Core.Services.Implementations
                     IsSuccess = false,
                     Errors = ["Password is incorrect"]
                 };
+            }
+            if (await _unitOfWork.UserManager.IsInRoleAsync(user, "Sales Representative"))
+            {
+                var customers = await _unitOfWork.Customers.GetAllAsync(c => c.SalesRepresntative == user, ["SalesRepresntative"]);
+                foreach (var customer in customers)
+                {
+                    customer.SalesRepresntative = null;
+                }
+
             }
             var result2 = await _unitOfWork.UserManager.DeleteAsync(user);
             if (result2.Succeeded)
