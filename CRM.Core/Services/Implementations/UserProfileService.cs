@@ -115,6 +115,14 @@ namespace CRM.Core.Services.Implementations
                     Errors = ["User not found"]
                 };
             }
+            if (!await _unitOfWork.UserManager.CheckPasswordAsync(user, dto.CurrentPassword))
+            {
+                return new ResultDto
+                {
+                    IsSuccess = false,
+                    Errors = ["Current password is not correct"]
+                };
+            }
             var result = await _unitOfWork.UserManager.ChangePasswordAsync(user, dto.CurrentPassword, dto.NewPassword);
             if (result.Succeeded)
             {
