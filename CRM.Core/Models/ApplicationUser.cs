@@ -15,7 +15,7 @@ namespace CRM.Core.Models
         public IEnumerable<Message> Messages { get; set; }
         public IEnumerable<Call> Calls { get; set; }
         public IEnumerable<Deal> Deals { get; set; }
-        public IEnumerable<Meeting> meetings { get; set; }
+        public IEnumerable<Meeting> Meetings { get; set; }
 
     }
 }
