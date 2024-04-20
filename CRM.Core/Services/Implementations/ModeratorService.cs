@@ -138,33 +138,38 @@ namespace CRM.Core.Services.Implementations
             {
                 customerDto.LastAction = lastAction;
             }
-            var userdto = new UserDto
+            if (customer.SalesRepresntative != null)
             {
-                Id = customer.SalesRepresntative.Id,
-                FirstName=customer.SalesRepresntative.FirstName,
-                LastName=customer.SalesRepresntative.LastName,
-                UserName = customer.SalesRepresntative.UserName,
-                Roles = await _unitOfWork.UserManager.GetRolesAsync(customer.SalesRepresntative),
-                Email = customer.SalesRepresntative.Email,
-                customers = await _unitOfWork.Customers.CountAsync(c => c.SalesRepresntative.Id == customer.SalesRepresntative.Id)
-            };
-            customerDto.SalesRepresentative = userdto;
-            var userdto2 = new UserDto
+                var userdto = new UserDto
+                {
+                    Id = customer.SalesRepresntative.Id,
+                    FirstName = customer.SalesRepresntative.FirstName,
+                    LastName = customer.SalesRepresntative.LastName,
+                    UserName = customer.SalesRepresntative.UserName,
+                    Roles = await _unitOfWork.UserManager.GetRolesAsync(customer.SalesRepresntative),
+                    Email = customer.SalesRepresntative.Email,
+                    customers = await _unitOfWork.Customers.CountAsync(c => c.SalesRepresntative.Id == customer.SalesRepresntative.Id)
+                };
+                customerDto.SalesRepresentative = userdto;
+            }
+            if (customer.MarketingModerator != null)
             {
-                Id = customer.MarketingModerator.Id,
-                FirstName = customer.MarketingModerator.FirstName,
-                LastName = customer.MarketingModerator.LastName,
-                UserName = customer.MarketingModerator.UserName,
-                Roles = await _unitOfWork.UserManager.GetRolesAsync(customer.MarketingModerator),
-                Email = customer.MarketingModerator.Email
-            };
-            customerDto.AddedBy = userdto2;
-            //customerDto.UserInterests = customer.Interests.Select(i => new UserInterestDto { /*Id = i.InterestID,*/ Name = i.InterestName }).ToList();
+                var userdto2 = new UserDto
+                {
+                    Id = customer.MarketingModerator.Id,
+                    FirstName = customer.MarketingModerator.FirstName,
+                    LastName = customer.MarketingModerator.LastName,
+                    UserName = customer.MarketingModerator.UserName,
+                    Roles = await _unitOfWork.UserManager.GetRolesAsync(customer.MarketingModerator),
+                    Email = customer.MarketingModerator.Email
+                };
+                customerDto.AddedBy = userdto2;
+            }            //customerDto.UserInterests = customer.Interests.Select(i => new UserInterestDto { /*Id = i.InterestID,*/ Name = i.InterestName }).ToList();
             return customerDto;
         }
         public async Task<ReturnAllCustomersDto> GetAllCustomers(int page, int size)
         {
-            var customers = await _unitOfWork.Customers.GetAllAsync(c=>!c.IsDeleted,["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
+            var customers = await _unitOfWork.Customers.GetAllAsync(c => !c.IsDeleted, ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
             if (customers == null)
             {
                 return new ReturnAllCustomersDto
@@ -207,27 +212,34 @@ namespace CRM.Core.Services.Implementations
                 {
                     customerDto.LastAction = lastAction;
                 }
-                var userdto = new UserDto
+                if (customer.SalesRepresntative != null)
                 {
-                    Id = customer.SalesRepresntative.Id,
-                    FirstName = customer.SalesRepresntative.FirstName,
-                    LastName = customer.SalesRepresntative.LastName,
-                    UserName = customer.SalesRepresntative.UserName,
-                    Roles = await _unitOfWork.UserManager.GetRolesAsync(customer.SalesRepresntative),
-                    Email = customer.SalesRepresntative.Email,
-                    customers = await _unitOfWork.Customers.CountAsync(c => c.SalesRepresntative.Id == customer.SalesRepresntative.Id)
-                };
-                customerDto.SalesRepresentative = userdto;
-                var userdto2 = new UserDto
+                    var userdto = new UserDto
+                    {
+                        Id = customer.SalesRepresntative.Id,
+                        FirstName = customer.SalesRepresntative.FirstName,
+                        LastName = customer.SalesRepresntative.LastName,
+                        UserName = customer.SalesRepresntative.UserName,
+                        Roles = await _unitOfWork.UserManager.GetRolesAsync(customer.SalesRepresntative),
+                        Email = customer.SalesRepresntative.Email,
+                        customers = await _unitOfWork.Customers.CountAsync(c => c.SalesRepresntative.Id == customer.SalesRepresntative.Id)
+                    };
+                    customerDto.SalesRepresentative = userdto;
+                }
+                if (customer.MarketingModerator != null)
                 {
-                    Id = customer.MarketingModerator.Id,
-                    FirstName = customer.MarketingModerator.FirstName,
-                    LastName = customer.MarketingModerator.LastName,
-                    UserName = customer.MarketingModerator.UserName,
-                    Roles = await _unitOfWork.UserManager.GetRolesAsync(customer.MarketingModerator),
-                    Email = customer.MarketingModerator.Email
-                };
-                customerDto.AddedBy = userdto2;
+                    var userdto2 = new UserDto
+                    {
+                        Id = customer.MarketingModerator.Id,
+                        FirstName = customer.MarketingModerator.FirstName,
+                        LastName = customer.MarketingModerator.LastName,
+                        UserName = customer.MarketingModerator.UserName,
+                        Roles = await _unitOfWork.UserManager.GetRolesAsync(customer.MarketingModerator),
+                        Email = customer.MarketingModerator.Email
+                    };
+                    customerDto.AddedBy = userdto2;
+                }
+
                 customersDto.Add(customerDto);
             }
             var Customers = customersDto.OrderByDescending(DateTime => DateTime.AdditionDate).ToList();
@@ -620,27 +632,35 @@ namespace CRM.Core.Services.Implementations
                 //}
                 dto.Interests = customer.Interests.Select(i => new UserInterestDto { Id = i.InterestID, Name = i.InterestName }).ToList();
 
-                var userdto = new UserDto
+                if (customer.SalesRepresntative != null)
                 {
-                    Id = customer.SalesRepresntative.Id,
-                    FirstName = customer.SalesRepresntative.FirstName,
-                    LastName = customer.SalesRepresntative.LastName,
-                    UserName = customer.SalesRepresntative.UserName,
-                    Roles = await _unitOfWork.UserManager.GetRolesAsync(customer.SalesRepresntative),
-                    Email = customer.SalesRepresntative.Email,
-                    customers = await _unitOfWork.Customers.CountAsync(c => c.SalesRepresntative.Id == customer.SalesRepresntative.Id)
-                };
-                dto.SalesRepresentative = userdto;
-                var userdto2 = new UserDto
+                    var userdto = new UserDto
+                    {
+                        Id = customer.SalesRepresntative.Id,
+                        FirstName = customer.SalesRepresntative.FirstName,
+                        LastName = customer.SalesRepresntative.LastName,
+                        UserName = customer.SalesRepresntative.UserName,
+                        Roles = await _unitOfWork.UserManager.GetRolesAsync(customer.SalesRepresntative),
+                        Email = customer.SalesRepresntative.Email,
+                        customers = await _unitOfWork.Customers.CountAsync(c => c.SalesRepresntative.Id == customer.SalesRepresntative.Id)
+                    };
+                    dto.SalesRepresentative = userdto;
+                }
+                if (customer.MarketingModerator != null)
                 {
-                    Id = customer.MarketingModerator.Id,
-                    FirstName = customer.MarketingModerator.FirstName,
-                    LastName = customer.MarketingModerator.LastName,
-                    UserName = customer.MarketingModerator.UserName,
-                    Roles = await _unitOfWork.UserManager.GetRolesAsync(customer.MarketingModerator),
-                    Email = customer.MarketingModerator.Email
-                };
-                dto.AddedBy = userdto2;
+                    var userdto2 = new UserDto
+                    {
+                        Id = customer.MarketingModerator.Id,
+                        FirstName = customer.MarketingModerator.FirstName,
+                        LastName = customer.MarketingModerator.LastName,
+                        UserName = customer.MarketingModerator.UserName,
+                        Roles = await _unitOfWork.UserManager.GetRolesAsync(customer.MarketingModerator),
+                        Email = customer.MarketingModerator.Email
+                    };
+                    dto.AddedBy = userdto2;
+                }
+
+
                 customerResult.Add(dto);
             }
             var Customers = customerResult.OrderByDescending(DateTime => DateTime.AdditionDate).ToList();
