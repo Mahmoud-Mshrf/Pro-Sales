@@ -51,16 +51,17 @@ namespace CRM.Controllers
             }
             return Ok(result);
         }
-        [HttpDelete("delete-interest/{id}")]
-        public async Task<IActionResult> DeleteInterest(int id)
-        {
-            var result = await _managerService.DeleteInterest(id);
-            if (!result.IsSuccess)
-            {
-                return BadRequest(result);
-            }
-            return Ok(result);
-        }
+        //[HttpPatch("disable-interest/{id}")]
+        //public async Task<IActionResult> DisableInterest(int id)
+        //{
+        //    var result = await _managerService.DisableInterest(id);
+        //    if (!result.IsSuccess)
+        //    {
+        //        var errors = new string[] {"Interest not found"};
+        //        return BadRequest();
+        //    }
+        //    return Ok(result);
+        //}
         [HttpGet("get-all-roles")]
         public IActionResult GetAllRoles()
         {
@@ -100,28 +101,13 @@ namespace CRM.Controllers
             }
             return Ok(result);
         }
-        [HttpPost("add-business-info")]
-        public async Task<IActionResult> AddBusinessInfo([FromBody] BusinessDto dto)
-        {
-            var email = User.FindFirstValue(ClaimTypes.Email);
-            var result = await _managerService.AddBusinessInfo(email, dto);
-            if (!result.IsSuccess)
-            {
-                return BadRequest(result);
-            }
-            return Ok(result);
-        }
+        //[HttpPost("add-business-info")]
         [HttpPut("update-business-info")]
         public async Task<IActionResult> UpdateBusinessInfo([FromBody] BusinessDto dto)
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
             var result = await _managerService.UpdateBusinessInfo(email, dto);
-            if (!result.IsSuccess)
-            {
-                return BadRequest(result);
-            }
             return Ok(result);
         }
-
     }
 }

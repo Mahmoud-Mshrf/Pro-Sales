@@ -17,7 +17,7 @@ namespace CRM.Core.Models
         [MaxLength(50)]
         public string CompanyName { get; set; }
 
-        [MaxLength(500)]
+        //[MaxLength(500)]
         public string Description { get; set; }
 
         [ForeignKey("ManagerId")] 

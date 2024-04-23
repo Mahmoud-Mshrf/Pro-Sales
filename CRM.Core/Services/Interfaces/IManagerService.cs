@@ -12,7 +12,7 @@ namespace CRM.Core.Services.Interfaces
         Task<InterestDto> AddInterest(string name);
         Task<InterestDto> updateInterest(InterestDto dto);
         Task<InterestDto> getInterest(int id);
-        Task<ResultDto> DeleteInterest(int id);
+        //Task<ReturnInterestDto> DisableInterest(int id);
         Task<SourceDto> updateSource(SourceDto dto);
         Task<SourceDto> getSource(int id);
         Task<ResultDto> DeleteSource(int id);
@@ -21,7 +21,6 @@ namespace CRM.Core.Services.Interfaces
         Task<ReturnUserRolesDto> ViewUserRoles(string userId);
         Task<ReturnUserRolesDto> ManageUserRoles(UserRolesDTO dto);
         //Task<BusinessDto> GetBussinesInfo();
-        Task<ResultDto> UpdateBusinessInfo(string email,BusinessDto dto);
-        Task<ResultDto> AddBusinessInfo(string email, BusinessDto dto);
+        Task<BusinessDto> UpdateBusinessInfo(string email, BusinessDto dto);
     }
 }
