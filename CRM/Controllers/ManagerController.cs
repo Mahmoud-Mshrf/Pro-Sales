@@ -24,7 +24,7 @@ namespace CRM.Controllers
             var result = await _managerService.AddInterest(dto.Name);
             if (string.IsNullOrEmpty(result.Name))
             {
-                var errors =new { errors = new string[] { $"Interest not found" } };
+                var errors =new { errors = new string[] { $"Interest already exists" } };
                 return BadRequest(errors);
             }
             return Ok(result);
@@ -33,9 +33,9 @@ namespace CRM.Controllers
         public async Task<IActionResult> UpdateInterest([FromBody] InterestDto dto)
         {
             var result = await _managerService.updateInterest(dto);
-            if (string.IsNullOrEmpty(result.Name))
+            if (!result.IsSuccess)
             {
-                var errors = new { errors = new string[] { "Interest not found" } };
+                var errors = new { result.Errors};
                 return BadRequest(errors);
             }
             return Ok(result);
