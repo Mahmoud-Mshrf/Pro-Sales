@@ -16,6 +16,12 @@ namespace CRM.Controllers
         {
             _reportingService = reportingService;
         }
+        [HttpGet("daily-report")]
+        public async Task<IActionResult> DailyReport(int page, int size)
+        {
+            var result = await _reportingService.GetDailyReport(page, size);
+            return Ok(result);
+        }
 
     }
 }
