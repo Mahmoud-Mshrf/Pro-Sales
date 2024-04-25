@@ -313,7 +313,7 @@ namespace CRM.Core.Services.Implementations
             customer.City = customerDto.City;
             customer.Age = customerDto.Age;
             customer.Gender = customerDto.Gender;
-            customer.AdditionDate = DateTime.Now;
+            customer.AdditionDate = DateTime.UtcNow;
             customer.SalesRepresntative = salesRep;
             customer.Source = source;
             customer.MarketingModerator = MarketingModerator;
