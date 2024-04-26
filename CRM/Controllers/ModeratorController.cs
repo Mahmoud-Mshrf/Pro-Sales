@@ -14,9 +14,11 @@ namespace CRM.Controllers
     public class ModeratorController : ControllerBase
     {
         private readonly IModeratorService _moderatorService;
-        public ModeratorController(IModeratorService moderatorService)
+        private readonly ISharedService? _sharedService;
+        public ModeratorController(IModeratorService moderatorService, ISharedService sharedService)
         {
             _moderatorService = moderatorService;
+            _sharedService = sharedService;
         }
         [HttpGet("get-all-sales")]
         public async Task<IActionResult> GetAllSalesRepresentatives()
@@ -103,7 +105,7 @@ namespace CRM.Controllers
             return Ok(result);
         }
         [HttpGet("get-customers")]
-        public async Task<IActionResult> GetCustomers(int page , int size, [FromQuery] string query = null)
+        public async Task<IActionResult> GetCustomers(int page , int size, [FromQuery] string? query = null)
         {
             if(query == null)
             {
@@ -134,7 +136,7 @@ namespace CRM.Controllers
         [HttpGet("get-last-action")]
         public async Task<IActionResult> LastAction(int id)
         {
-            var result = await _moderatorService.GetLastAction(id);
+            var result = await _sharedService.GetLastAction(id);
             return Ok(result);
         }
         [HttpGet("get-customer-actions/{customerId}")]

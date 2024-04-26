@@ -25,7 +25,7 @@ namespace CRM.Core.Services.Interfaces
         //Task<IEnumerable<ReturnCustomerDto>> Search(string query);
         Task<UserDto> GetSalesById(string id);
         Task<IEnumerable<object>> GetAllActionsForCustomer(int customerId);
-        Task<ActionDto> GetLastAction(int Id);
+       // Task<ActionDto> GetLastAction(int Id);
         
     }
 }

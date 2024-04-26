@@ -11,10 +11,9 @@ namespace CRM.Core.Services.Interfaces
     public interface ISalesRepresntative
     {
         #region MangeCalls
-        
+
         Task<ActionResult<IEnumerable<object>>> AddCall(AddCallDto addcallDto, string salesRepEmail);
-        // Task<ReturnCallsDto> UpdateCallInfo(AddCallDto callDto, string CallId);
-        Task<List<CallDto>> UpdateCallInfo(AddCallDto addCallDto, string callId);
+        Task<ActionResult<IEnumerable<CallDto>>> UpdateCallInfo(UpdateCallDto addCallDto, string callId);
         Task<IEnumerable<CallDto>> GetAllCalls();
         Task<IEnumerable<CallDto>> GetCallById(string callId);
         Task<ResultDto> DeleteCallById(string callId);
@@ -22,7 +21,7 @@ namespace CRM.Core.Services.Interfaces
 
         #region ManageMessages
         Task<ActionResult<IEnumerable<object>>> AddMessage(AddMessageDto messageDto, string salesRepEmail);
-        Task<ResultDto> UpdateMessageInfo(AddMessageDto messageDto, string MessageId);
+        Task<ActionResult<IEnumerable<object>>> UpdateMessageInfo(updateMessagDto messageDto, string messageId);
         Task<IEnumerable<MessageDto>> GetAllMessages();
         Task<IEnumerable<MessageDto>> GetMessageById(string messageID);
         Task<ResultDto> DeleteMessageById(string MessageId);
@@ -31,7 +30,9 @@ namespace CRM.Core.Services.Interfaces
 
         #region ManageMeetings
         Task<ActionResult<IEnumerable<object>>> AddMeeting(AddMeetingDto meetingDto, string SaleRepEmail);
-        Task<ResultDto> UpdateMeeting(AddMeetingDto meetingDto, string MeetingId);
+        Task<ActionResult<IEnumerable<object>>> UpdateMeetingInfo(UpdateMeetingDto meetingDto, string meetingId);
+
+
         Task<IEnumerable<MeetingDto>> GetAllMeetings();
         Task<IEnumerable<MeetingDto>> GetMeetingByID(string MeetingId);
         Task<ResultDto> DeleteMeeting(string MeetingId);
@@ -40,7 +41,9 @@ namespace CRM.Core.Services.Interfaces
         #region ManageDeals
         Task<ActionResult<IEnumerable<object>>> AddDeal(AddDealDto addcallDto, string salesRepEmail);
 
-        Task<ResultDto> UpdateDeal(AddDealDto dealsDto, string DealId);
+        Task<ActionResult<IEnumerable<object>>> UpdateDealInfo(UpdateDealDto dealDto, string dealId);
+
+
         Task<IEnumerable<DealsDto>> GetAllDeals();
         Task<IEnumerable<DealsDto>> GetDealById(string DealId);
         Task<ResultDto> DeleteDeal(string DealId);
@@ -50,6 +53,7 @@ namespace CRM.Core.Services.Interfaces
 
         
         Task<ActionResult<IEnumerable<object>>> GetAllActionsForCustomer(int customerId);
-
+         Task<ActionResult<IEnumerable<ReturnAllCustomersDto>>> GetAllCustomersForSalesRep(int page, int size);
+        Task<ActionResult<IEnumerable<object>>> GetCustomer(int customerId);
     }
 }

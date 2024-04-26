@@ -13,5 +13,6 @@ namespace CRM.Core.Services.Interfaces
         Task<ReturnSourcesDto> GetAllSources();
         Task<BusinessDto> GetBussinesInfo();
         Task<IEnumerable<object>> GetActionsForCustomer(int customerId);
+        Task<ActionDto> GetLastAction(int Id);
     }
 }

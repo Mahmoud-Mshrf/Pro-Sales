@@ -21,8 +21,8 @@ namespace CRM.Core.Models
         [Key]
         public string CallID { get; set; }
         public DateTime CallDate { get; set; }
-        public DateTime FollowUpDate { get; set; }
-        public CallStatus CallStatus { get; set; }
+        public DateTime? FollowUpDate { get; set; }
+        public CallStatus? CallStatus { get; set; }
 
 
         [MaxLength(500)]

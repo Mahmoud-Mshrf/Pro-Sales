@@ -15,7 +15,7 @@ namespace CRM.Core.Models
         [Key]
         public string DealId { get; set; }
 
-        public DateTime DealDate { get; set; }
+        public DateTime? DealDate { get; set; }
         public String description { get; set; }
         public double Price { get; set; }
         public Customer Customer { get; set; }

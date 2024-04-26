@@ -9,15 +9,13 @@ using System.Threading.Tasks;
 
 namespace CRM.Core.Dtos
 {
-    public class AddCallDto
+    public class UpdateCallDto
     {
         [EnumDataType(typeof(CallStatus))]
-        [Required]
+       
         public CallStatus? status { get; set; }
         [MaxLength(500)]
-        [Required]
         public string summary { get; set; }
-        [Required]
         public DateTime date { get; set; }
         public DateTime? followUp { get; set; }
 

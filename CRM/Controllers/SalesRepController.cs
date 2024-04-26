@@ -31,7 +31,7 @@ namespace CRM.Controllers
             try
             {
                 var SalesRepresntativeEmail = User.FindFirstValue(ClaimTypes.Email);
-                  var result = await _salesRepresntative.AddCall(callDto, SalesRepresntativeEmail);
+                var result = await _salesRepresntative.AddCall(callDto, SalesRepresntativeEmail);
 
                 if (result.Result is BadRequestObjectResult badRequestResult)
                 {
@@ -46,7 +46,7 @@ namespace CRM.Controllers
 
                 return StatusCode(500, "An unexpected error occurred");
             }
-            catch 
+            catch
             {
 
                 return StatusCode(500, "Internal server error");
@@ -56,21 +56,36 @@ namespace CRM.Controllers
 
 
 
-        [HttpPut("[action]")]
-        public async Task<IActionResult> UpdateCall([FromBody] AddCallDto callDto, string CallId)
+        [HttpPut("[action]/{callId}")]
+        public async Task<IActionResult> UpdateCallInfo(string callId, [FromBody] UpdateCallDto callDto)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                var salesRepresentativeEmail = User.FindFirstValue(ClaimTypes.Email);
+                var result = await _salesRepresntative.UpdateCallInfo(callDto, callId);
+
+                if (result.Result is BadRequestObjectResult badRequestResult)
+                {
+                    return BadRequest(badRequestResult.Value);
+                }
+
+                if (result.Result is OkObjectResult okResult)
+                {
+                    return Ok(okResult.Value);
+                }
+
+                return StatusCode(500, "An unexpected error occurred");
             }
-            var SalesRepresntativeEmail = User.FindFirstValue(ClaimTypes.Email);
-            var result = await _salesRepresntative.UpdateCallInfo(callDto, CallId);
-            //if (!result.IsSuccess)
-            //{
-            //    return BadRequest(result);
-            //}
-            return Ok(result);
+            catch (Exception)
+            {
+                return StatusCode(500, "Internal server error");
+            }
         }
+
+
+
+
+
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllCalls()
         {
@@ -86,7 +101,7 @@ namespace CRM.Controllers
             }
             catch (Exception ex)
             {
-               
+
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
@@ -106,7 +121,7 @@ namespace CRM.Controllers
             }
             catch (Exception ex)
             {
-               
+
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
@@ -144,28 +159,39 @@ namespace CRM.Controllers
 
                 return StatusCode(500, "An unexpected error occurred");
             }
-            catch 
+            catch
             {
 
                 return StatusCode(500, "Internal server error");
             }
         }
 
-        [HttpPut("[action]")]
-        public async Task<IActionResult> UpdateMessage([FromBody] AddMessageDto messageDto, string MessageId)
+        [HttpPut("[action]/{messageId}")]
+        public async Task<IActionResult> UpdateMessageInfo(string messageId, [FromBody] updateMessagDto messageDto)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                var salesRepresentativeEmail = User.FindFirstValue(ClaimTypes.Email);
+                var result = await _salesRepresntative.UpdateMessageInfo(messageDto, messageId);
+
+                if (result.Result is BadRequestObjectResult badRequestResult)
+                {
+                    return BadRequest(badRequestResult.Value);
+                }
+
+                if (result.Result is OkObjectResult okResult)
+                {
+                    return Ok(okResult.Value);
+                }
+
+                return StatusCode(500, "An unexpected error occurred");
             }
-            var SalesRepresntativeEmail = User.FindFirstValue(ClaimTypes.Email);
-            var result = await _salesRepresntative.UpdateMessageInfo(messageDto, MessageId);
-            if (!result.IsSuccess)
+            catch (Exception)
             {
-                return BadRequest(result);
+                return StatusCode(500, "Internal server error");
             }
-            return Ok(result);
         }
+
 
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllMessages()
@@ -192,7 +218,7 @@ namespace CRM.Controllers
             try
             {
                 var message = await _salesRepresntative.GetMessageById(messageId);
-                if ( message== null || !message.Any())
+                if (message == null || !message.Any())
                 {
                     return NotFound(new { errors = new[] { "Message not found" } });
                 }
@@ -245,7 +271,7 @@ namespace CRM.Controllers
 
                 return StatusCode(500, "An unexpected error occurred");
             }
-            catch 
+            catch
             {
 
                 return StatusCode(500, "Internal server error");
@@ -254,21 +280,38 @@ namespace CRM.Controllers
 
 
 
-        [HttpPut("[action]")]
-        public async Task<IActionResult> UpdateMeeting([FromBody] AddMeetingDto meetingDto, string MeetingId)
+        [HttpPut("[action]/{MeetingId}")]
+        public async Task<IActionResult> UpdateMeetingInfo(string meetingId, [FromBody] UpdateMeetingDto meetingDto)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                var salesRepresentativeEmail = User.FindFirstValue(ClaimTypes.Email);
+                var result = await _salesRepresntative.UpdateMeetingInfo(meetingDto, meetingId);
+
+                if (result.Result is BadRequestObjectResult badRequestResult)
+                {
+                    return BadRequest(badRequestResult.Value);
+                }
+
+                if (result.Result is OkObjectResult okResult)
+                {
+                    return Ok(okResult.Value);
+                }
+
+                return StatusCode(500, "An unexpected error occurred");
             }
-            var SalesRepresntativeEmail = User.FindFirstValue(ClaimTypes.Email);
-            var result = await _salesRepresntative.UpdateMeeting(meetingDto, MeetingId);
-            if (!result.IsSuccess)
+            catch (Exception)
             {
-                return BadRequest(result);
+                return StatusCode(500, "Internal server error");
             }
-            return Ok(result);
         }
+
+
+
+
+
+
+
 
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllMeetings()
@@ -353,20 +396,30 @@ namespace CRM.Controllers
             }
         }
 
-        [HttpPut("[action]")]
-        public async Task<IActionResult> UpdateDeal([FromBody] AddDealDto dealDto, string DealId)
+        [HttpPut("[action]/{DealId}")]
+        public async Task<IActionResult> UpdateDealInfo(string dealId, [FromBody] UpdateDealDto dealDto)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                var salesRepresentativeEmail = User.FindFirstValue(ClaimTypes.Email);
+                var result = await _salesRepresntative.UpdateDealInfo(dealDto, dealId);
+
+                if (result.Result is BadRequestObjectResult badRequestResult)
+                {
+                    return BadRequest(badRequestResult.Value);
+                }
+
+                if (result.Result is OkObjectResult okResult)
+                {
+                    return Ok(okResult.Value);
+                }
+
+                return StatusCode(500, "An unexpected error occurred");
             }
-            var SalesRepresntativeEmail = User.FindFirstValue(ClaimTypes.Email);
-            var result = await _salesRepresntative.UpdateDeal(dealDto,  DealId);
-            if (!result.IsSuccess)
+            catch (Exception)
             {
-                return BadRequest(result);
+                return StatusCode(500, "Internal server error");
             }
-            return Ok(result);
         }
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllDeals()
@@ -418,7 +471,7 @@ namespace CRM.Controllers
             return Ok(result);
         }
         #endregion
-     
+
         [HttpGet("ActionsForCustomersAssignedToSales/{customerId}")]
         public async Task<IActionResult> GetCustomerActions(int customerId)
         {
@@ -436,14 +489,70 @@ namespace CRM.Controllers
                     return Ok(okResult.Value);
                 }
 
-                
+
                 return StatusCode(500, "An unexpected error occurred");
             }
-            catch 
+            catch
             {
-                
+
                 return StatusCode(500, "Internal server error");
             }
+
+
+        }
+        [HttpGet("customers")]
+        public async Task<IActionResult> GetCustomersForSalesRep(int page = 1, int size = 10, [FromQuery] string? query = null)
+        {
+            try
+            {
+                var result = await _salesRepresntative.GetAllCustomersForSalesRep(page, size);
+
+                if (result.Result is BadRequestObjectResult badRequestResult)
+                {
+                    return BadRequest(badRequestResult.Value);
+                }
+                if (result.Result is OkObjectResult okResult)
+                {
+                    return Ok(okResult.Value);
+                }
+
+
+                return StatusCode(500, "An unexpected error occurred");
+            }
+            catch
+            {
+
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpGet("GetCustomerAssignedToSales/{customerId}")]
+        public async Task<IActionResult> GetCustomerAssignedToSales(int customerId)
+        {
+            try
+            {
+                var Result = await _salesRepresntative.GetCustomer(customerId);
+
+                if (Result.Result is BadRequestObjectResult badRequestResult)
+                {
+                    return BadRequest(badRequestResult.Value);
+                }
+
+                if (Result.Result is OkObjectResult okResult)
+                {
+                    return Ok(okResult.Value);
+                }
+
+
+                return StatusCode(500, "An unexpected error occurred");
+            }
+            catch
+            {
+
+                return StatusCode(500, "Internal server error");
+            }
+
+
         }
 
 

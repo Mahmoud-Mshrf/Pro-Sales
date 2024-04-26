@@ -10,16 +10,18 @@ namespace CRM.Core.Dtos
 {
     public class AddMeetingDto
     {
+
         [Required]
-        public bool online { get; set; }
-        [MaxLength(1000), Required]
+        public bool?online { get; set; }
+        [MaxLength(1000)]
+        [Required]
         public string summary { get; set; }
         [Required]
-        public DateTime date { get; set; }
+        public DateTime ? date { get; set; }
+       
+        public DateTime?followUp { get; set; }
 
-        public DateTime followUp { get; set; }
         [Required]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public int CustomerId { get; set; }
 
     }

@@ -15,13 +15,13 @@ namespace CRM.Core.Models
     {
         [Key]
         public string MeetingID { get; set; }
-        public DateTime MeetingDate { get; set; }
+        public DateTime?MeetingDate { get; set; }
 
 
         [MaxLength(1000)]
-        public string MeetingSummary { get; set; }
-        public DateTime FollowUpDate { get; set; }
-        public bool connectionState { get; set; }
+        public string MeetingSummary { get; set; }  
+        public DateTime? FollowUpDate { get; set; }
+        public bool?connectionState { get; set; }
 
         [ForeignKey("CustomerId")]
         public Customer Customer { get; set; }
