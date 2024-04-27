@@ -76,18 +76,26 @@ namespace CRM.Core.Services.Implementations
         }
         public async Task<JwtSecurityToken> CreateToken(ApplicationUser user)
         {
+
             var userClaims = await _unitOfWork.UserManager.GetClaimsAsync(user);
             var roles = await _unitOfWork.UserManager.GetRolesAsync(user);
-            var roleClaims = new List<Claim>();
-            foreach (var role in roles)
-            {
-                roleClaims.Add(new Claim(ClaimTypes.Role, role));
-            }
+            // rename role claim in jwt to roles
+
+
+            //var roleClaims = new List<Claim>();
+            //foreach (var role in roles)
+            //{
+            //    roleClaims.Add(new Claim(ClaimTypes.Role, role));
+            //}
+            var roleClaims = roles.Select(role => new Claim("roles", role)).ToList();
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Sub,user.UserName),
+                new Claim("username",user.UserName),
                 new Claim(JwtRegisteredClaimNames.Email,user.Email),
                 new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()),
+                new Claim("firstName",user.FirstName),
+                new Claim("lastName",user.LastName),
+                new Claim("id",user.Id)
             }
             .Union(userClaims)
             .Union(roleClaims);
