@@ -28,54 +28,102 @@ namespace CRM.Controllers
         [HttpPost("[action]")]
         public async Task<IActionResult> AddCall([FromBody] AddCallDto callDto)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                var SalesRepresntativeEmail = User.FindFirstValue(ClaimTypes.Email);
+                var result = await _salesRepresntative.AddCall(callDto, SalesRepresntativeEmail);
+
+                if (result.Result is BadRequestObjectResult badRequestResult)
+                {
+                    return BadRequest(badRequestResult.Value);
+                }
+
+                if (result.Result is OkObjectResult okResult)
+                {
+                    return Ok(okResult.Value);
+                }
+
+
+                return StatusCode(500, "An unexpected error occurred");
             }
-            var SalesRepresntativeEmail = User.FindFirstValue(ClaimTypes.Email);
-            var result = await _salesRepresntative.AddCall(callDto, SalesRepresntativeEmail);
-            if (!result.IsSuccess)
+            catch
             {
-                return BadRequest(result);
+
+                return StatusCode(500, "Internal server error");
             }
-            return Ok(result);
         }
 
-        [HttpPut("[action]")]
-        public async Task<IActionResult> UpdateCall([FromBody] AddCallDto callDto, string CallId)
+
+
+
+        [HttpPut("[action]/{callId}")]
+        public async Task<IActionResult> UpdateCallInfo(string callId, [FromBody] UpdateCallDto callDto)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                var salesRepresentativeEmail = User.FindFirstValue(ClaimTypes.Email);
+                var result = await _salesRepresntative.UpdateCallInfo(callDto, callId);
+
+                if (result.Result is BadRequestObjectResult badRequestResult)
+                {
+                    return BadRequest(badRequestResult.Value);
+                }
+
+                if (result.Result is OkObjectResult okResult)
+                {
+                    return Ok(okResult.Value);
+                }
+
+                return StatusCode(500, "An unexpected error occurred");
             }
-            var SalesRepresntativeEmail = User.FindFirstValue(ClaimTypes.Email);
-            var result = await _salesRepresntative.UpdateCallInfo(callDto, CallId);
-            //if (!result.IsSuccess)
-            //{
-            //    return BadRequest(result);
-            //}
-            return Ok(result);
+            catch (Exception)
+            {
+                return StatusCode(500, "Internal server error");
+            }
         }
+
+
+
+
+
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllCalls()
         {
-            var result = await _salesRepresntative.GetAllCalls();
-            if (!result.IsSuccess)
+            try
             {
-                return BadRequest(result.Errors);
+                var calls = await _salesRepresntative.GetAllCalls();
+                if (calls == null || !calls.Any())
+                {
+                    return NotFound(new { errors = new[] { " No Calls found" } });
+                }
+
+                return Ok(calls);
             }
-            return Ok(result.Calls);
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
         }
 
         [HttpGet("[action]/{callId}")]
         public async Task<IActionResult> GetCallById(string callId)
         {
-            var result = await _salesRepresntative.GetCallById(callId);
-            if (!result.IsSuccess)
+            try
             {
-                return NotFound(result.Errors);
+                var call = await _salesRepresntative.GetCallById(callId);
+                if (call == null || !call.Any())
+                {
+                    return NotFound(new { errors = new[] { "Call not found" } });
+                }
+
+                return Ok(call);
             }
-            return Ok(result);
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
         }
         [HttpDelete("[action]/{callId}")]
         public async Task<IActionResult> DeleteCallById(string callId)
@@ -91,55 +139,96 @@ namespace CRM.Controllers
 
         #region ManageMessages
         [HttpPost("[action]")]
-        public async Task<IActionResult> AddMessages([FromBody] AddMessageDto messageDto)
+        public async Task<IActionResult> AddMessage([FromBody] AddMessageDto messageDto)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                var SalesRepresntativeEmail = User.FindFirstValue(ClaimTypes.Email);
+                var result = await _salesRepresntative.AddMessage(messageDto, SalesRepresntativeEmail);
+
+                if (result.Result is BadRequestObjectResult badRequestResult)
+                {
+                    return BadRequest(badRequestResult.Value);
+                }
+
+                if (result.Result is OkObjectResult okResult)
+                {
+                    return Ok(okResult.Value);
+                }
+
+
+                return StatusCode(500, "An unexpected error occurred");
             }
-            var SalesRepresntativeEmail = User.FindFirstValue(ClaimTypes.Email);
-            var result = await _salesRepresntative.AddMessage(messageDto, SalesRepresntativeEmail);
-            if (!result.IsSuccess)
+            catch
             {
-                return BadRequest(result);
+
+                return StatusCode(500, "Internal server error");
             }
-            return Ok(result);
         }
 
-        [HttpPut("[action]")]
-        public async Task<IActionResult> UpdateMessage([FromBody] AddMessageDto messageDto, string MessageId)
+        [HttpPut("[action]/{messageId}")]
+        public async Task<IActionResult> UpdateMessageInfo(string messageId, [FromBody] updateMessagDto messageDto)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                var salesRepresentativeEmail = User.FindFirstValue(ClaimTypes.Email);
+                var result = await _salesRepresntative.UpdateMessageInfo(messageDto, messageId);
+
+                if (result.Result is BadRequestObjectResult badRequestResult)
+                {
+                    return BadRequest(badRequestResult.Value);
+                }
+
+                if (result.Result is OkObjectResult okResult)
+                {
+                    return Ok(okResult.Value);
+                }
+
+                return StatusCode(500, "An unexpected error occurred");
             }
-            var SalesRepresntativeEmail = User.FindFirstValue(ClaimTypes.Email);
-            var result = await _salesRepresntative.UpdateMessageInfo(messageDto, MessageId);
-            if (!result.IsSuccess)
+            catch (Exception)
             {
-                return BadRequest(result);
+                return StatusCode(500, "Internal server error");
             }
-            return Ok(result);
         }
+
 
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllMessages()
         {
-            var result = await _salesRepresntative.GetAllMessages();
-            if (!result.IsSuccess)
-                return BadRequest(result.Errors);
-            return Ok(result.Messages);
-        }
-
-        [HttpGet("[action]/{messageId}")]
-        public async Task<IActionResult> GetMessageById(string MessageId)
-        {
-            var result = await _salesRepresntative.GetMessageById(MessageId);
-            if (!result.IsSuccess)
+            try
             {
-                return NotFound(result.Errors);
+                var messages = await _salesRepresntative.GetAllMessages();
+                if (messages == null || !messages.Any())
+                {
+                    return NotFound(new { errors = new[] { " No Messages found" } });
+                }
+
+                return Ok(messages);
             }
-            return Ok(result.Messages);
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+        [HttpGet("[action]/{messageId}")]
+        public async Task<IActionResult> GetMessageById(string messageId)
+        {
+            try
+            {
+                var message = await _salesRepresntative.GetMessageById(messageId);
+                if (message == null || !message.Any())
+                {
+                    return NotFound(new { errors = new[] { "Message not found" } });
+                }
+
+                return Ok(message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
         }
 
         [HttpDelete("[action]/{MessageId}")]
@@ -164,55 +253,105 @@ namespace CRM.Controllers
         [HttpPost("[action]")]
         public async Task<IActionResult> AddMeeting([FromBody] AddMeetingDto meetingDto)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                var SalesRepresntativeEmail = User.FindFirstValue(ClaimTypes.Email);
+                var result = await _salesRepresntative.AddMeeting(meetingDto, SalesRepresntativeEmail);
+
+                if (result.Result is BadRequestObjectResult badRequestResult)
+                {
+                    return BadRequest(badRequestResult.Value);
+                }
+
+                if (result.Result is OkObjectResult okResult)
+                {
+                    return Ok(okResult.Value);
+                }
+
+
+                return StatusCode(500, "An unexpected error occurred");
             }
-            var SalesRepEmail = User.FindFirstValue(ClaimTypes.Email);
-            var result = await _salesRepresntative.AddMeeting(meetingDto, SalesRepEmail);
-            if (!result.IsSuccess)
+            catch
             {
-                return BadRequest(result);
+
+                return StatusCode(500, "Internal server error");
             }
-            return Ok(result);
         }
 
 
-        [HttpPut("[action]")]
-        public async Task<IActionResult> UpdateMeeting([FromBody] AddMeetingDto meetingDto, string MeetingId)
+
+        [HttpPut("[action]/{MeetingId}")]
+        public async Task<IActionResult> UpdateMeetingInfo(string meetingId, [FromBody] UpdateMeetingDto meetingDto)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                var salesRepresentativeEmail = User.FindFirstValue(ClaimTypes.Email);
+                var result = await _salesRepresntative.UpdateMeetingInfo(meetingDto, meetingId);
+
+                if (result.Result is BadRequestObjectResult badRequestResult)
+                {
+                    return BadRequest(badRequestResult.Value);
+                }
+
+                if (result.Result is OkObjectResult okResult)
+                {
+                    return Ok(okResult.Value);
+                }
+
+                return StatusCode(500, "An unexpected error occurred");
             }
-            var SalesRepresntativeEmail = User.FindFirstValue(ClaimTypes.Email);
-            var result = await _salesRepresntative.UpdateMeeting(meetingDto, MeetingId);
-            if (!result.IsSuccess)
+            catch (Exception)
             {
-                return BadRequest(result);
+                return StatusCode(500, "Internal server error");
             }
-            return Ok(result);
         }
+
+
+
+
+
+
+
 
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllMeetings()
         {
-            var result = await _salesRepresntative.GetAllMeetings();
-            if (!result.IsSuccess)
-                return BadRequest(result.Errors);
-            return Ok(result.Meetings);
+            try
+            {
+                var meetings = await _salesRepresntative.GetAllMeetings();
+                if (meetings == null || !meetings.Any())
+                {
+                    return NotFound(new { errors = new[] { " No Meetings found" } });
+                }
+
+                return Ok(meetings);
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
         }
 
         [HttpGet("[action]/{meetingId}")]
-        public async Task<IActionResult> GetMeetingById(string MeetingId)
+        public async Task<IActionResult> GetMeetingById(string meetingId)
         {
-            var result = await _salesRepresntative.GetMeetingByID(MeetingId);
-            if (!result.IsSuccess)
+            try
             {
-                return NotFound(result.Errors);
+                var meeting = await _salesRepresntative.GetMeetingByID(meetingId);
+                if (meeting == null || !meeting.Any())
+                {
+                    return NotFound(new { errors = new[] { "Meeting not found" } });
+                }
+
+                return Ok(meeting);
             }
-            return Ok(result);
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
         }
+
 
         [HttpDelete("[action]/{MeetingId}")]
         public async Task<IActionResult> DeleteMeetingById(string meetingId)
@@ -232,51 +371,94 @@ namespace CRM.Controllers
         [HttpPost("[action]")]
         public async Task<IActionResult> AddDeal([FromBody] AddDealDto dealDto)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                var SalesRepresntativeEmail = User.FindFirstValue(ClaimTypes.Email);
+                var result = await _salesRepresntative.AddDeal(dealDto, SalesRepresntativeEmail);
+
+                if (result.Result is BadRequestObjectResult badRequestResult)
+                {
+                    return BadRequest(badRequestResult.Value);
+                }
+
+                if (result.Result is OkObjectResult okResult)
+                {
+                    return Ok(okResult.Value);
+                }
+
+
+                return StatusCode(500, "An unexpected error occurred");
             }
-            var SalesRepresntativeEmail = User.FindFirstValue(ClaimTypes.Email);
-            var result = await _salesRepresntative.AddDeal(dealDto, SalesRepresntativeEmail);
-            if (!result.IsSuccess)
+            catch
             {
-                return BadRequest(result);
+
+                return StatusCode(500, "Internal server error");
             }
-            return Ok(result);
         }
-        [HttpPut("[action]")]
-        public async Task<IActionResult> UpdateDeal([FromBody] AddDealDto dealDto, string DealId)
+
+        [HttpPut("[action]/{DealId}")]
+        public async Task<IActionResult> UpdateDealInfo(string dealId, [FromBody] UpdateDealDto dealDto)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                var salesRepresentativeEmail = User.FindFirstValue(ClaimTypes.Email);
+                var result = await _salesRepresntative.UpdateDealInfo(dealDto, dealId);
+
+                if (result.Result is BadRequestObjectResult badRequestResult)
+                {
+                    return BadRequest(badRequestResult.Value);
+                }
+
+                if (result.Result is OkObjectResult okResult)
+                {
+                    return Ok(okResult.Value);
+                }
+
+                return StatusCode(500, "An unexpected error occurred");
             }
-            var SalesRepresntativeEmail = User.FindFirstValue(ClaimTypes.Email);
-            var result = await _salesRepresntative.UpdateDeal(dealDto,  DealId);
-            if (!result.IsSuccess)
+            catch (Exception)
             {
-                return BadRequest(result);
+                return StatusCode(500, "Internal server error");
             }
-            return Ok(result);
         }
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllDeals()
         {
-            var result = await _salesRepresntative.GetAllDeals();
-            if (!result.IsSuccess)
-                return BadRequest(result.Errors);
-            return Ok(result.Deals);
+            try
+            {
+                var deals = await _salesRepresntative.GetAllDeals();
+                if (deals == null || !deals.Any())
+                {
+                    return NotFound(new { errors = new[] { " No Deals found" } });
+                }
+
+                return Ok(deals);
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
         }
 
         [HttpGet("[action]/{dealId}")]
         public async Task<IActionResult> GetDealById(string dealId)
         {
-            var result = await _salesRepresntative.GetDealById(dealId);
-            if (!result.IsSuccess)
+            try
             {
-                return NotFound(result.Errors);
+                var deal = await _salesRepresntative.GetDealById(dealId);
+                if (deal == null || !deal.Any())
+                {
+                    return NotFound(new { errors = new[] { "Deal not found" } });
+                }
+
+                return Ok(deal);
             }
-            return Ok(result);
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
         }
         [HttpDelete("[action]/{dealId}")]
         public async Task<IActionResult> DeleteDealById(string dealId)
@@ -289,7 +471,7 @@ namespace CRM.Controllers
             return Ok(result);
         }
         #endregion
-     
+
         [HttpGet("ActionsForCustomersAssignedToSales/{customerId}")]
         public async Task<IActionResult> GetCustomerActions(int customerId)
         {
@@ -307,14 +489,70 @@ namespace CRM.Controllers
                     return Ok(okResult.Value);
                 }
 
-                
+
                 return StatusCode(500, "An unexpected error occurred");
             }
-            catch (Exception ex)
+            catch
             {
-                
+
                 return StatusCode(500, "Internal server error");
             }
+
+
+        }
+        [HttpGet("customers")]
+        public async Task<IActionResult> GetCustomersForSalesRep(int page = 1, int size = 10, [FromQuery] string? query = null)
+        {
+            try
+            {
+                var result = await _salesRepresntative.GetAllCustomersForSalesRep(page, size);
+
+                if (result.Result is BadRequestObjectResult badRequestResult)
+                {
+                    return BadRequest(badRequestResult.Value);
+                }
+                if (result.Result is OkObjectResult okResult)
+                {
+                    return Ok(okResult.Value);
+                }
+
+
+                return StatusCode(500, "An unexpected error occurred");
+            }
+            catch
+            {
+
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpGet("GetCustomerAssignedToSales/{customerId}")]
+        public async Task<IActionResult> GetCustomerAssignedToSales(int customerId)
+        {
+            try
+            {
+                var Result = await _salesRepresntative.GetCustomer(customerId);
+
+                if (Result.Result is BadRequestObjectResult badRequestResult)
+                {
+                    return BadRequest(badRequestResult.Value);
+                }
+
+                if (Result.Result is OkObjectResult okResult)
+                {
+                    return Ok(okResult.Value);
+                }
+
+
+                return StatusCode(500, "An unexpected error occurred");
+            }
+            catch
+            {
+
+                return StatusCode(500, "Internal server error");
+            }
+
+
         }
 
 

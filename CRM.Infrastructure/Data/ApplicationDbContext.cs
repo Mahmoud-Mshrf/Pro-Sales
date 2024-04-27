@@ -21,6 +21,16 @@ namespace CRM.Infrastructure.Data
             .HasMany(c => c.Interests)
             .WithMany(i => i.Customers)
             .UsingEntity(j => j.ToTable("CustomerInterest"));
+            builder.Entity<Meeting>()
+            .Property(m => m.FollowUpDate)
+            .HasDefaultValue(null);
+            builder.Entity<Call>()
+           .Property(m => m.FollowUpDate)
+           .HasDefaultValue(null);
+            builder.Entity<Message>()
+           .Property(m => m.FollowUpDate)
+           .HasDefaultValue(null);
+
 
             builder.Entity<Customer>()
                 .HasOne(s => s.MarketingModerator)

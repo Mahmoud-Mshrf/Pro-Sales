@@ -4,6 +4,7 @@ using CRM.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CRM.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240426072749_AllowNull")]
+    partial class AllowNull
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -109,7 +112,8 @@ namespace CRM.Infrastructure.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("ManagerId")
                         .HasColumnType("nvarchar(450)");
@@ -139,7 +143,7 @@ namespace CRM.Infrastructure.Migrations
                     b.Property<int?>("CustomerId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("FollowUpDate")
+                    b.Property<DateTime>("FollowUpDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("SalesRepresntativeId")
@@ -261,9 +265,6 @@ namespace CRM.Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<bool>("IsDisabled")
-                        .HasColumnType("bit");
-
                     b.HasKey("InterestID");
 
                     b.ToTable("Interests");
@@ -310,7 +311,7 @@ namespace CRM.Infrastructure.Migrations
                     b.Property<int?>("CustomerId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("FollowUpDate")
+                    b.Property<DateTime>("FollowUpDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("MessageContent")
@@ -578,9 +579,8 @@ namespace CRM.Infrastructure.Migrations
                         .HasForeignKey("CustomerId");
 
                     b.HasOne("CRM.Core.Models.ApplicationUser", "SalesRepresntative")
-                        .WithMany("Calls")
-                        .HasForeignKey("SalesRepresntativeId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .WithMany()
+                        .HasForeignKey("SalesRepresntativeId");
 
                     b.Navigation("Customer");
 
@@ -590,9 +590,8 @@ namespace CRM.Infrastructure.Migrations
             modelBuilder.Entity("CRM.Core.Models.Customer", b =>
                 {
                     b.HasOne("CRM.Core.Models.ApplicationUser", "MarketingModerator")
-                        .WithMany("Customers")
-                        .HasForeignKey("MarketingModeratorId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .WithMany()
+                        .HasForeignKey("MarketingModeratorId");
 
                     b.HasOne("CRM.Core.Models.ApplicationUser", "SalesRepresntative")
                         .WithMany()
@@ -620,9 +619,8 @@ namespace CRM.Infrastructure.Migrations
                         .HasForeignKey("InterestID");
 
                     b.HasOne("CRM.Core.Models.ApplicationUser", "SalesRepresntative")
-                        .WithMany("Deals")
-                        .HasForeignKey("SalesRepresntativeId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .WithMany()
+                        .HasForeignKey("SalesRepresntativeId");
 
                     b.Navigation("Customer");
 
@@ -638,9 +636,8 @@ namespace CRM.Infrastructure.Migrations
                         .HasForeignKey("CustomerId");
 
                     b.HasOne("CRM.Core.Models.ApplicationUser", "SalesRepresntative")
-                        .WithMany("Meetings")
-                        .HasForeignKey("SalesRepresntativeId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .WithMany()
+                        .HasForeignKey("SalesRepresntativeId");
 
                     b.Navigation("Customer");
 
@@ -654,9 +651,8 @@ namespace CRM.Infrastructure.Migrations
                         .HasForeignKey("CustomerId");
 
                     b.HasOne("CRM.Core.Models.ApplicationUser", "SalesRepresntative")
-                        .WithMany("Messages")
-                        .HasForeignKey("SalesRepresntativeId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .WithMany()
+                        .HasForeignKey("SalesRepresntativeId");
 
                     b.Navigation("Customer");
 
@@ -736,19 +732,6 @@ namespace CRM.Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("CRM.Core.Models.ApplicationUser", b =>
-                {
-                    b.Navigation("Calls");
-
-                    b.Navigation("Customers");
-
-                    b.Navigation("Deals");
-
-                    b.Navigation("Meetings");
-
-                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("CRM.Core.Models.Customer", b =>

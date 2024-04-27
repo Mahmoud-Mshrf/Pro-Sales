@@ -133,7 +133,7 @@ namespace CRM.Core.Services.Implementations
             //    customerDto.Interests.Add(new UserInterestDto { Id = interest.InterestID, Name = interest.InterestName });
             //}
             customerDto.Interests = customer.Interests.Select(i => new UserInterestDto { Id = i.InterestID, Name = i.InterestName }).ToList();
-            var lastAction = await GetLastAction(customer.CustomerId);
+            var lastAction = await _sharedService.GetLastAction(customer.CustomerId);
             if (lastAction.Summary != null)
             {
                 customerDto.LastAction = lastAction;
@@ -207,7 +207,7 @@ namespace CRM.Core.Services.Implementations
                 //    customerDto.Interests.Add(new UserInterestDto { Id = interest.InterestID, Name = interest.InterestName });
                 //}
                 customerDto.Interests = customer.Interests.Select(i => new UserInterestDto { Id = i.InterestID, Name = i.InterestName }).ToList();
-                var lastAction = await GetLastAction(customer.CustomerId);
+                var lastAction = await _sharedService.GetLastAction(customer.CustomerId);
                 if (lastAction.Summary != null)
                 {
                     customerDto.LastAction = lastAction;
@@ -648,7 +648,7 @@ namespace CRM.Core.Services.Implementations
                     //Interests = customer.Interests.Select(i => new UserInterestDto { /*Id = i.InterestID,*/ Name = i.InterestName, IsSelected = true }).ToList(),
                     AdditionDate = customer.AdditionDate
                 };
-                var lastAction = await GetLastAction(customer.CustomerId);
+                var lastAction = await _sharedService.GetLastAction(customer.CustomerId);
                 if (lastAction.Summary != null)
                 {
                     dto.LastAction = lastAction;
@@ -757,7 +757,7 @@ namespace CRM.Core.Services.Implementations
                     Id = customer.Source.SourceId,
                     Name = customer.Source.SourceName
                 };
-                var lastAction = await GetLastAction(customer.CustomerId);
+                var lastAction = await _sharedService.GetLastAction(customer.CustomerId);
                 if (lastAction.Summary != null)
                 {
                     customerDto.LastAction = lastAction;
@@ -806,68 +806,68 @@ namespace CRM.Core.Services.Implementations
             };
 
         }
-        public async Task<ActionDto> GetLastAction(int Id)
-        {
-            var customer = await _unitOfWork.Customers.FindAsync(c => c.CustomerId == Id, ["Messages","Calls","Meetings","Deals"]);
-            var messages = await _unitOfWork.Messages.GetAllAsync();
-            var lastMessage = messages.Where(m => m.Customer==customer).OrderByDescending(m => m.MessageDate).FirstOrDefault();
-            var deals = await _unitOfWork.Deals.GetAllAsync();
-            var lastDeal = deals.Where(d => d.Customer==customer).OrderByDescending(d=>d.DealDate).FirstOrDefault();
-            var calls = await _unitOfWork.Calls.GetAllAsync();
-            var lastCall = calls.Where(c => c.Customer == customer).OrderByDescending(c => c.CallDate).FirstOrDefault();
-            var meetings = await _unitOfWork.Meetings.GetAllAsync();
-            var lastMeeting = meetings.Where(m => m.Customer == customer).OrderByDescending(m => m.MeetingDate).FirstOrDefault();
+        //public async Task<ActionDto> GetLastAction(int Id)
+        //{
+        //    var customer = await _unitOfWork.Customers.FindAsync(c => c.CustomerId == Id, ["Messages","Calls","Meetings","Deals"]);
+        //    var messages = await _unitOfWork.Messages.GetAllAsync();
+        //    var lastMessage = messages.Where(m => m.Customer==customer).OrderByDescending(m => m.MessageDate).FirstOrDefault();
+        //    var deals = await _unitOfWork.Deals.GetAllAsync();
+        //    var lastDeal = deals.Where(d => d.Customer==customer).OrderByDescending(d=>d.DealDate).FirstOrDefault();
+        //    var calls = await _unitOfWork.Calls.GetAllAsync();
+        //    var lastCall = calls.Where(c => c.Customer == customer).OrderByDescending(c => c.CallDate).FirstOrDefault();
+        //    var meetings = await _unitOfWork.Meetings.GetAllAsync();
+        //    var lastMeeting = meetings.Where(m => m.Customer == customer).OrderByDescending(m => m.MeetingDate).FirstOrDefault();
         
-            if (lastMessage == null && lastDeal == null && lastCall == null && lastMeeting == null)
-            {
-                return new ActionDto();
-            }
+        //    if (lastMessage == null && lastDeal == null && lastCall == null && lastMeeting == null)
+        //    {
+        //        return new ActionDto();
+        //    }
         
-            // comparise between the dates for the previous last actions and return the most recently action 
-            var lastActions = new List<(DateTime Date, string Type, object Data)>
-            {
-                (lastMessage?.MessageDate ?? DateTime.MinValue, "Message", lastMessage),
-                (lastDeal?.DealDate ?? DateTime.MinValue, "Deal", lastDeal),
-                (lastCall?.CallDate ?? DateTime.MinValue, "Call", lastCall),
-                (lastMeeting?.MeetingDate ?? DateTime.MinValue, "Meeting", lastMeeting)
-            };
+        //    // comparise between the dates for the previous last actions and return the most recently action 
+        //    var lastActions = new List<(DateTime Date, string Type, object Data)>
+        //    {
+        //        (lastMessage?.MessageDate ?? DateTime.MinValue, "Message", lastMessage),
+        //        (lastDeal?.DealDate ?? DateTime.MinValue, "Deal", lastDeal),
+        //        (lastCall?.CallDate ?? DateTime.MinValue, "Call", lastCall),
+        //        (lastMeeting?.MeetingDate ?? DateTime.MinValue, "Meeting", lastMeeting)
+        //    };
             
-            var mostRecentAction = lastActions.OrderByDescending(a => a.Date).FirstOrDefault();
+        //    var mostRecentAction = lastActions.OrderByDescending(a => a.Date).FirstOrDefault();
             
-            if (mostRecentAction != default)
-            {
-                var lastAction = new ActionDto
-                {
-                    Date = mostRecentAction.Date,
-                    Type = mostRecentAction.Type,
-                };
-                if (lastAction.Type == "Message")
-                {
-                    lastAction.Summary = lastMessage.MessageContent;
-                    lastAction.Id = lastMessage.MessageID;
-                }
-                if (lastAction.Type == "Deal")
-                {
-                    lastAction.Summary = lastDeal.description;
-                    lastAction.Id = lastDeal.DealId;
-                }
-                if (lastAction.Type == "Call")
-                {
-                    lastAction.Summary = lastCall.CallSummery;
-                    lastAction.Id = lastCall.CallID;
-                }
-                if (lastAction.Type == "Meeting")
-                {
-                    lastAction.Summary = lastMeeting.MeetingSummary;
-                    lastAction.Id = lastMeeting.MeetingID;
-                }
-                return lastAction;
-            }
-            else
-            {
-                return null; // or handle the case where no action is found
-            }
-        }
+        //    if (mostRecentAction != default)
+        //    {
+        //        var lastAction = new ActionDto
+        //        {
+        //            Date = mostRecentAction.Date,
+        //            Type = mostRecentAction.Type,
+        //        };
+        //        if (lastAction.Type == "Message")
+        //        {
+        //            lastAction.Summary = lastMessage.MessageContent;
+        //            lastAction.Id = lastMessage.MessageID;
+        //        }
+        //        if (lastAction.Type == "Deal")
+        //        {
+        //            lastAction.Summary = lastDeal.description;
+        //            lastAction.Id = lastDeal.DealId;
+        //        }
+        //        if (lastAction.Type == "Call")
+        //        {
+        //            lastAction.Summary = lastCall.CallSummery;
+        //            lastAction.Id = lastCall.CallID;
+        //        }
+        //        if (lastAction.Type == "Meeting")
+        //        {
+        //            lastAction.Summary = lastMeeting.MeetingSummary;
+        //            lastAction.Id = lastMeeting.MeetingID;
+        //        }
+        //        return lastAction;
+        //    }
+        //    else
+        //    {
+        //        return null; // or handle the case where no action is found
+        //    }
+        //}
         public async Task<IEnumerable<object>> GetAllActionsForCustomer(int customerId)
         {
             var actions = await _sharedService.GetActionsForCustomer(customerId);

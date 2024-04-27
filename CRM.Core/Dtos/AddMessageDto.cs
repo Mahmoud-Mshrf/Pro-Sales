@@ -15,9 +15,9 @@ namespace CRM.Core.Dtos
         public string summary { get; set; }
         [Required]
         public DateTime date { get; set; }
-        public DateTime followUp { get; set; }
-        [Required]
+        public DateTime? followUp { get; set; }
+        
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-        public int CustomerId { get; set; }
+        public int? CustomerId { get; set; }
     }
 }

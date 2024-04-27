@@ -14,7 +14,7 @@ namespace CRM.Core.Models
         [Required]
         [MaxLength(1000)]
         public string MessageContent { get; set; }
-        public DateTime FollowUpDate { get; set; }
+        public DateTime? FollowUpDate { get; set; }
 
         [ForeignKey("CustomerId")]
         public Customer Customer { get; set; }

@@ -10,13 +10,13 @@ namespace CRM.Core.Dtos
 {
     public class AddDealDto
     {
-        [Required]
+        [Required]  
         public double price { get; set; }
         [Required]
         public String summary { get; set; }
         [Required]
-        public DateTime date { get; set; }
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        public DateTime? date { get; set; }
+        [Required]
         public int CustomerId { get; set; }
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public int InterestId { get; set; }
