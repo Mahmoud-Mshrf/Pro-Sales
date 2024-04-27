@@ -579,9 +579,8 @@ namespace CRM.Core.Services.Implementations
 
             return ReturnCustomerDto;
         }
-        public async Task<ResultDto> AddSource(string name)
+        public async Task<SourceDto> AddSource(string name)
         {
-
             var source = new Source
             {
                 SourceName = name
@@ -589,20 +588,15 @@ namespace CRM.Core.Services.Implementations
             var sources = await _unitOfWork.Sources.GetAllAsync();
             if (sources.Any(sources => sources.SourceName.ToLower() == name.ToLower()))
             {
-                return new ResultDto
-                {
-                    IsSuccess = false,
-                    Errors = ["Source already exists"]
-                };
+                return new SourceDto();
             }
             var result = await _unitOfWork.Sources.AddAsync(source);
             _unitOfWork.complete();
             BackgroundJob.Schedule(() => DeleteUnusedSource(source.SourceId), TimeSpan.FromDays(1));
-
-            return new ResultDto
+            return new SourceDto()
             {
-                IsSuccess = true,
-                Message = "Source added successfully"
+                Id = result.SourceId,
+                Name = result.SourceName
             };
         }
         public async Task<ReturnAllCustomersDto> Search(string query, int page, int size)

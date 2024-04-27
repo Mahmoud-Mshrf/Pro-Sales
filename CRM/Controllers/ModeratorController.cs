@@ -98,9 +98,10 @@ namespace CRM.Controllers
         public async Task<IActionResult> AddSource([FromBody] NameDto dto)
         {
             var result = await _moderatorService.AddSource(dto.Name);
-            if (!result.IsSuccess)
+            if (result.Id==0|| string.IsNullOrEmpty(result.Name))
             {
-                return BadRequest(result);
+                var errors = new { errors = "Source already exist" };
+                return BadRequest(errors);
             }
             return Ok(result);
         }
