@@ -52,7 +52,8 @@ namespace CRM.Core.Services.Implementations
             }
             // check if there is another interest with the new name
             var interests = await _unitOfWork.Interests.GetAllAsync();
-            if (interests.Any(interests => interests.InterestName.ToLower() == dto.Name.ToLower()))
+            var sameNameInterest = interests.First(interest => interest.InterestName.ToLower() == dto.Name.ToLower());
+            if(sameNameInterest!=null && sameNameInterest!=interest)
             {
                 return new ReturnInterestDto
                 {
