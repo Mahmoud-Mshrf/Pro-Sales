@@ -11,5 +11,7 @@ namespace CRM.Core.Dtos
     {
         [JsonIgnore]
         public bool IsSuccess { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string[] Errors { get; set; } = null;
     }
 }

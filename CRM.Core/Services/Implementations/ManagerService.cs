@@ -39,19 +39,34 @@ namespace CRM.Core.Services.Implementations
                 IsDisabled= result.IsDisabled
             };
         }
-        public async Task<InterestDto> updateInterest(InterestDto dto)
+        public async Task<ReturnInterestDto> updateInterest(InterestDto dto)
         {
             var interest = await _unitOfWork.Interests.GetByIdAsync(dto.Id);
             if (interest == null)
             {
-                return new InterestDto();
+                return new ReturnInterestDto
+                {
+                    IsSuccess = false,
+                    Errors = ["Interest not found"]
+                };
+            }
+            // check if there is another interest with the new name
+            var interests = await _unitOfWork.Interests.GetAllAsync();
+            if (interests.Any(interests => interests.InterestName.ToLower() == dto.Name.ToLower()))
+            {
+                return new ReturnInterestDto
+                {
+                    IsSuccess = false,
+                    Errors = ["Interest already exists"]
+                };
             }
             interest.InterestName = dto.Name;
             interest.IsDisabled = dto.IsDisabled;
             _unitOfWork.Interests.Update(interest);
             _unitOfWork.complete();
-            return new InterestDto
+            return new ReturnInterestDto
             {
+                IsSuccess = true,
                 Id = interest.InterestID,
                 Name = interest.InterestName,
                 IsDisabled = interest.IsDisabled

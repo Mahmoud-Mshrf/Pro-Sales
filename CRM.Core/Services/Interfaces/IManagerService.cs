@@ -10,7 +10,7 @@ namespace CRM.Core.Services.Interfaces
     public interface IManagerService
     {
         Task<InterestDto> AddInterest(string name);
-        Task<InterestDto> updateInterest(InterestDto dto);
+        Task<ReturnInterestDto> updateInterest(InterestDto dto);
         Task<InterestDto> getInterest(int id);
         //Task<ReturnInterestDto> DisableInterest(int id);
         Task<SourceDto> updateSource(SourceDto dto);
