@@ -108,8 +108,6 @@ namespace CRM
             // Add Hangfire to the container
             builder.Services.AddHangfire(x => x.UseSqlServerStorage(builder.Configuration.GetConnectionString("HangfireConnection")));
             builder.Services.AddHangfireServer();
-
-
             builder.Services.Configure<JWT>(builder.Configuration.GetSection("JWT"));// Add JWT configuration to the container
             builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));// Add MailSettings configuration to the container
             builder.Services.AddApplicationServices();

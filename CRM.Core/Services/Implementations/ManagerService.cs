@@ -221,6 +221,9 @@ namespace CRM.Core.Services.Implementations
                     return returnUserRolesdto;
                 }
             }
+            var WasSalesRep = await _unitOfWork.UserManager.IsInRoleAsync(user, "Sales Representative");
+            var WasModerator = await _unitOfWork.UserManager.IsInRoleAsync(user, "Marketing Moderator");
+            var WasManager = await _unitOfWork.UserManager.IsInRoleAsync(user, "Manager");
             var UserRoles = await _unitOfWork.UserManager.GetRolesAsync(user);
             foreach (var role in dto.Roles)
             {
@@ -228,6 +231,36 @@ namespace CRM.Core.Services.Implementations
                     await _unitOfWork.UserManager.RemoveFromRoleAsync(user, role.Name);
                 if (!UserRoles.Any(r => r == role.Name) && role.IsSelected)
                     await _unitOfWork.UserManager.AddToRoleAsync(user, role.Name);
+            }
+            var IsSalesRep = await _unitOfWork.UserManager.IsInRoleAsync(user, "Sales Representative");
+            if (WasSalesRep && !IsSalesRep)
+            {
+                var customers = await _unitOfWork.Customers.GetAllAsync(x => x.SalesRepresntative.Id == user.Id);
+                foreach (var customer in customers)
+                {
+                    customer.SalesRepresntative = null;
+                    _unitOfWork.Customers.Update(customer);
+                }
+            }
+            var IsManager = await _unitOfWork.UserManager.IsInRoleAsync(user, "Manager");
+            if (!WasManager && IsManager)
+            {
+                var customers = await _unitOfWork.Customers.GetAllAsync(x => x.SalesRepresntative.Id == user.Id);
+                foreach (var customer in customers)
+                {
+                    customer.SalesRepresntative = null;
+                    _unitOfWork.Customers.Update(customer);
+                }
+            }
+            var IsModerator = await _unitOfWork.UserManager.IsInRoleAsync(user, "Marketing Moderator");
+            if (WasModerator && !IsModerator)
+            {
+                var customers = await _unitOfWork.Customers.GetAllAsync(x => x.SalesRepresntative.Id == user.Id);
+                foreach (var customer in customers)
+                {
+                    customer.SalesRepresntative = null;
+                    _unitOfWork.Customers.Update(customer);
+                }
             }
             BackgroundJob.Schedule(() => DeletUserWithoutRoles(dto.Id), TimeSpan.FromDays(5));
             var roles = await _unitOfWork.RoleManager.Roles.ToListAsync();
