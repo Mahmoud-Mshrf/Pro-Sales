@@ -233,13 +233,16 @@ namespace CRM.Core.Services.Implementations
                     await _unitOfWork.UserManager.AddToRoleAsync(user, role.Name);
             }
             var IsSalesRep = await _unitOfWork.UserManager.IsInRoleAsync(user, "Sales Representative");
-            if (WasSalesRep && !IsSalesRep)
+            var IsModerator = await _unitOfWork.UserManager.IsInRoleAsync(user, "Marketing Moderator");
+
+            if ((WasSalesRep && !IsSalesRep) && (!IsModerator))
             {
                 var customers = await _unitOfWork.Customers.GetAllAsync(x => x.SalesRepresntative.Id == user.Id);
                 foreach (var customer in customers)
                 {
                     customer.SalesRepresntative = null;
                     _unitOfWork.Customers.Update(customer);
+                    _unitOfWork.complete();
                 }
             }
             var IsManager = await _unitOfWork.UserManager.IsInRoleAsync(user, "Manager");
@@ -250,9 +253,9 @@ namespace CRM.Core.Services.Implementations
                 {
                     customer.SalesRepresntative = null;
                     _unitOfWork.Customers.Update(customer);
+                    _unitOfWork.complete();
                 }
             }
-            var IsModerator = await _unitOfWork.UserManager.IsInRoleAsync(user, "Marketing Moderator");
             if (WasModerator && !IsModerator)
             {
                 var customers = await _unitOfWork.Customers.GetAllAsync(x => x.SalesRepresntative.Id == user.Id);
@@ -260,6 +263,7 @@ namespace CRM.Core.Services.Implementations
                 {
                     customer.SalesRepresntative = null;
                     _unitOfWork.Customers.Update(customer);
+                    _unitOfWork.complete();
                 }
             }
             BackgroundJob.Schedule(() => DeletUserWithoutRoles(dto.Id), TimeSpan.FromDays(5));
