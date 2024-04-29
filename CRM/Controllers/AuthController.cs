@@ -58,7 +58,7 @@ namespace CRM.Controllers
             {
                 setRefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
             }
-            return Ok(result);
+            return Ok(result.AccessToken);
         }
         private void setRefreshTokenInCookie(string refreshToken, DateTime refreshTokenExpiration)
         {
@@ -84,7 +84,7 @@ namespace CRM.Controllers
                 return BadRequest(errors);
             }
             setRefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
-            return Ok(result);
+            return Ok(result.AccessToken);
         }
         [HttpPost("revoke-token")]
         public async Task<IActionResult> RevokeToken()
@@ -152,7 +152,7 @@ namespace CRM.Controllers
                 {
                     setRefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
                 }
-                return Ok(result);
+                return Ok(result.AccessToken);
             }
             else if (codeDto.Purpose == "ConfirmNewEmail")
             {
@@ -166,7 +166,7 @@ namespace CRM.Controllers
                 {
                     setRefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
                 }
-                return Ok(result);
+                return Ok(result.AccessToken);
             }
             else
             {

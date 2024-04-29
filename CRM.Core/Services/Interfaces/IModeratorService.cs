@@ -20,7 +20,7 @@ namespace CRM.Core.Services.Interfaces
         Task<ReturnAllCustomersDto> GetLastWeekCustomers(int page, int size);
         //Task<ReturnAllCustomersDto> GetAllCustomers();
         Task<ResultDto> DeleteCustomer(int CustomerId);
-        Task<ResultDto> AddSource(string name);
+        Task<SourceDto> AddSource(string name);
         Task<ReturnAllCustomersDto> Search(string query,int page,int size);
         //Task<IEnumerable<ReturnCustomerDto>> Search(string query);
         Task<UserDto> GetSalesById(string id);

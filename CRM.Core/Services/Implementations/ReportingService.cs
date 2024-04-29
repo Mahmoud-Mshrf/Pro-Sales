@@ -26,8 +26,8 @@ namespace CRM.Core.Services.Implementations
             var customers = await _unitOfWork.Customers.GetAllAsync(x => x.AdditionDate.Day == DateTime.UtcNow.Day, ["SalesRepresntative"]);
             var messages = await _unitOfWork.Messages.GetAllAsync(x => x.MessageDate.Day == DateTime.UtcNow.Day, ["SalesRepresntative"]);
             var calls = await _unitOfWork.Calls.GetAllAsync(x => x.CallDate.Day == DateTime.UtcNow.Day, ["SalesRepresntative"]);
-            var meetings = await _unitOfWork.Meetings.GetAllAsync(x => x.MeetingDate.Day == DateTime.UtcNow.Day, ["SalesRepresntative"]);
-            var deals = await _unitOfWork.Deals.GetAllAsync(x => x.DealDate.Day == DateTime.UtcNow.Day, ["SalesRepresntative"]);
+            var meetings = await _unitOfWork.Meetings.GetAllAsync(x => x.MeetingDate.Value.Day == DateTime.UtcNow.Day, ["SalesRepresntative"]);
+            var deals = await _unitOfWork.Deals.GetAllAsync(x => x.DealDate.Value.Day == DateTime.UtcNow.Day, ["SalesRepresntative"]);
 
             var salesReports = new List<SalesReport>();
 
@@ -38,8 +38,8 @@ namespace CRM.Core.Services.Implementations
                 salesreport.LastName = sales.LastName;
                 salesreport.Customers = customers.Where(c => c.SalesRepresntative.Id == sales.Id).Count();
                 salesreport.Messages = messages.Where(m => m.SalesRepresntative.Id == sales.Id).Count();
-                salesreport.Meetings.Online = meetings.Where(m => m.SalesRepresntative.Id == sales.Id && m.connectionState).Count();
-                salesreport.Meetings.Offline = meetings.Where(m => m.SalesRepresntative.Id == sales.Id && !m.connectionState).Count();
+                salesreport.Meetings.Online = meetings.Where(m => m.SalesRepresntative.Id == sales.Id && m.connectionState.Value).Count();
+                salesreport.Meetings.Offline = meetings.Where(m => m.SalesRepresntative.Id == sales.Id && !m.connectionState.Value).Count();
                 salesreport.Deals = deals.Where(d => d.SalesRepresntative.Id == sales.Id).Count();
                 salesreport.Calls.Completed = calls.Where(d => d.SalesRepresntative.Id == sales.Id && d.CallStatus == CallStatus.Completed).Count();
                 salesreport.Calls.Missed = calls.Where(d => d.SalesRepresntative.Id == sales.Id && d.CallStatus == CallStatus.Missed).Count();
