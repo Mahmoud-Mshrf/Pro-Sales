@@ -22,6 +22,12 @@ namespace CRM.Controllers
             var result = await _reportingService.GetDailyReport(page, size);
             return Ok(result);
         }
+        [HttpGet("global-statistics")]
+        public async Task<IActionResult> GlobalStat()
+        {
+            var result = await _reportingService.GlobalStatAsync();
+            return Ok(result);
+        }
 
     }
 }

@@ -8,10 +8,10 @@ namespace CRM.Core.Reports
 {
     public class GlobalStat
     {
-        public ItemStat Customers { get; set; }
-        public ItemStat Actions { get; set; }
-        public ItemStat Deals { get; set; }
-        public ItemStat Revenue { get; set; }
+        public ItemStat Customers { get; set; } = new ItemStat();
+        public ItemStat Actions { get; set; }= new ItemStat();
+        public ItemStat Deals { get; set; } = new ItemStat();
+        public ItemStat Revenue { get; set; } = new ItemStat();
 
     }
     public class ItemStat
