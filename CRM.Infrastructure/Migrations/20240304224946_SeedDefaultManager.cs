@@ -19,6 +19,7 @@ namespace CRM.Infrastructure.Migrations
 
             // Assign DefaultAdmin to Admin role
             migrationBuilder.Sql("INSERT INTO AspNetUserRoles (UserId, RoleId) VALUES ((SELECT Id FROM AspNetUsers WHERE UserName = 'DefaultManager'), (SELECT Id FROM AspNetRoles WHERE [Name] = 'Manager'))");
+            migrationBuilder.Sql("INSERT INTO AspNetUserClaims (UserId,ClaimType,ClaimValue) VALUES ((SELECT Id FROM AspNetUsers WHERE UserName = 'DefaultManager'),'SuperAdmin','Yes')");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
