@@ -28,6 +28,16 @@ namespace CRM.Controllers
             var result = await _reportingService.GlobalStatAsync();
             return Ok(result);
         }
-
+        [HttpGet("sales-reprot/{id}")]
+        public async Task<IActionResult> SalesReport(string id)
+        {
+            var result = await _reportingService.SalesReport(id);
+            if (result.IsSuccess == false)
+            {
+                var errors = new { result.Errors };
+                return BadRequest(errors);
+            }
+            return Ok(result);
+        }
     }
 }
