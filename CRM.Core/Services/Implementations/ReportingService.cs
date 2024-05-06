@@ -31,12 +31,16 @@ namespace CRM.Core.Services.Implementations
         {
             var salesReps = await _unitOfWork.UserManager.GetUsersInRoleAsync("Sales Representative");
 
-            IEnumerable<Customer> customers = new List<Customer>();
-            IEnumerable<Message> messages = new List<Message>();
-            IEnumerable<Call> calls = new List<Call>();
-            IEnumerable<Meeting> meetings = new List<Meeting>();
-            IEnumerable<Deal> deals = new List<Deal>();
-
+            //IEnumerable<Customer> customers = new List<Customer>();
+            //IEnumerable<Message> messages = new List<Message>();
+            //IEnumerable<Call> calls = new List<Call>();
+            //IEnumerable<Meeting> meetings = new List<Meeting>();
+            //IEnumerable<Deal> deals = new List<Deal>();
+            var  customers = await _unitOfWork.Customers.GetAllAsync(["SalesRepresntative"]);
+            var  messages = await _unitOfWork.Messages.GetAllAsync(["SalesRepresntative"]);
+            var  calls = await _unitOfWork.Calls.GetAllAsync(["SalesRepresntative"]);
+            var  meetings = await _unitOfWork.Meetings.GetAllAsync(["SalesRepresntative"]);
+            var  deals = await _unitOfWork.Deals.GetAllAsync(["SalesRepresntative"]);
             if (within == "Daily")
             {
                 customers = await _unitOfWork.Customers.GetAllAsync(x => x.AdditionDate.Day==Today, ["SalesRepresntative"]);
@@ -96,50 +100,74 @@ namespace CRM.Core.Services.Implementations
             var allCusotmers = customers.Count();
             // return count of this week customers
             var thisWeekCustomers = customers.Where(c => c.AdditionDate >= PastWeek).Count();
-            
+            var thisMonthCustomers = customers.Where(c => c.AdditionDate >= PastMonth).Count();
+            var todayCustomers = customers.Where(c => c.AdditionDate.Day==Today).Count();
+
             var deals = await _unitOfWork.Deals.GetAllAsync();
             var allDeals = deals.Count();
             var thisWeekDeals = deals.Where(d => d.DealDate.Value >= PastWeek);
+            var thisMonthDeals = deals.Where(d => d.DealDate.Value >= PastMonth);
+            var todayDeals = deals.Where(d => d.DealDate.Value.Day == Today);
             var thisWeekDealsCount = thisWeekDeals.Count();
+            var thisMonthDealsCount = thisMonthDeals.Count();
+            var todayDealsCount = todayDeals.Count();
 
             var revenues = deals.Sum(d => d.Price);
             var thisWeekrevenues = thisWeekDeals.Sum(d => d.Price);
+            var thisMonthrevenues = thisMonthDeals.Sum(d => d.Price);
+            var todayrevenues = todayDeals.Sum(d => d.Price);
 
             var meetings = await _unitOfWork.Meetings.GetAllAsync();
             var allMeetings = meetings.Count();
             var thisWeekMeetings = meetings.Where(m=> m.MeetingDate.Value >= PastWeek).Count();
+            var thisMonthMeetings = meetings.Where(m=> m.MeetingDate.Value >= PastMonth).Count();
+            var todayMeetings = meetings.Where(m=> m.MeetingDate.Value.Day == Today).Count();
 
             var calls = await _unitOfWork.Calls.GetAllAsync();
             var allCalls = calls.Count();
             var thisWeekCalls = calls.Where(c=>c.CallDate >= PastWeek).Count();
+            var thisMonthCalls = calls.Where(c=>c.CallDate >= PastMonth).Count();
+            var todayCalls = calls.Where(c=>c.CallDate.Day== Today).Count();
 
             var messages = await _unitOfWork.Messages.GetAllAsync();
             var allMessages = messages.Count();
             var thisWeekMessages = messages.Where(m=>m.MessageDate >= PastWeek).Count();
+            var thisMonthMessages = messages.Where(m=>m.MessageDate >= PastMonth).Count();
+            var todayMessages = messages.Where(m => m.MessageDate.Day == Today).Count();
 
             var allActions = allCalls + allMessages + allMeetings + allDeals;
             var thisWeekActions = thisWeekCalls + thisWeekMessages + thisWeekMeetings + thisWeekDealsCount;
+            var thisMonthActions = thisMonthCalls + thisMonthMessages + thisMonthMeetings + thisMonthDealsCount;
+            var todayActions = todayCalls + todayMessages + todayMeetings + todayDealsCount;
             return new GlobalStat
             {
                 Customers =
                 {
                     Total=allCusotmers,
-                    ThisWeek=thisWeekCustomers
+                    ThisWeek=thisWeekCustomers,
+                    ThisMonth=thisMonthCustomers,
+                    Today=todayCustomers
                 },
                 Deals =
                 {
                     Total= allDeals,
-                    ThisWeek= thisWeekDealsCount
+                    ThisWeek= thisWeekDealsCount,
+                    ThisMonth=thisMonthDealsCount,
+                    Today=todayDealsCount
                 },
                 Revenue =
                 {
                     Total=(int) revenues,
-                    ThisWeek=(int) thisWeekrevenues
+                    ThisWeek=(int) thisWeekrevenues,
+                    ThisMonth=(int) thisMonthrevenues,
+                    Today=(int) todayrevenues
                 },
                 Actions =
                 {
                     Total=allActions,
-                    ThisWeek=thisWeekActions
+                    ThisWeek=thisWeekActions,
+                    ThisMonth=thisMonthActions,
+                    Today=todayActions
                 }
             };
 
