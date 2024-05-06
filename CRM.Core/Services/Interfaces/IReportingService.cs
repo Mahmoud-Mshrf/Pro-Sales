@@ -9,6 +9,8 @@ namespace CRM.Core.Services.Interfaces
 {
     public interface IReportingService
     {
-        Task<DailyReport> GetDailyReport(int page, int size);
+        Task<DailyReport> MainReport(int page, int size, string within);
+        Task<GlobalStat> GlobalStatAsync();
+        Task<SalesRepresentativeReport> SalesReport(string salesId, string within);
     }
 }

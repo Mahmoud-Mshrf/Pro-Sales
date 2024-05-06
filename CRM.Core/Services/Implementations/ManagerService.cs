@@ -221,6 +221,13 @@ namespace CRM.Core.Services.Implementations
                     return returnUserRolesdto;
                 }
             }
+            var userClaims= await _unitOfWork.UserManager.GetClaimsAsync(user);
+            if (userClaims.Any(c => c.Type == "SuperAdmin"))
+            {
+                returnUserRolesdto.IsSucces = false;
+                returnUserRolesdto.Errors = ["You can't change the role of the super admin"];
+                return returnUserRolesdto;
+            }
             var WasSalesRep = await _unitOfWork.UserManager.IsInRoleAsync(user, "Sales Representative");
             var WasModerator = await _unitOfWork.UserManager.IsInRoleAsync(user, "Marketing Moderator");
             var WasManager = await _unitOfWork.UserManager.IsInRoleAsync(user, "Manager");
