@@ -43,27 +43,27 @@ namespace CRM.Core.Services.Implementations
             var  deals = await _unitOfWork.Deals.GetAllAsync(["SalesRepresntative"]);
             if (within == "Daily")
             {
-                customers = await _unitOfWork.Customers.GetAllAsync(x => x.AdditionDate.Day==Today, ["SalesRepresntative"]);
-                messages = await _unitOfWork.Messages.GetAllAsync(x => x.MessageDate.Day == Today, ["SalesRepresntative"]);
-                calls = await _unitOfWork.Calls.GetAllAsync(x => x.CallDate.Day == Today, ["SalesRepresntative"]);
-                meetings = await _unitOfWork.Meetings.GetAllAsync(x => x.MeetingDate.Value.Day == Today, ["SalesRepresntative"]);
-                deals = await _unitOfWork.Deals.GetAllAsync(x => x.DealDate.Value.Day == Today, ["SalesRepresntative"]);
+                customers = customers.Where(x => x.AdditionDate.Day==Today);
+                messages = messages.Where(x => x.MessageDate.Day == Today);
+                calls = calls.Where(x => x.CallDate.Day == Today);
+                meetings = meetings.Where(x => x.MeetingDate.Value.Day == Today);
+                deals = deals.Where(x => x.DealDate.Value.Day == Today);
             }
             else if (within == "Monthly")
             {
-                customers = await _unitOfWork.Customers.GetAllAsync(x => x.AdditionDate >= PastMonth, ["SalesRepresntative"]);
-                messages = await _unitOfWork.Messages.GetAllAsync(x => x.MessageDate >= PastMonth, ["SalesRepresntative"]);
-                calls = await _unitOfWork.Calls.GetAllAsync(x => x.CallDate >= PastMonth, ["SalesRepresntative"]);
-                meetings = await _unitOfWork.Meetings.GetAllAsync(x => x.MeetingDate.Value >= PastMonth, ["SalesRepresntative"]);
-                deals = await _unitOfWork.Deals.GetAllAsync(x => x.DealDate.Value >= PastMonth, ["SalesRepresntative"]);
+                customers = customers.Where(x => x.AdditionDate >= PastMonth);
+                messages = messages.Where(x => x.MessageDate >= PastMonth);
+                calls = calls.Where(x => x.CallDate >= PastMonth);
+                meetings = meetings.Where(x => x.MeetingDate.Value >= PastMonth);
+                deals = deals.Where(x => x.DealDate.Value >= PastMonth);
             }
             else if(within== "Weekly")
             {
-                customers = await _unitOfWork.Customers.GetAllAsync(x => x.AdditionDate >= PastWeek, ["SalesRepresntative"]);
-                messages = await _unitOfWork.Messages.GetAllAsync(x => x.MessageDate>= PastWeek, ["SalesRepresntative"]);
-                calls = await _unitOfWork.Calls.GetAllAsync(x => x.CallDate >= PastWeek, ["SalesRepresntative"]);
-                meetings = await _unitOfWork.Meetings.GetAllAsync(x => x.MeetingDate.Value >= PastWeek, ["SalesRepresntative"]);
-                deals = await _unitOfWork.Deals.GetAllAsync(x => x.DealDate.Value >= PastWeek, ["SalesRepresntative"]);
+                customers = customers.Where(x => x.AdditionDate >= PastWeek);
+                messages = messages.Where(x => x.MessageDate >= PastWeek);
+                calls = calls.Where(x => x.CallDate >= PastWeek);
+                meetings = meetings.Where(x => x.MeetingDate.Value >= PastWeek);
+                deals = deals.Where(x => x.DealDate.Value >= PastWeek);
             }
 
             var salesReports = new List<SalesReport>();
@@ -183,35 +183,39 @@ namespace CRM.Core.Services.Implementations
                     Errors = ["Sales representative not found"]
                 };
             }
-
-            IEnumerable<Customer> customers = new List<Customer>();
-            IEnumerable<Message> messages = new List<Message>();
-            IEnumerable<Call> calls = new List<Call>();
-            IEnumerable<Meeting> meetings = new List<Meeting>();
-            IEnumerable<Deal> deals = new List<Deal>();
+            //IEnumerable<Customer> customers = new List<Customer>();
+            //IEnumerable<Message> messages = new List<Message>();
+            //IEnumerable<Call> calls = new List<Call>();
+            //IEnumerable<Meeting> meetings = new List<Meeting>();
+            //IEnumerable<Deal> deals = new List<Deal>();
+            var customers = await _unitOfWork.Customers.GetAllAsync(["SalesRepresntative"]);
+            var messages = await _unitOfWork.Messages.GetAllAsync(["SalesRepresntative"]);
+            var calls = await _unitOfWork.Calls.GetAllAsync(["SalesRepresntative"]);
+            var meetings = await _unitOfWork.Meetings.GetAllAsync(["SalesRepresntative"]);
+            var deals = await _unitOfWork.Deals.GetAllAsync(["SalesRepresntative"]);
             if (within == "Daily")
             {
-                customers = await _unitOfWork.Customers.GetAllAsync(x => x.AdditionDate.Day == Today, ["SalesRepresntative"]);
-                messages = await _unitOfWork.Messages.GetAllAsync(x => x.MessageDate.Day == Today, ["SalesRepresntative"]);
-                calls = await _unitOfWork.Calls.GetAllAsync(x => x.CallDate.Day == Today, ["SalesRepresntative"]);
-                meetings = await _unitOfWork.Meetings.GetAllAsync(x => x.MeetingDate.Value.Day == Today, ["SalesRepresntative"]);
-                deals = await _unitOfWork.Deals.GetAllAsync(x => x.DealDate.Value.Day == Today, ["SalesRepresntative"]);
+                customers = customers.Where(x => x.AdditionDate.Day == Today);
+                messages = messages.Where(x => x.MessageDate.Day == Today);
+                calls = calls.Where(x => x.CallDate.Day == Today);
+                meetings = meetings.Where(x => x.MeetingDate.Value.Day == Today);
+                deals = deals.Where(x => x.DealDate.Value.Day == Today);
             }
             else if (within == "Monthly")
             {
-                customers = await _unitOfWork.Customers.GetAllAsync(x => x.AdditionDate >= PastMonth, ["SalesRepresntative"]);
-                messages = await _unitOfWork.Messages.GetAllAsync(x => x.MessageDate >= PastMonth, ["SalesRepresntative"]);
-                calls = await _unitOfWork.Calls.GetAllAsync(x => x.CallDate >= PastMonth, ["SalesRepresntative"]);
-                meetings = await _unitOfWork.Meetings.GetAllAsync(x => x.MeetingDate.Value >= PastMonth, ["SalesRepresntative"]);
-                deals = await _unitOfWork.Deals.GetAllAsync(x => x.DealDate.Value >= PastMonth, ["SalesRepresntative"]);
+                customers = customers.Where(x => x.AdditionDate >= PastMonth);
+                messages = messages.Where(x => x.MessageDate >= PastMonth);
+                calls = calls.Where(x => x.CallDate >= PastMonth);
+                meetings = meetings.Where(x => x.MeetingDate.Value >= PastMonth);
+                deals = deals.Where(x => x.DealDate.Value >= PastMonth);
             }
             else if (within == "Weekly")
             {
-                customers = await _unitOfWork.Customers.GetAllAsync(x => x.AdditionDate >= PastWeek, ["SalesRepresntative"]);
-                messages = await _unitOfWork.Messages.GetAllAsync(x => x.MessageDate >= PastWeek, ["SalesRepresntative"]);
-                calls = await _unitOfWork.Calls.GetAllAsync(x => x.CallDate >= PastWeek, ["SalesRepresntative"]);
-                meetings = await _unitOfWork.Meetings.GetAllAsync(x => x.MeetingDate.Value >= PastWeek, ["SalesRepresntative"]);
-                deals = await _unitOfWork.Deals.GetAllAsync(x => x.DealDate.Value >= PastWeek, ["SalesRepresntative"]);
+                customers = customers.Where(x => x.AdditionDate >= PastWeek);
+                messages = messages.Where(x => x.MessageDate >= PastWeek);
+                calls = calls.Where(x => x.CallDate >= PastWeek);
+                meetings = meetings.Where(x => x.MeetingDate.Value >= PastWeek);
+                deals = deals.Where(x => x.DealDate.Value >= PastWeek);
             }
             var interests = await _unitOfWork.Interests.GetAllAsync();
             var sources = await _unitOfWork.Sources.GetAllAsync();
@@ -281,13 +285,17 @@ namespace CRM.Core.Services.Implementations
             salesreport.Sources = sourcesList;
             var orderdDeals = salesDeals.OrderByDescending(x=>x.Price).ToList();
             var bestDeal = orderdDeals.FirstOrDefault();
-            salesreport.BestDeal = new BestDeal
+            if (bestDeal != null)
             {
-                CustomerFirstName = bestDeal.Customer.FirstName,
-                CustomerLastName = bestDeal.Customer.LastName,
-                InterestName = bestDeal.Interest.InterestName,
-                DealPrice = bestDeal.Price
-            };
+                salesreport.BestDeal = new BestDeal
+                {
+                    CustomerFirstName = bestDeal.Customer.FirstName,
+                    CustomerLastName = bestDeal.Customer.LastName,
+                    InterestName = bestDeal.Interest.InterestName,
+                    DealPrice = bestDeal.Price
+                };
+            }
+            
             return salesreport;
         }
     }
