@@ -298,5 +298,83 @@ namespace CRM.Core.Services.Implementations
             
             return salesreport;
         }
+        public async Task<IEnumerable<ItemCount>> DealsReport(string within)
+        {
+            var interests = await _unitOfWork.Interests.GetAllAsync();
+            var deals = await _unitOfWork.Deals.GetAllAsync();
+            if(within== "Weekly")
+            {
+                deals = deals.Where(d => d.DealDate.Value >= PastWeek);
+            }
+            else if (within == "Monthly")
+            {
+                deals = deals.Where(d => d.DealDate.Value >= PastMonth);
+            }
+            else if (within== "Daily")
+            {
+                deals = deals.Where(d => d.DealDate.Value.Day == Today); 
+            }
+            var interestsList = new List<ItemCount>();
+            foreach (var interest in interests)
+            {
+                var interestitem = new ItemCount
+                {
+                    Name = interest.InterestName
+                };
+                interestsList.Add(interestitem);
+            }
+            foreach (var deal in deals)
+            {
+                foreach (var item in interestsList)
+                {
+                    if (deal.Interest.InterestName == item.Name)
+                    {
+                        item.Count++;
+                        item.Revenue += deal.Price;
+                        break;
+                    }
+                }
+            }
+
+            return interestsList;
+        }
+        public async Task<IEnumerable<ItemCount>> SourcesReport(string within)
+        {
+            var sources = await _unitOfWork.Sources.GetAllAsync();
+            var customers = await _unitOfWork.Customers.GetAllAsync();
+            if (within == "Weekly")
+            {
+                customers = customers.Where(d => d.AdditionDate >= PastWeek);
+            }
+            else if (within == "Monthly")
+            {
+                customers = customers.Where(d => d.AdditionDate >= PastMonth);
+            }
+            else if (within == "Daily")
+            {
+                customers = customers.Where(d => d.AdditionDate.Day == Today);
+            }
+            var sourcesList = new List<ItemCount>();
+            foreach (var source in sources)
+            {
+                var sourceitem = new ItemCount
+                {
+                    Name = source.SourceName
+                };
+                sourcesList.Add(sourceitem);
+            }
+            foreach (var customer in customers)
+            {
+                foreach (var item in sourcesList)
+                {
+                    if (customer.Source.SourceName == item.Name)
+                    {
+                        item.Count++;
+                        break;
+                    }
+                }
+            }
+            return sourcesList;
+        }
     }
 }
