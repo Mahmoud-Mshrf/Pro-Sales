@@ -20,15 +20,44 @@ namespace CRM.Core.Services.Implementations
             _unitOfWork = unitOfWork;
             _filterService = filterService;
         }
-
-        public async Task<DailyReport> GetDailyReport(int page, int size)
+        static bool WithinDay(DateTime date) => date.Day == DateTime.UtcNow.Day; 
+        static bool WithinDays(DateTime date,int days) => date == DateTime.UtcNow.AddDays(-days);
+        static bool WithinMonth(DateTime date) => date == DateTime.UtcNow.AddDays(-30);
+        static bool WithinWeek(DateTime date) => date == DateTime.UtcNow.AddDays(-7);
+        public async Task<DailyReport> MainReport(int page, int size,string within)
         {
             var salesReps = await _unitOfWork.UserManager.GetUsersInRoleAsync("Sales Representative");
-            var customers = await _unitOfWork.Customers.GetAllAsync(x => x.AdditionDate.Day == DateTime.UtcNow.Day, ["SalesRepresntative"]);
-            var messages = await _unitOfWork.Messages.GetAllAsync(x => x.MessageDate.Day == DateTime.UtcNow.Day, ["SalesRepresntative"]);
-            var calls = await _unitOfWork.Calls.GetAllAsync(x => x.CallDate.Day == DateTime.UtcNow.Day, ["SalesRepresntative"]);
-            var meetings = await _unitOfWork.Meetings.GetAllAsync(x => x.MeetingDate.Value.Day == DateTime.UtcNow.Day, ["SalesRepresntative"]);
-            var deals = await _unitOfWork.Deals.GetAllAsync(x => x.DealDate.Value.Day == DateTime.UtcNow.Day, ["SalesRepresntative"]);
+
+            IEnumerable<Customer> customers = new List<Customer>();
+            IEnumerable<Message> messages = new List<Message>();
+            IEnumerable<Call> calls = new List<Call>();
+            IEnumerable<Meeting> meetings = new List<Meeting>();
+            IEnumerable<Deal> deals = new List<Deal>();
+
+            if (within == "Daily")
+            {
+                customers = await _unitOfWork.Customers.GetAllAsync(x => WithinDay(x.AdditionDate), ["SalesRepresntative"]);
+                messages = await _unitOfWork.Messages.GetAllAsync(x => WithinDay(x.MessageDate), ["SalesRepresntative"]);
+                calls = await _unitOfWork.Calls.GetAllAsync(x => WithinDay(x.CallDate), ["SalesRepresntative"]);
+                meetings = await _unitOfWork.Meetings.GetAllAsync(x => WithinDay(x.MeetingDate.Value), ["SalesRepresntative"]);
+                deals = await _unitOfWork.Deals.GetAllAsync(x => WithinDay(x.DealDate.Value), ["SalesRepresntative"]);
+            }
+            else if (within == "Monthly")
+            {
+                customers = await _unitOfWork.Customers.GetAllAsync(x => WithinMonth(x.AdditionDate), ["SalesRepresntative"]);
+                messages = await _unitOfWork.Messages.GetAllAsync(x => WithinMonth(x.MessageDate), ["SalesRepresntative"]);
+                calls = await _unitOfWork.Calls.GetAllAsync(x => WithinMonth(x.CallDate), ["SalesRepresntative"]);
+                meetings = await _unitOfWork.Meetings.GetAllAsync(x => WithinMonth(x.MeetingDate.Value), ["SalesRepresntative"]);
+                deals = await _unitOfWork.Deals.GetAllAsync(x => WithinMonth(x.DealDate.Value), ["SalesRepresntative"]);
+            }
+            else if(within== "Weekly")
+            {
+                customers = await _unitOfWork.Customers.GetAllAsync(x => WithinWeek(x.AdditionDate), ["SalesRepresntative"]);
+                messages = await _unitOfWork.Messages.GetAllAsync(x => WithinWeek(x.MessageDate), ["SalesRepresntative"]);
+                calls = await _unitOfWork.Calls.GetAllAsync(x => WithinWeek(x.CallDate), ["SalesRepresntative"]);
+                meetings = await _unitOfWork.Meetings.GetAllAsync(x => WithinWeek(x.MeetingDate.Value), ["SalesRepresntative"]);
+                deals = await _unitOfWork.Deals.GetAllAsync(x => WithinWeek(x.DealDate.Value), ["SalesRepresntative"]);
+            }
 
             var salesReports = new List<SalesReport>();
 
@@ -63,27 +92,27 @@ namespace CRM.Core.Services.Implementations
             var customers =await _unitOfWork.Customers.GetAllAsync();
             var allCusotmers = customers.Count();
             // return count of this week customers
-            var thisWeekCustomers = customers.Where(c => c.AdditionDate >= DateTime.Now.AddDays(-7)).Count();
+            var thisWeekCustomers = customers.Where(c => WithinWeek(c.AdditionDate)).Count();
             
             var deals = await _unitOfWork.Deals.GetAllAsync();
             var allDeals = deals.Count();
-            var thisWeekDeals = deals.Where(d => d.DealDate >= DateTime.Now.AddDays(-7));
+            var thisWeekDeals = deals.Where(d => WithinWeek(d.DealDate.Value));
             var thisWeekDealsCount = thisWeekDeals.Count();
 
-            var revenues = (int) deals.Sum(d => d.Price);
-            var thisWeekrevenues =(int) thisWeekDeals.Sum(d => d.Price);
+            var revenues = deals.Sum(d => d.Price);
+            var thisWeekrevenues = thisWeekDeals.Sum(d => d.Price);
 
             var meetings = await _unitOfWork.Meetings.GetAllAsync();
             var allMeetings = meetings.Count();
-            var thisWeekMeetings = meetings.Where(m=>m.MeetingDate>= DateTime.Now.AddDays(-7)).Count();
+            var thisWeekMeetings = meetings.Where(m=>WithinWeek(m.MeetingDate.Value)).Count();
 
             var calls = await _unitOfWork.Calls.GetAllAsync();
             var allCalls = calls.Count();
-            var thisWeekCalls = calls.Where(c=>c.CallDate>= DateTime.Now.AddDays(-7)).Count();
+            var thisWeekCalls = calls.Where(c=>WithinWeek(c.CallDate)).Count();
 
             var messages = await _unitOfWork.Messages.GetAllAsync();
             var allMessages = messages.Count();
-            var thisWeekMessages = messages.Where(m=>m.MessageDate >= DateTime.Now.AddDays(-7)).Count();
+            var thisWeekMessages = messages.Where(m=>WithinWeek(m.MessageDate)).Count();
 
             var allActions = allCalls + allMessages + allMeetings + allDeals;
             var thisWeekActions = thisWeekCalls + thisWeekMessages + thisWeekMeetings + thisWeekDealsCount;
@@ -101,8 +130,8 @@ namespace CRM.Core.Services.Implementations
                 },
                 Revenue =
                 {
-                    Total=revenues,
-                    ThisWeek=thisWeekrevenues
+                    Total=(int) revenues,
+                    ThisWeek=(int) thisWeekrevenues
                 },
                 Actions =
                 {
@@ -112,7 +141,7 @@ namespace CRM.Core.Services.Implementations
             };
 
         }
-        public async Task<SalesRepresentativeReport> SalesReport(string salesId)
+        public async Task<SalesRepresentativeReport> SalesReport(string salesId,string within)
         {
             var sales = await _unitOfWork.UserManager.FindByIdAsync(salesId);
             if (sales == null)
@@ -124,11 +153,35 @@ namespace CRM.Core.Services.Implementations
                 };
             }
 
-            var customers = await _unitOfWork.Customers.GetAllAsync(x => x.AdditionDate >= DateTime.UtcNow.AddDays(-30), ["SalesRepresntative"]);
-            var messages = await _unitOfWork.Messages.GetAllAsync(c => c.MessageDate >= DateTime.UtcNow.AddDays(-30), ["SalesRepresntative"]);
-            var calls = await _unitOfWork.Calls.GetAllAsync(x => x.CallDate >= DateTime.UtcNow.AddDays(-30), ["SalesRepresntative"]);
-            var meetings = await _unitOfWork.Meetings.GetAllAsync(x => x.MeetingDate.Value >= DateTime.UtcNow.AddDays(-30), ["SalesRepresntative"]);
-            var deals = await _unitOfWork.Deals.GetAllAsync(x => x.DealDate.Value >= DateTime.UtcNow.AddDays(-30), ["SalesRepresntative"]);
+            IEnumerable<Customer> customers = new List<Customer>();
+            IEnumerable<Message> messages = new List<Message>();
+            IEnumerable<Call> calls = new List<Call>();
+            IEnumerable<Meeting> meetings = new List<Meeting>();
+            IEnumerable<Deal> deals = new List<Deal>();
+            if (within == "Daily")
+            {
+                customers = await _unitOfWork.Customers.GetAllAsync(x => WithinDay(x.AdditionDate), ["SalesRepresntative"]);
+                messages = await _unitOfWork.Messages.GetAllAsync(x => WithinDay(x.MessageDate), ["SalesRepresntative"]);
+                calls = await _unitOfWork.Calls.GetAllAsync(x => WithinDay(x.CallDate), ["SalesRepresntative"]);
+                meetings = await _unitOfWork.Meetings.GetAllAsync(x => WithinDay(x.MeetingDate.Value), ["SalesRepresntative"]);
+                deals = await _unitOfWork.Deals.GetAllAsync(x => WithinDay(x.DealDate.Value), ["SalesRepresntative"]);
+            }
+            else if (within == "Monthly")
+            {
+                customers = await _unitOfWork.Customers.GetAllAsync(x => WithinMonth(x.AdditionDate), ["SalesRepresntative"]);
+                messages = await _unitOfWork.Messages.GetAllAsync(x => WithinMonth(x.MessageDate), ["SalesRepresntative"]);
+                calls = await _unitOfWork.Calls.GetAllAsync(x => WithinMonth(x.CallDate), ["SalesRepresntative"]);
+                meetings = await _unitOfWork.Meetings.GetAllAsync(x => WithinMonth(x.MeetingDate.Value), ["SalesRepresntative"]);
+                deals = await _unitOfWork.Deals.GetAllAsync(x => WithinMonth(x.DealDate.Value), ["SalesRepresntative"]);
+            }
+            else if (within == "Weekly")
+            {
+                customers = await _unitOfWork.Customers.GetAllAsync(x => WithinWeek(x.AdditionDate), ["SalesRepresntative"]);
+                messages = await _unitOfWork.Messages.GetAllAsync(x => WithinWeek(x.MessageDate), ["SalesRepresntative"]);
+                calls = await _unitOfWork.Calls.GetAllAsync(x => WithinWeek(x.CallDate), ["SalesRepresntative"]);
+                meetings = await _unitOfWork.Meetings.GetAllAsync(x => WithinWeek(x.MeetingDate.Value), ["SalesRepresntative"]);
+                deals = await _unitOfWork.Deals.GetAllAsync(x => WithinWeek(x.DealDate.Value), ["SalesRepresntative"]);
+            }
             var interests = await _unitOfWork.Interests.GetAllAsync();
             var sources = await _unitOfWork.Sources.GetAllAsync();
 
@@ -148,7 +201,7 @@ namespace CRM.Core.Services.Implementations
             salesreport.Calls.Cancelled = calls.Where(d => d.SalesRepresntative.Id == sales.Id && d.CallStatus == CallStatus.Cancelled).Count();
             salesreport.Calls.Busy = calls.Where(d => d.SalesRepresntative.Id == sales.Id && d.CallStatus == CallStatus.Busy).Count();
             salesreport.Calls.Failed = calls.Where(d => d.SalesRepresntative.Id == sales.Id && d.CallStatus == CallStatus.Failed).Count();
-            salesreport.Revenue =(int) salesDeals.Sum(x => x.Price);
+            //salesreport.Revenue =(int) salesDeals.Sum(x => x.Price);
             var InterestsList = new List<ItemCount>();
             foreach (var interest in interests)
             {
@@ -166,6 +219,7 @@ namespace CRM.Core.Services.Implementations
                     if(deal.Interest.InterestName==item.Name)
                     {
                         item.Count++;
+                        item.Revenue += deal.Price;
                         break;
                     }
                 }
@@ -201,7 +255,7 @@ namespace CRM.Core.Services.Implementations
                 CustomerFirstName = bestDeal.Customer.FirstName,
                 CustomerLastName = bestDeal.Customer.LastName,
                 InterestName = bestDeal.Interest.InterestName,
-                DealPrice = (int)bestDeal.Price
+                DealPrice = bestDeal.Price
             };
             return salesreport;
         }

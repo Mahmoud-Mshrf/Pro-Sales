@@ -10,7 +10,7 @@ namespace CRM.Core.Reports
 {
     public class SalesRepresentativeReport:SalesReport
     {
-        public int Revenue {  get; set; }
+        //public int Revenue {  get; set; }
         public IEnumerable<ItemCount> DoneDeals { get; set; }=new List<ItemCount>();
         public IEnumerable<ItemCount> Sources { get; set; }= new List<ItemCount>();
         public BestDeal BestDeal { get; set; }=new BestDeal();
@@ -24,12 +24,14 @@ namespace CRM.Core.Reports
     {
         public string Name { get; set; }
         public int Count { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        public double Revenue { get; set; }
     }
     public class BestDeal
     {
         public string CustomerFirstName { get; set; }
         public string CustomerLastName { get; set; }
         public string InterestName { get; set; }
-        public int DealPrice { get; set; }
+        public double DealPrice { get; set; }
     }
 }
