@@ -30,7 +30,16 @@ namespace CRM.Core.Services.Implementations
         public async Task<DailyReport> MainReport(int page, int size,string within)
         {
             var salesReps = await _unitOfWork.UserManager.GetUsersInRoleAsync("Sales Representative");
-
+            var saless = new List<ApplicationUser>();
+            foreach (var user in salesReps)
+            {
+                var isManager =await _unitOfWork.UserManager.IsInRoleAsync(user, "Manager");
+                if(!isManager)
+                {
+                    saless.Add(user);
+                }
+            }
+            salesReps = saless;
             //IEnumerable<Customer> customers = new List<Customer>();
             //IEnumerable<Message> messages = new List<Message>();
             //IEnumerable<Call> calls = new List<Call>();

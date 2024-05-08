@@ -42,17 +42,17 @@ namespace CRM.Controllers
             return Ok(result);
             
         }
-        //[HttpGet("deals-report")]
-        //public async Task<IActionResult> DealsReport(string? within)
-        //{
-        //    var result = await _reportingService.DealsReport(within);
-        //    return Ok(result);
-        //}
-        //[HttpGet("sources-report")]
-        //public async Task<IActionResult> SourcesReport(string? within)
-        //{
-        //    var result = await _reportingService.SourcesReport(within);
-        //    return Ok(result);
-        //}
+        [HttpGet("deals-report")]
+        public async Task<IActionResult> DealsReport(string? within)
+        {
+            var result = await _reportingService.DealsReport(within);
+            return Ok(result);
+        }
+        [HttpGet("sources-report")]
+        public async Task<IActionResult> SourcesReport(string? within)
+        {
+            var result = await _reportingService.SourcesReport(within);
+            return Ok(result);
+        }
     }
 }
