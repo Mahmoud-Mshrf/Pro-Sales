@@ -505,6 +505,16 @@ namespace CRM.Controllers
         {
             try
             {
+                if (query!=null)
+                {
+                    var id = User.FindFirstValue("id");
+                    var resultt = await _salesRepresntative.Search(query, page, size, id);
+                    if (!resultt.IsSuccess)
+                    {
+                        return BadRequest(resultt);
+                    }
+                    return Ok(resultt.Pages);
+                }
                 var result = await _salesRepresntative.GetAllCustomersForSalesRep(page, size);
 
                 if (result.Result is BadRequestObjectResult badRequestResult)
@@ -555,7 +565,13 @@ namespace CRM.Controllers
 
         }
 
-
+        [HttpGet("search-assigned-customers")]
+        public async Task<IActionResult> SearchAssingedCustomers(int page, int size, [FromQuery] string? query)
+        {
+            var id = User.FindFirstValue("id");
+            var result = await _salesRepresntative.Search(query, page, size,id);
+            return Ok(result.Pages);
+        }
 
 
 

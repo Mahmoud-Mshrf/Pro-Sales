@@ -55,5 +55,6 @@ namespace CRM.Core.Services.Interfaces
         Task<ActionResult<IEnumerable<object>>> GetAllActionsForCustomer(int customerId);
          Task<ActionResult<IEnumerable<ReturnAllCustomersDto>>> GetAllCustomersForSalesRep(int page, int size);
         Task<ActionResult<IEnumerable<object>>> GetCustomer(int customerId);
+        Task<ReturnAllCustomersDto> Search(string query, int page, int size, string id);
     }
 }

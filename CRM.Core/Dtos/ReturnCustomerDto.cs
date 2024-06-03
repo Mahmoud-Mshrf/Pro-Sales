@@ -16,6 +16,7 @@ namespace CRM.Core.Dtos
         //public int CustomerId { get; set; }
         [JsonIgnore]
         public bool IsSuccess { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public UserDto SalesRepresentative { get; set; }
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public UserDto AddedBy { get; set; }

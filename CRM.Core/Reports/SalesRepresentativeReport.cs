@@ -13,7 +13,8 @@ namespace CRM.Core.Reports
         //public int Revenue {  get; set; }
         public IEnumerable<ItemCount> DoneDeals { get; set; }=new List<ItemCount>();
         public IEnumerable<ItemCount> Sources { get; set; }= new List<ItemCount>();
-        public BestDeal BestDeal { get; set; }=new BestDeal();
+        [JsonIgnore(Condition =JsonIgnoreCondition.WhenWritingNull)]
+        public BestDeal BestDeal { get; set; }
         [JsonIgnore]
         public bool IsSuccess { get; set; }
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]

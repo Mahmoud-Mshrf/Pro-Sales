@@ -12,5 +12,7 @@ namespace CRM.Core.Services.Interfaces
         Task<DailyReport> MainReport(int page, int size, string within);
         Task<GlobalStat> GlobalStatAsync();
         Task<SalesRepresentativeReport> SalesReport(string salesId, string within);
+        Task<IEnumerable<ItemCount>> DealsReport(string within);
+        Task<IEnumerable<ItemCount>> SourcesReport(string within);
     }
 }
