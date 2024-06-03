@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Identity;
 
 namespace CRM.Core.Services.Implementations
 {
@@ -22,16 +23,17 @@ namespace CRM.Core.Services.Implementations
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ISharedService _sharedService;
         private readonly IFilterService _filterService;
+        private readonly UserManager<ApplicationUser> _usermanager;
 
-        public SalesService(IUnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor, ISharedService sharedService, IFilterService filterService)
+        public SalesService(IUnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor, ISharedService sharedService, IFilterService filterService, UserManager<ApplicationUser> usermanager)
         {
             _unitOfWork = unitOfWork;
             _httpContextAccessor = httpContextAccessor;
             _sharedService = sharedService;
             _filterService = filterService;
-
+            _usermanager = usermanager;
         }
-
+          
         #region ManageCalls
 
         public async Task<ActionResult<IEnumerable<object>>> AddCall(AddCallDto addcallDto, string salesRepEmail)
@@ -1548,7 +1550,129 @@ namespace CRM.Core.Services.Implementations
 
         }
 
+        public async Task<ReturnAllCustomersDto> Search(string query, int page, int size,string id)
+        {
+            //var customers = await _unitOfWork.Customers.GetAllAsync(c => c.FirstName.ToLower().Contains(query.ToLower()), ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
+            //if (!customers.Any())
+            //{
+            //    customers = await _unitOfWork.Customers.GetAllAsync(c => c.LastName.ToLower().Contains(query.ToLower()), ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
+            //}
 
+            var user = await _usermanager.FindByIdAsync(id);
+            var assignedCustomers = await _unitOfWork.Customers.GetAllAsync(c=>c.SalesRepresntative==user, ["Interests", "Source", "MarketingModerator", "SalesRepresntative"]);
+
+            //var customers = await _unitOfWork.Customers.GetAllAsync(c => (c.FirstName.ToLower() + " " + c.LastName.ToLower()).Contains(query.ToLower()) && !c.IsDeleted&& c.SalesRepresntative == user);
+            //if (!customers.Any())
+            //{
+            //    customers = await _unitOfWork.Customers.GetAllAsync(c => c.FirstName.ToLower().Contains(query.ToLower()) && !c.IsDeleted&&c.SalesRepresntative==user);
+            //}
+            //if (!customers.Any())
+            //{
+            //    customers = await _unitOfWork.Customers.GetAllAsync(c => c.LastName.ToLower().Contains(query.ToLower()) && !c.IsDeleted&&c.SalesRepresntative==user);
+            //}
+            //if (!customers.Any())
+            //{
+            //    customers = await _unitOfWork.Customers.GetAllAsync(c => c.Email.ToLower().Contains(query.ToLower()) && !c.IsDeleted&&c.SalesRepresntative==user);
+            //}
+            //if (!customers.Any())
+            //{
+            //    customers = await _unitOfWork.Customers.GetAllAsync(c => c.Phone.ToLower().Contains(query.ToLower()) && !c.IsDeleted&&c.SalesRepresntative==user);
+            //}
+
+            
+
+            var customers = assignedCustomers.Where(c => (c.FirstName.ToLower() + " " + c.LastName.ToLower()).Contains(query.ToLower()) && !c.IsDeleted );
+            if (!customers.Any())
+            {
+                customers = assignedCustomers.Where(c => c.FirstName.ToLower().Contains(query.ToLower()) && !c.IsDeleted );
+            }
+            if (!customers.Any())
+            {
+                customers = assignedCustomers.Where(c => c.LastName.ToLower().Contains(query.ToLower()) && !c.IsDeleted );
+            }
+            if (!customers.Any())
+            {
+                customers = assignedCustomers.Where(c => c.Email.ToLower().Contains(query.ToLower()) && !c.IsDeleted );
+            }
+            if (!customers.Any())
+            {
+                customers = assignedCustomers.Where(c => c.Phone.ToLower().Contains(query.ToLower()) && !c.IsDeleted );
+            }
+
+            var customerResult = new List<ReturnCustomerDto>();
+            foreach (var customer in customers)
+            {
+                var dto = new ReturnCustomerDto
+                {
+                    Id = customer.CustomerId,
+                    FirstName = customer.FirstName,
+                    LastName = customer.LastName,
+                    Age = customer.Age,
+                    City = customer.City,
+                    Email = customer.Email,
+                    Gender = customer.Gender,
+                    Phone = customer.Phone,
+                    //SourceId = customer.Source.SourceId,
+                    //SalesRepresntativeId = customer.SalesRepresntative.Id,
+                    //Interests = customer.Interests.Select(i => new UserInterestDto { /*Id = i.InterestID,*/ Name = i.InterestName, IsSelected = true }).ToList(),
+                    AdditionDate = customer.AdditionDate
+                };
+                var lastAction = await _sharedService.GetLastAction(customer.CustomerId);
+                if (lastAction.Summary != null)
+                {
+                    dto.LastAction = lastAction;
+                }
+                dto.Source = new SourceDto
+                {
+                    Id = customer.Source.SourceId,
+                    Name = customer.Source.SourceName
+                };
+                //foreach (var interest in customer.Interests)
+                //{
+                //    dto.Interests.Add(new UserInterestDto { Id = interest.InterestID, Name = interest.InterestName });
+                //}
+                dto.Interests = customer.Interests.Select(i => new UserInterestDto { Id = i.InterestID, Name = i.InterestName }).ToList();
+
+                if (customer.SalesRepresntative != null)
+                {
+                    var userdto = new UserDto
+                    {
+                        Id = customer.SalesRepresntative.Id,
+                        FirstName = customer.SalesRepresntative.FirstName,
+                        LastName = customer.SalesRepresntative.LastName,
+                        UserName = customer.SalesRepresntative.UserName,
+                        Roles = await _unitOfWork.UserManager.GetRolesAsync(customer.SalesRepresntative),
+                        Email = customer.SalesRepresntative.Email,
+                        customers = await _unitOfWork.Customers.CountAsync(c => c.SalesRepresntative.Id == customer.SalesRepresntative.Id)
+                    };
+                    dto.SalesRepresentative = userdto;
+                }
+                if (customer.MarketingModerator != null)
+                {
+                    var userdto2 = new UserDto
+                    {
+                        Id = customer.MarketingModerator.Id,
+                        FirstName = customer.MarketingModerator.FirstName,
+                        LastName = customer.MarketingModerator.LastName,
+                        UserName = customer.MarketingModerator.UserName,
+                        Roles = await _unitOfWork.UserManager.GetRolesAsync(customer.MarketingModerator),
+                        Email = customer.MarketingModerator.Email
+                    };
+                    dto.AddedBy = userdto2;
+                }
+
+
+                customerResult.Add(dto);
+            }
+            var Customers = customerResult.OrderByDescending(DateTime => DateTime.AdditionDate).ToList();
+            var CustomerPage = _filterService.Paginate(Customers, page, size);
+            return new ReturnAllCustomersDto
+            {
+                IsSuccess = true,
+                Pages = CustomerPage
+                //Customers = customersDto.OrderByDescending(DateTime => DateTime.AdditionDate).ToList()
+            };
+        }
 
 
     }

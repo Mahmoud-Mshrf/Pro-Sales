@@ -39,7 +39,7 @@ namespace CRM.Core.Services.Implementations
                     saless.Add(user);
                 }
             }
-            salesReps = saless;
+            
             //IEnumerable<Customer> customers = new List<Customer>();
             //IEnumerable<Message> messages = new List<Message>();
             //IEnumerable<Call> calls = new List<Call>();
@@ -77,7 +77,7 @@ namespace CRM.Core.Services.Implementations
 
             var salesReports = new List<SalesReport>();
 
-            foreach (var sales in salesReps)
+            foreach (var sales in saless)
             {
                 var salesreport = new SalesReport();
                 salesreport.FirstName = sales.FirstName;
