@@ -877,7 +877,6 @@ namespace CRM.Core.Services.Implementations
                 _unitOfWork.complete();
             }
         }
-
         public async Task CheckAndScheduleSourceDeletion(int sourceId)
         {
             var source = await _unitOfWork.Sources.FindAsync(x => x.SourceId == sourceId);
@@ -887,6 +886,7 @@ namespace CRM.Core.Services.Implementations
                 BackgroundJob.Schedule(() => DeleteUnusedSource(source.SourceId), TimeSpan.FromDays(1));
             }
         }
+
 
     }
 }

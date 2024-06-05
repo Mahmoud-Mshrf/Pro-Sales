@@ -201,11 +201,11 @@ namespace CRM.Core.Services.Implementations
             });
             return returnUserRolesdto;
         }
-        public async Task<ReturnUserRolesDto> ManageUserRoles(UserRolesDTO dto)
+        public async Task<ReturnUserRolesDto> ManageUserRoles(UserRolesDTO dto,string ManagerId)
         {
             var user = await _unitOfWork.UserManager.FindByIdAsync(dto.Id);
             var returnUserRolesdto = new ReturnUserRolesDto();
-
+            var manager= await _unitOfWork.UserManager.FindByIdAsync(ManagerId);
             if (user is null)
             {
                 returnUserRolesdto.IsSucces = false;
@@ -222,7 +222,7 @@ namespace CRM.Core.Services.Implementations
                 }
             }
             var userClaims= await _unitOfWork.UserManager.GetClaimsAsync(user);
-            if (userClaims.Any(c => c.Type == "SuperAdmin"))
+            if (userClaims.Any(c => c.Type == "SuperAdmin")&& user !=manager)
             {
                 returnUserRolesdto.IsSucces = false;
                 returnUserRolesdto.Errors = ["You can't change the role of the super admin"];
@@ -294,7 +294,7 @@ namespace CRM.Core.Services.Implementations
         {
             var user = await _unitOfWork.UserManager.FindByIdAsync(id);
             var roles = await _unitOfWork.UserManager.GetRolesAsync(user);
-            if (user is not null && !roles.IsNullOrEmpty())
+            if (user!=null && roles.IsNullOrEmpty())
             {
                 await _unitOfWork.UserManager.DeleteAsync(user);
             }
