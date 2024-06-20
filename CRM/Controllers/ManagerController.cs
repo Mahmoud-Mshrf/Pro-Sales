@@ -92,8 +92,8 @@ namespace CRM.Controllers
             {
                 return BadRequest(ModelState);
             }
-
-            var result = await _managerService.ManageUserRoles(dto);
+            var id = User.FindFirstValue("id");
+            var result = await _managerService.ManageUserRoles(dto,id);
             if (!result.IsSucces)
             {
                 var errors = new { errors = result.Errors };

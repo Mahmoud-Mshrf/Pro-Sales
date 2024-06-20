@@ -440,6 +440,7 @@ namespace CRM.Core.Services.Implementations
                     Errors = ["Source not found"]
                 };
             }
+            await CheckAndScheduleSourceDeletion(customer.Source.SourceId);
             //var interest = await _unitOfWork.Interests.GetAllAsync(customerDto.);
             var BussinesInterests = await _unitOfWork.Interests.GetAllAsync();
             foreach (var interestt in customerDto.Interests)
@@ -876,6 +877,16 @@ namespace CRM.Core.Services.Implementations
                 _unitOfWork.complete();
             }
         }
+        public async Task CheckAndScheduleSourceDeletion(int sourceId)
+        {
+            var source = await _unitOfWork.Sources.FindAsync(x => x.SourceId == sourceId);
+            if (source != null && !source.Customers.Any())
+            {
+                // Schedule a job to delete the source if it still has no customers after one day
+                BackgroundJob.Schedule(() => DeleteUnusedSource(source.SourceId), TimeSpan.FromDays(1));
+            }
+        }
+
 
     }
 }
